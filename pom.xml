@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+   Copyright 2013 Michael Osipov
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>net.sf.michael-o</groupId>
+		<artifactId>michael-o-parent</artifactId>
+		<version>4</version>
+	</parent>
+
+	<groupId>net.sf.michael-o.tomcat</groupId>
+	<artifactId>tomcat-authnz-spnego-ad</artifactId>
+	<version>0.9-SNAPSHOT</version>
+	<packaging>jar</packaging>
+
+	<name>Apache Tomcat SPNEGO/Kerberos Authenticator and Active Directory Realm</name>
+	<description>A fully featured, first-class SPNEGO/Kerberos (incl. Current Windows Identity) Authenticator and Active Directory (incl. User Database) Realm for the Apache Tomcat servlet container.</description>
+	<url>http://tomcatspnegoad.sourceforge.net</url>
+	<inceptionYear>2013</inceptionYear>
+
+	<developers>
+		<developer>
+			<id>michael-o</id>
+			<name>Michael Osipov</name>
+			<email>michael-o@users.sf.net</email>
+			<url>http://sourceforge.net/u/michael-o/profile</url>
+			<timezone>Europe/Berlin</timezone>
+		</developer>
+		<developer>
+			<name>Christoph Hümbert</name>
+			<timezone>Europe/Berlin</timezone>
+		</developer>
+	</developers>
+
+	<mailingLists>
+		<mailingList>
+			<name>General Discussion</name>
+			<post>general@discussion.tomcatspnegoad.p.re.sf.net</post>
+			<archive>http://sourceforge.net/p/tomcatspnegoad/discussion/general</archive>
+		</mailingList>
+	</mailingLists>
+
+	<!-- Not inherited due to http://jira.codehaus.org/browse/MNG-2423 -->
+	<prerequisites>
+		<maven>2.2.1</maven>
+	</prerequisites>
+
+	<scm>
+		<connection>scm:svn:http://svn.code.sf.net/p/tomcatspnegoad/code/trunk</connection>
+		<developerConnection>scm:svn:https://svn.code.sf.net/p/tomcatspnegoad/code/trunk</developerConnection>
+		<url>http://sourceforge.net/p/tomcatspnegoad/code/HEAD/tree/trunk</url>
+	</scm>
+	<issueManagement>
+		<system>SourceForge.net Tickets</system>
+		<url>http://sourceforge.net/p/tomcatspnegoad/tickets</url>
+	</issueManagement>
+
+	<distributionManagement>
+		<site>
+			<id>sourceforge.net</id>
+			<name>SourceForge.net Project Web</name>
+			<url>scp://shell.sourceforge.net/home/project-web/tomcatspnegoad/htdocs</url>
+		</site>
+	</distributionManagement>
+
+	<properties>
+		<tomcat.version>6.0.35</tomcat.version>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.tomcat</groupId>
+			<artifactId>catalina</artifactId>
+			<version>${tomcat.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.tomcat</groupId>
+			<artifactId>juli</artifactId>
+			<version>${tomcat.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.tomcat</groupId>
+			<artifactId>servlet-api</artifactId>
+			<version>${tomcat.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.michael-o.dirctxsrc</groupId>
+			<artifactId>dircontextsource</artifactId>
+			<version>0.10.2</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<defaultGoal>package</defaultGoal>
+		<plugins>
+			<plugin>
+				<artifactId>maven-clean-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>delete-dependency-reduced-pom</id>
+						<phase>clean</phase>
+						<goals>
+							<goal>clean</goal>
+						</goals>
+						<configuration>
+							<filesets>
+								<filesets>
+									<directory>${basedir}</directory>
+									<includes>
+										<include>dependency-reduced-pom.xml</include>
+									</includes>
+								</filesets>
+							</filesets>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-shade-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+						<configuration>
+							<artifactSet>
+								<includes>
+									<include>org.apache.commons:commons-lang3</include>
+								</includes>
+							</artifactSet>
+							<filters>
+								<filter>
+									<artifact>org.apache.commons:commons-lang3</artifact>
+									<includes>
+										<include>org/apache/commons/lang3/StringUtils.class</include>
+										<include>org/apache/commons/lang3/reflect/MethodUtils.class</include>
+										<include>org/apache/commons/lang3/reflect/MemberUtils.class</include>
+									</includes>
+								</filter>
+							</filters>
+							<relocations>
+								<relocation>
+									<pattern>org.apache.commons.lang3</pattern>
+									<shadedPattern>internal.org.apache.commons.lang3</shadedPattern>
+								</relocation>
+							</relocations>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>unpack-site-resources</id>
+						<phase>pre-site</phase>
+						<goals>
+							<goal>unpack</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>${project.parent.groupId}</groupId>
+									<artifactId>${project.parent.artifactId}</artifactId>
+									<version>${project.parent.version}</version>
+									<classifier>site-resources</classifier>
+									<type>zip</type>
+									<overWrite>true</overWrite>
+									<outputDirectory>${project.build.directory}/site</outputDirectory>
+								</artifactItem>
+							</artifactItems>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<configuration>
+					<links>
+						<link>https://tomcat.apache.org/tomcat-6.0-doc/api</link>
+					</links>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<reporting>
+		<plugins>
+			<plugin>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<configuration>
+					<links>
+						<link>https://tomcat.apache.org/tomcat-6.0-doc/api</link>
+					</links>
+				</configuration>
+			</plugin>
+		</plugins>
+	</reporting>
+
+	<profiles>
+		<profile>
+			<id>sourceforge-release</id>
+			<build>
+				<plugins>
+					<plugin>
+						<artifactId>maven-assembly-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>build-src-assembly</id>
+								<phase>package</phase>
+								<goals>
+									<goal>single</goal>
+								</goals>
+								<configuration>
+									<attach>false</attach>
+									<descriptors>
+										<descriptor>src/assembly/src.xml</descriptor>
+									</descriptors>
+								</configuration>
+							</execution>
+							<execution>
+								<id>build-bin-assembly</id>
+								<phase>site</phase>
+								<goals>
+									<goal>single</goal>
+								</goals>
+								<configuration>
+									<attach>false</attach>
+									<descriptors>
+										<descriptor>src/assembly/bin.xml</descriptor>
+									</descriptors>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<artifactId>maven-resources-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>prepare-sourceforge-release-files</id>
+								<phase>process-resources</phase>
+								<goals>
+									<goal>copy-resources</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>${project.build.directory}/sf-release</outputDirectory>
+									<resources>
+										<resource>
+											<directory>src/sf-release</directory>
+											<filtering>true</filtering>
+										</resource>
+									</resources>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>wagon-maven-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>upload-sourceforge-release-src-assembly</id>
+								<phase>deploy</phase>
+								<goals>
+									<goal>upload</goal>
+								</goals>
+								<configuration>
+									<fromDir>${project.build.directory}</fromDir>
+									<includes>${project.artifactId}-${project.version}-src.*</includes>
+									<serverId>sourceforge.net</serverId>
+									<url>sftp://frs.sourceforge.net/home/frs/project/tomcatspnegoad</url>
+									<toDir>${project.version}</toDir>
+								</configuration>
+							</execution>
+							<execution>
+								<id>upload-sourceforge-release-bin-assembly</id>
+								<phase>site-deploy</phase>
+								<goals>
+									<goal>upload</goal>
+								</goals>
+								<configuration>
+									<fromDir>${project.build.directory}</fromDir>
+									<includes>${project.artifactId}-${project.version}-bin.*</includes>
+									<serverId>sourceforge.net</serverId>
+									<url>sftp://frs.sourceforge.net/home/frs/project/tomcatspnegoad</url>
+									<toDir>${project.version}</toDir>
+								</configuration>
+							</execution>
+							<execution>
+								<id>upload-sourceforge-release-files</id>
+								<phase>site-deploy</phase>
+								<goals>
+									<goal>upload</goal>
+								</goals>
+								<configuration>
+									<fromDir>${project.build.directory}/sf-release</fromDir>
+									<serverId>sourceforge.net</serverId>
+									<url>sftp://frs.sourceforge.net/home/frs/project/tomcatspnegoad</url>
+									<toDir>${project.version}</toDir>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+</project>
