@@ -157,8 +157,8 @@
 									<artifact>org.apache.commons:commons-lang3</artifact>
 									<includes>
 										<include>org/apache/commons/lang3/StringUtils.class</include>
-										<include>org/apache/commons/lang3/reflect/MethodUtils.class</include>
-										<include>org/apache/commons/lang3/reflect/MemberUtils.class</include>
+										<include>org/apache/commons/lang3/CharSequenceUtils.class</include>
+										<include>org/apache/commons/lang3/ArrayUtils.class</include>
 									</includes>
 								</filter>
 							</filters>
