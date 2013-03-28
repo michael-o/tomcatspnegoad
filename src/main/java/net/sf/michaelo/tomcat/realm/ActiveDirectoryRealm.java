@@ -1,3 +1,18 @@
+/*
+ * Copyright 2013 Michael Osipov
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package net.sf.michaelo.tomcat.realm;
 
 import java.net.URI;
@@ -49,6 +64,8 @@ import org.ietf.jgss.GSSCredential;
  * {@code loginEntryName}, the realm will try the delegated credential first and if none is supplied
  * the login entry will be used as fallback.
  * </p>
+ *
+ * @version $Id$
  */
 public class ActiveDirectoryRealm extends GssApiAwareRealm<DirContextSource> {
 
@@ -137,7 +154,7 @@ public class ActiveDirectoryRealm extends GssApiAwareRealm<DirContextSource> {
 
 	/**
 	 * Sets the role name prefixed which can be stripped during retrieval.
-	 * 
+	 *
 	 * @param prefixes
 	 *            the strippable role name prefixes
 	 */
@@ -146,7 +163,7 @@ public class ActiveDirectoryRealm extends GssApiAwareRealm<DirContextSource> {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param username
 	 * @param gssCredential
 	 * @return the retrieved principal
@@ -287,7 +304,7 @@ public class ActiveDirectoryRealm extends GssApiAwareRealm<DirContextSource> {
 
 	/**
 	 * Returns the distinguished name of a search result.
-	 * 
+	 *
 	 * @param context
 	 *            Our DirContext
 	 * @param base

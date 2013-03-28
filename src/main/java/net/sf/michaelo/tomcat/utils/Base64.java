@@ -1,8 +1,22 @@
+/*
+ * Copyright 2013 Michael Osipov
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package net.sf.michaelo.tomcat.utils;
 
 /**
  * Base64 encoder/decoder.
- * 
  */
 public final class Base64 {
 
@@ -14,7 +28,7 @@ public final class Base64 {
 
 	/**
 	 * Base-64 encodes the supplied block of data. Line wrapping is not applied on output.
-	 * 
+	 *
 	 * @param bytes
 	 *            The block of data that is to be Base-64 encoded.
 	 * @return A <code>String</code> containing the encoded data.
@@ -59,7 +73,7 @@ public final class Base64 {
 
 	/**
 	 * Decodes the supplied Base-64 encoded string.
-	 * 
+	 *
 	 * @param string
 	 *            The Base-64 encoded string that is to be decoded.
 	 * @return A <code>byte[]</code> containing the decoded data block.

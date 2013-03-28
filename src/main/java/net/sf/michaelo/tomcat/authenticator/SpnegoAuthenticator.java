@@ -1,3 +1,18 @@
+/*
+ * Copyright 2013 Michael Osipov
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package net.sf.michaelo.tomcat.authenticator;
 
 import java.io.IOException;
@@ -40,6 +55,8 @@ import org.ietf.jgss.Oid;
  * {@code true}.</li>
  * </ul>
  * </p>
+ *
+ * @version $Id$
  */
 /*
  * Meldungen werden im Moment nicht richtig ausgegeben wegen:
@@ -58,7 +75,7 @@ public class SpnegoAuthenticator extends AuthenticatorBase {
 
 	/**
 	 * Sets the login entry name which establishes the GSS context.
-	 * 
+	 *
 	 * @param loginEntryName
 	 *            the login entry name
 	 */
@@ -68,7 +85,7 @@ public class SpnegoAuthenticator extends AuthenticatorBase {
 
 	/**
 	 * Sets the storage of client's/initiator's delegated credential in the user principal.
-	 * 
+	 *
 	 * @param storeDelegatedCredential
 	 *            the store delegated credential indication
 	 */
