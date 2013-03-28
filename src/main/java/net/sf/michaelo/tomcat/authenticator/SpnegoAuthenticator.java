@@ -29,25 +29,22 @@ import org.ietf.jgss.GSSException;
 import org.ietf.jgss.GSSManager;
 import org.ietf.jgss.Oid;
 
-
 /**
  * A SPNEGO Authenticator which utilizes GSS-API to authenticate a client.
  * <p>
  * This authenticator has the following configuration options:
  * <ul>
- * <li>{@code loginEntryName}: Login entry name with a configured
- * {@code Krb5LoginModule}.</li>
- * <li>{@code storeDelegatedCredential}: Store the client's/initiator's
- * delegated credential in the user principal (optional). Valid values are
- * {@code true}, {@code false}. Default value is {@code true}.</li>
+ * <li>{@code loginEntryName}: Login entry name with a configured {@code Krb5LoginModule}.</li>
+ * <li>{@code storeDelegatedCredential}: Store the client's/initiator's delegated credential in the
+ * user principal (optional). Valid values are {@code true}, {@code false}. Default value is
+ * {@code true}.</li>
  * </ul>
  * </p>
  */
 /*
  * Meldungen werden im Moment nicht richtig ausgegeben wegen:
- * http://www.mail-archive.com/users@tomcat.apache.org/msg98308.html
- * 
- * Lösung: com.siemens.dynamowerk.tomcat.valve.EnhancedErrorReportValve benutzen
+ * http://www.mail-archive.com/users@tomcat.apache.org/msg98308.html Lösung:
+ * com.siemens.dynamowerk.tomcat.valve.EnhancedErrorReportValve benutzen
  */
 public class SpnegoAuthenticator extends AuthenticatorBase {
 
@@ -70,8 +67,7 @@ public class SpnegoAuthenticator extends AuthenticatorBase {
 	}
 
 	/**
-	 * Sets the storage of client's/initiator's delegated credential in the user
-	 * principal.
+	 * Sets the storage of client's/initiator's delegated credential in the user principal.
 	 * 
 	 * @param storeDelegatedCredential
 	 *            the store delegated credential indication
@@ -90,19 +86,21 @@ public class SpnegoAuthenticator extends AuthenticatorBase {
 		response.sendError(HttpServletResponse.SC_UNAUTHORIZED, message);
 	}
 
-	protected void setException(Request request, Response response, AuthenticationException e) throws IOException {
+	protected void setException(Request request, Response response, AuthenticationException e)
+			throws IOException {
 		request.setAttribute(Globals.EXCEPTION_ATTR, e);
 		response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 	}
 
 	@Override
-	protected boolean authenticate(Request request, Response response, LoginConfig config) throws IOException {
+	protected boolean authenticate(Request request, Response response, LoginConfig config)
+			throws IOException {
 
 		// HttpServletRequest request = req.getRequest();
 		// HttpServletResponse response = resp.getResponse();
 
 		Principal principal = request.getUserPrincipal();
-		//String ssoId = (String) request.getNote(Constants.REQ_SSOID_NOTE);
+		// String ssoId = (String) request.getNote(Constants.REQ_SSOID_NOTE);
 		if (principal != null) {
 			if (logger.isDebugEnabled())
 				logger.debug(String.format("Already authenticated '%s'", principal));
@@ -111,11 +109,11 @@ public class SpnegoAuthenticator extends AuthenticatorBase {
 				associate(ssoId, request.getSessionInternal(true));
 			return true;
 		}
-		
+
 		// NOTE: We don't try to reauthenticate using any existing SSO session,
-        // because that will only work if the original authentication was
-        // BASIC or FORM, which are less secure than the DIGEST auth-type
-        // specified for this webapp
+		// because that will only work if the original authentication was
+		// BASIC or FORM, which are less secure than the DIGEST auth-type
+		// specified for this webapp
 
 		/*
 		if (ssoId != null) {
@@ -172,7 +170,8 @@ public class SpnegoAuthenticator extends AuthenticatorBase {
 			} catch (LoginException e) {
 				logger.error("Unable to login as the service principal", e);
 
-				AuthenticationException ae = new AuthenticationException("Unable to login as the service principal", e);
+				AuthenticationException ae = new AuthenticationException(
+						"Unable to login as the service principal", e);
 				setException(request, response, ae);
 				return false;
 			}
@@ -183,8 +182,8 @@ public class SpnegoAuthenticator extends AuthenticatorBase {
 				public GSSCredential run() throws GSSException {
 					Oid spnegoOid = new Oid("1.3.6.1.5.5.2");
 					// Oid krb5Oid = new Oid("1.2.840.113554.1.2.2");
-					return manager.createCredential(null, GSSCredential.DEFAULT_LIFETIME, spnegoOid,
-							GSSCredential.ACCEPT_ONLY);
+					return manager.createCredential(null, GSSCredential.DEFAULT_LIFETIME,
+							spnegoOid, GSSCredential.ACCEPT_ONLY);
 				}
 			};
 
@@ -209,12 +208,14 @@ public class SpnegoAuthenticator extends AuthenticatorBase {
 		} catch (PrivilegedActionException e) {
 			logger.error("Unable to login as the service principal", e.getException());
 
-			AuthenticationException ae = new AuthenticationException("Unable to login as the service principal", e);
+			AuthenticationException ae = new AuthenticationException(
+					"Unable to login as the service principal", e);
 			setException(request, response, ae);
 			return false;
 		} catch (RuntimeException e) {
 			// Logging erfolgt bereits im Realm
-			AuthenticationException ae = new AuthenticationException("Unable to perform principal search", e.getCause());
+			AuthenticationException ae = new AuthenticationException(
+					"Unable to perform principal search", e.getCause());
 			setException(request, response, ae);
 			return false;
 		} finally {
@@ -238,8 +239,10 @@ public class SpnegoAuthenticator extends AuthenticatorBase {
 			register(request, response, principal, SPNEGO_METHOD, principal.getName(), null);
 			if (ArrayUtils.isNotEmpty(outToken)) {
 				// Send response token on success only
-				response.setHeader("WWW-Authenticate", NEGOTIATE_HEADER + " " + Base64.encode(outToken));
-				// Connection must be closed due to https://issues.apache.org/bugzilla/show_bug.cgi?id=54076
+				response.setHeader("WWW-Authenticate",
+						NEGOTIATE_HEADER + " " + Base64.encode(outToken));
+				// Connection must be closed due to
+				// https://issues.apache.org/bugzilla/show_bug.cgi?id=54076
 				response.addHeader("Connection", "close");
 			}
 			return true;

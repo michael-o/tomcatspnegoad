@@ -5,11 +5,9 @@ import javax.naming.directory.DirContext;
 
 import org.apache.commons.lang3.StringUtils;
 
-
 public class UserPrincipalNameSearchMapper implements UsernameSearchMapper {
 
-	protected static class UserPrincipalNameMappedValues implements
-			MappedValues {
+	protected static class UserPrincipalNameMappedValues implements MappedValues {
 
 		private String searchUsername;
 
@@ -34,8 +32,8 @@ public class UserPrincipalNameSearchMapper implements UsernameSearchMapper {
 
 	}
 
-	public synchronized MappedValues map(DirContext context,
-			String username) throws NamingException {
+	public synchronized MappedValues map(DirContext context, String username)
+			throws NamingException {
 
 		return new UserPrincipalNameMappedValues(username);
 

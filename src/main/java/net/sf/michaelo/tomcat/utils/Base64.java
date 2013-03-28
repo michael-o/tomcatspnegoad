@@ -13,8 +13,7 @@ public final class Base64 {
 	}
 
 	/**
-	 * Base-64 encodes the supplied block of data. Line wrapping is not applied
-	 * on output.
+	 * Base-64 encodes the supplied block of data. Line wrapping is not applied on output.
 	 * 
 	 * @param bytes
 	 *            The block of data that is to be Base-64 encoded.
@@ -33,7 +32,8 @@ public final class Base64 {
 		int block;
 		int idx = 0;
 		while (idx < length) {
-			block = ((bytes[idx++] & 0xff) << 16) | ((bytes[idx++] & 0xff) << 8) | (bytes[idx++] & 0xff);
+			block = ((bytes[idx++] & 0xff) << 16) | ((bytes[idx++] & 0xff) << 8)
+					| (bytes[idx++] & 0xff);
 			buffer.append(ALPHABET.charAt(block >>> 18));
 			buffer.append(ALPHABET.charAt((block >>> 12) & 0x3f));
 			buffer.append(ALPHABET.charAt((block >>> 6) & 0x3f));
@@ -70,7 +70,8 @@ public final class Base64 {
 			return new byte[0];
 		}
 
-		final int pad = (string.charAt(length - 2) == '=') ? 2 : (string.charAt(length - 1) == '=') ? 1 : 0;
+		final int pad = (string.charAt(length - 2) == '=') ? 2
+				: (string.charAt(length - 1) == '=') ? 1 : 0;
 		final int size = length * 3 / 4 - pad;
 		byte[] buffer = new byte[size];
 		int block;

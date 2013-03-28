@@ -3,7 +3,6 @@ package net.sf.michaelo.tomcat.realm.mapper;
 import javax.naming.NamingException;
 import javax.naming.directory.DirContext;
 
-
 public interface UsernameSearchMapper {
 
 	interface MappedValues {

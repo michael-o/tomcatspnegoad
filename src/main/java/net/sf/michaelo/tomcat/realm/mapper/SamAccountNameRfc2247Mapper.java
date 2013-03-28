@@ -12,14 +12,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 
-
 public class SamAccountNameRfc2247Mapper extends SamAccountNameMapper {
 
-	private static final Log logger = LogFactory
-			.getLog(SamAccountNameRfc2247Mapper.class);
+	private static final Log logger = LogFactory.getLog(SamAccountNameRfc2247Mapper.class);
 
-	public synchronized MappedValues map(DirContext context,
-			String username) throws NamingException {
+	public synchronized MappedValues map(DirContext context, String username)
+			throws NamingException {
 
 		String searchUsername = StringUtils.substringBefore(username, "@");
 		String realm = StringUtils.substringAfter(username, "@");
@@ -35,8 +33,7 @@ public class SamAccountNameRfc2247Mapper extends SamAccountNameMapper {
 
 		Name realmComponentName;
 		for (String realmComponent : realmComponents) {
-			realmComponentName = parser.parse("DC="
-					+ realmComponent.toLowerCase(Locale.ENGLISH));
+			realmComponentName = parser.parse("DC=" + realmComponent.toLowerCase(Locale.ENGLISH));
 			searchBaseName.addAll(realmComponentName);
 		}
 

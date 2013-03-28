@@ -1,14 +1,13 @@
 package net.sf.michaelo.tomcat.realm.mapper;
 
 public abstract class SamAccountNameMapper implements UsernameSearchMapper {
-	
+
 	protected static class SamAccountNameMappedValues implements MappedValues {
 
 		private String searchBase;
 		private String searchUsername;
 
-		protected SamAccountNameMappedValues(String searchBase,
-				String searchUsername) {
+		protected SamAccountNameMappedValues(String searchBase, String searchUsername) {
 			this.searchBase = searchBase;
 			this.searchUsername = searchUsername;
 		}
@@ -29,5 +28,5 @@ public abstract class SamAccountNameMapper implements UsernameSearchMapper {
 		}
 
 	}
-	
+
 }

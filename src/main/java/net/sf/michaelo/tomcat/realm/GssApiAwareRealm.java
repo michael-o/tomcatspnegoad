@@ -22,9 +22,9 @@ public abstract class GssApiAwareRealm<T> extends RealmBase {
 
 	protected boolean localResource;
 	protected String resourceName;
-	
+
 	private T resource;
-	
+
 	public void setLocalResource(boolean localResource) {
 		this.localResource = localResource;
 	}
@@ -34,7 +34,7 @@ public abstract class GssApiAwareRealm<T> extends RealmBase {
 	}
 
 	abstract protected Principal getPrincipal(String username, GSSCredential gssCredential);
-	
+
 	@Override
 	protected String getPassword(String password) {
 		throw new UnsupportedOperationException("This method is not supported by this realm");
@@ -108,14 +108,14 @@ public abstract class GssApiAwareRealm<T> extends RealmBase {
 	}
 
 	/*
-	 * Must be accessed like this due to 
+	 * Must be accessed like this due to
 	 * http://www.mail-archive.com/users@tomcat.apache.org/msg98380.html
 	 */
 	@SuppressWarnings("unchecked")
 	protected synchronized T lookupResource() throws NamingException {
 		Context context = null;
 
-		if(resource == null) {
+		if (resource == null) {
 			if (localResource) {
 				context = ContextBindings.getClassLoader();
 				context = (Context) context.lookup("comp/env");
@@ -123,7 +123,7 @@ public abstract class GssApiAwareRealm<T> extends RealmBase {
 				StandardServer server = (StandardServer) ServerFactory.getServer();
 				context = server.getGlobalNamingContext();
 			}
-			
+
 			resource = (T) context.lookup(resourceName);
 		}
 

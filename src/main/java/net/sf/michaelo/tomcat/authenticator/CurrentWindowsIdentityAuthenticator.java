@@ -25,22 +25,19 @@ import org.ietf.jgss.GSSException;
 import org.ietf.jgss.GSSManager;
 import org.ietf.jgss.Oid;
 
-
 /**
- * Windows Identitiy Authenticator which utilizes GSS-API to retrieve to
- * currently logged in user.
+ * Windows Identitiy Authenticator which utilizes GSS-API to retrieve to currently logged in user.
  * <p>
  * This authenticator has the following configuration options:
  * <ul>
- * <li>{@code loginEntryName}: Login entry name with a configured
- * {@code Krb5LoginModule}.</li>
+ * <li>{@code loginEntryName}: Login entry name with a configured {@code Krb5LoginModule}.</li>
  * </ul>
  * </p>
  */
 public class CurrentWindowsIdentityAuthenticator extends AuthenticatorBase {
 
 	private static Log logger = LogFactory.getLog(CurrentWindowsIdentityAuthenticator.class);
-	
+
 	protected static final String WINDOWS_IDENTITY_METHOD = "WINDOWS_IDENTITY";
 
 	private String loginEntryName;
@@ -58,18 +55,18 @@ public class CurrentWindowsIdentityAuthenticator extends AuthenticatorBase {
 		return "net.sf.michaelo.tomcat.authenticator.CurrentWindowsIdentityAuthenticator/0.9";
 	}
 
-	protected void setException(Request request, Response response,
-			AuthenticationException e) throws IOException {
+	protected void setException(Request request, Response response, AuthenticationException e)
+			throws IOException {
 		request.setAttribute(Globals.EXCEPTION_ATTR, e);
 		response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 	}
 
 	@Override
-	protected boolean authenticate(Request request, Response response,
-			LoginConfig config) throws IOException {
+	protected boolean authenticate(Request request, Response response, LoginConfig config)
+			throws IOException {
 
 		Principal principal = request.getUserPrincipal();
-		//String ssoId = (String) request.getNote(Constants.REQ_SSOID_NOTE);
+		// String ssoId = (String) request.getNote(Constants.REQ_SSOID_NOTE);
 		if (principal != null) {
 			if (logger.isDebugEnabled())
 				logger.debug(String.format("Already authenticated '%s'", principal));
@@ -78,11 +75,11 @@ public class CurrentWindowsIdentityAuthenticator extends AuthenticatorBase {
 				associate(ssoId, request.getSessionInternal(true));
 			return true;
 		}
-		
+
 		// NOTE: We don't try to reauthenticate using any existing SSO session,
-        // because that will only work if the original authentication was
-        // BASIC or FORM, which are less secure than the DIGEST auth-type
-        // specified for this webapp
+		// because that will only work if the original authentication was
+		// BASIC or FORM, which are less secure than the DIGEST auth-type
+		// specified for this webapp
 
 		/*
 		if (ssoId != null) {
@@ -115,8 +112,7 @@ public class CurrentWindowsIdentityAuthenticator extends AuthenticatorBase {
 				public GSSCredential run() throws GSSException {
 					// Oid spnegoOid = new Oid("1.3.6.1.5.5.2");
 					Oid krb5Oid = new Oid("1.2.840.113554.1.2.2");
-					return manager.createCredential(null,
-							GSSCredential.DEFAULT_LIFETIME, krb5Oid,
+					return manager.createCredential(null, GSSCredential.DEFAULT_LIFETIME, krb5Oid,
 							GSSCredential.INITIATE_ONLY);
 				}
 			};
@@ -127,8 +123,7 @@ public class CurrentWindowsIdentityAuthenticator extends AuthenticatorBase {
 			principal = realm.authenticate(gssCredential);
 
 		} catch (PrivilegedActionException e) {
-			logger.error("Unable to login as the user principal",
-					e.getException());
+			logger.error("Unable to login as the user principal", e.getException());
 
 			AuthenticationException ae = new AuthenticationException(
 					"Unable to login as the user principal", e);
@@ -151,8 +146,8 @@ public class CurrentWindowsIdentityAuthenticator extends AuthenticatorBase {
 		}
 
 		if (principal != null) {
-			register(request, response, principal, WINDOWS_IDENTITY_METHOD,
-					principal.getName(), null);
+			register(request, response, principal, WINDOWS_IDENTITY_METHOD, principal.getName(),
+					null);
 			return true;
 		}
 

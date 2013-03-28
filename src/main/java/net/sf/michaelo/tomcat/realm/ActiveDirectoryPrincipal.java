@@ -33,8 +33,8 @@ public class ActiveDirectoryPrincipal implements Principal, Serializable {
 	 * @param roles
 	 *            the roles retrieved from Active Directory
 	 */
-	public ActiveDirectoryPrincipal(KerberosPrincipal principal, String dn,
-			byte[] sid, GSSCredential gssCredential, List<String> roles) {
+	public ActiveDirectoryPrincipal(KerberosPrincipal principal, String dn, byte[] sid,
+			GSSCredential gssCredential, List<String> roles) {
 		this.principal = principal;
 		this.dn = dn;
 		this.sid = ArrayUtils.clone(sid);
@@ -75,7 +75,7 @@ public class ActiveDirectoryPrincipal implements Principal, Serializable {
 	public String getDn() {
 		return dn;
 	}
-	
+
 	public byte[] getSid() {
 		return ArrayUtils.clone(sid);
 	}
@@ -93,5 +93,5 @@ public class ActiveDirectoryPrincipal implements Principal, Serializable {
 	public GSSCredential getDelegatedCredential() {
 		return gssCredential;
 	}
-	
+
 }
