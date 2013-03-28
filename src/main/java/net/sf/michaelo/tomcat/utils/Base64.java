@@ -17,6 +17,8 @@ package net.sf.michaelo.tomcat.utils;
 
 /**
  * Base64 encoder/decoder.
+ *
+ * @version $Id$
  */
 public final class Base64 {
 
