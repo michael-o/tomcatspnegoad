@@ -59,9 +59,9 @@ import org.ietf.jgss.Oid;
  * @version $Id$
  */
 /*
- * Meldungen werden im Moment nicht richtig ausgegeben wegen:
- * http://www.mail-archive.com/users@tomcat.apache.org/msg98308.html Lösung:
- * com.siemens.dynamowerk.tomcat.valve.EnhancedErrorReportValve benutzen
+ * Error messages aren't reported correctly by the ErrorReportValve, see
+ * http://www.mail-archive.com/users@tomcat.apache.org/msg98308.html Solution:
+ * net.sf.michaelo.tomcat.extras.valves.EnhancedErrorReportValve
  */
 public class SpnegoAuthenticator extends AuthenticatorBase {
 
@@ -98,12 +98,17 @@ public class SpnegoAuthenticator extends AuthenticatorBase {
 		return "net.sf.michaelo.tomcat.authenticator.SpnegoAuthenticator/0.9";
 	}
 
-	protected void setUnauthorizedHeader(Response response, String message) throws IOException {
+	protected void sendUnauthorizedHeader(Response response) throws IOException {
+		response.setHeader("WWW-Authenticate", NEGOTIATE_AUTH_SCHEME);
+		response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+	}
+
+	protected void sendUnauthorizedHeader(Response response, String message) throws IOException {
 		response.setHeader("WWW-Authenticate", NEGOTIATE_AUTH_SCHEME);
 		response.sendError(HttpServletResponse.SC_UNAUTHORIZED, message);
 	}
 
-	protected void setException(Request request, Response response, AuthenticationException e)
+	protected void sendException(Request request, Response response, AuthenticationException e)
 			throws IOException {
 		request.setAttribute(Globals.EXCEPTION_ATTR, e);
 		response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -145,24 +150,19 @@ public class SpnegoAuthenticator extends AuthenticatorBase {
 		String authorization = request.getHeader("Authorization");
 
 		if (!StringUtils.startsWithIgnoreCase(authorization, NEGOTIATE_AUTH_SCHEME)) {
-			setUnauthorizedHeader(response, "Unauthorized");
+			sendUnauthorizedHeader(response);
 			return false;
 		}
 
-		String authorizationValue = StringUtils.substringAfter(authorization, NEGOTIATE_AUTH_SCHEME);
+		String authorizationValue = StringUtils
+				.substringAfter(authorization, NEGOTIATE_AUTH_SCHEME);
 		authorizationValue = StringUtils.trim(authorizationValue);
 
 		if (StringUtils.isEmpty(authorizationValue)) {
-			if (logger.isDebugEnabled())
-				logger.debug("The Negotiate authorization header value sent by the client did not include a token");
-
-			setUnauthorizedHeader(response,
-					"The Negotiate authorization header value did not include a token");
+			sendUnauthorizedHeader(response);
 			return false;
 		}
 
-		LoginContext lc = null;
-		GSSContext gssContext = null;
 		byte[] outToken = null;
 		byte[] inToken = null;
 
@@ -172,13 +172,14 @@ public class SpnegoAuthenticator extends AuthenticatorBase {
 		try {
 			inToken = Base64.decode(authorizationValue);
 		} catch (Exception e) {
-			logger.error("The Negotiate authorization header value sent by the client was invalid", e);
+			logger.error("The Negotiate authorization header value sent by the client was invalid: " + authorizationValue, e);
 
-			AuthenticationException ae = new AuthenticationException(
-					"The Negotiate authorization header value was invalid", e);
-			setException(request, response, ae);
+			sendUnauthorizedHeader(response, "The Negotiate authorization header value was invalid");
 			return false;
 		}
+
+		LoginContext lc = null;
+		GSSContext gssContext = null;
 
 		try {
 			try {
@@ -189,12 +190,12 @@ public class SpnegoAuthenticator extends AuthenticatorBase {
 
 				AuthenticationException ae = new AuthenticationException(
 						"Unable to login as the service principal", e);
-				setException(request, response, ae);
+				sendException(request, response, ae);
 				return false;
 			}
 
 			final GSSManager manager = GSSManager.getInstance();
-			final PrivilegedExceptionAction<GSSCredential> action = new PrivilegedExceptionAction<GSSCredential>() {
+			final PrivilegedExceptionAction<GSSCredential> serverCredentialAction = new PrivilegedExceptionAction<GSSCredential>() {
 				@Override
 				public GSSCredential run() throws GSSException {
 					Oid spnegoOid = new Oid("1.3.6.1.5.5.2");
@@ -204,37 +205,65 @@ public class SpnegoAuthenticator extends AuthenticatorBase {
 				}
 			};
 
-			gssContext = manager.createContext(Subject.doAs(lc.getSubject(), action));
-			outToken = gssContext.acceptSecContext(inToken, 0, inToken.length);
+			try {
+				gssContext = manager.createContext(Subject.doAs(lc.getSubject(),
+						serverCredentialAction));
+			} catch (PrivilegedActionException e) {
+				logger.error("Unable to obtain the server credential", e.getException());
 
-			if (!gssContext.isEstablished()) {
-				if (logger.isDebugEnabled())
-					logger.debug("GSS context not yet established, continuing");
-			} else {
-				GssApiAwareRealm<?> realm = (GssApiAwareRealm<?>) context.getRealm();
-				principal = realm.authenticate(gssContext, isStoreDelegatedCredential());
+				AuthenticationException ae = new AuthenticationException(
+						"Unable to obtain the server credential", e.getException());
+				sendException(request, response, ae);
+				return false;
+			} catch (GSSException e) {
+				logger.error("Failed to create a security context", e);
+
+				AuthenticationException ae = new AuthenticationException(
+						"Failed to create a security context", e);
+				sendException(request, response, ae);
+				return false;
 			}
 
-		} catch (GSSException e) {
-			logger.warn("Failed to validate client-supplied service ticket: " + authorizationValue, e);
+			try {
 
-			AuthenticationException ae = new AuthenticationException(
-					"Failed to validate client-supplied service ticket", e);
-			setException(request, response, ae);
-			return false;
-		} catch (PrivilegedActionException e) {
-			logger.error("Unable to login as the service principal", e.getException());
+				outToken = gssContext.acceptSecContext(inToken, 0, inToken.length);
 
-			AuthenticationException ae = new AuthenticationException(
-					"Unable to login as the service principal", e);
-			setException(request, response, ae);
-			return false;
-		} catch (RuntimeException e) {
-			// Logging erfolgt bereits im Realm
-			AuthenticationException ae = new AuthenticationException(
-					"Unable to perform principal search", e.getCause());
-			setException(request, response, ae);
-			return false;
+				/*
+				 * This might now work anyway because Tomcat does not support connection-level
+				 * authentication. One actually have to cache the GSSContext in the HTTP session.
+				 */
+				if (!gssContext.isEstablished()) {
+					if (logger.isDebugEnabled())
+						logger.debug("Security context not yet established, continuing");
+
+					response.setHeader("WWW-Authenticate",
+							NEGOTIATE_AUTH_SCHEME + " " + Base64.encode(outToken));
+					response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+					return false;
+				} else {
+					GssApiAwareRealm<?> realm = (GssApiAwareRealm<?>) context.getRealm();
+					principal = realm.authenticate(gssContext, isStoreDelegatedCredential());
+				}
+
+			} catch (GSSException e) {
+				logger.warn(
+						"Failed to accept security context with client-supplied service ticket: "
+								+ authorizationValue, e);
+
+				// TODO Maybe a 401 is better suited here?
+				AuthenticationException ae = new AuthenticationException(
+						"Failed to accept security context with client-supplied service ticket", e);
+				sendException(request, response, ae);
+				return false;
+			} catch (RuntimeException e) {
+				// No logging necessary, it happens already in the realm
+				// TODO maybe move to here
+				AuthenticationException ae = new AuthenticationException(
+						"Unable to perform principal search", e.getCause());
+				sendException(request, response, ae);
+				return false;
+			}
+
 		} finally {
 			if (gssContext != null) {
 				try {
@@ -255,7 +284,7 @@ public class SpnegoAuthenticator extends AuthenticatorBase {
 		if (principal != null) {
 			register(request, response, principal, SPNEGO_METHOD, principal.getName(), null);
 			if (ArrayUtils.isNotEmpty(outToken)) {
-				// Send response token on success only
+				// Send response token if there is one
 				response.setHeader("WWW-Authenticate",
 						NEGOTIATE_AUTH_SCHEME + " " + Base64.encode(outToken));
 				// Connection must be closed due to
@@ -265,7 +294,7 @@ public class SpnegoAuthenticator extends AuthenticatorBase {
 			return true;
 		}
 
-		setUnauthorizedHeader(response, "Unauthorized");
+		sendUnauthorizedHeader(response);
 		return false;
 	}
 
