@@ -68,7 +68,7 @@ public class SpnegoAuthenticator extends AuthenticatorBase {
 	private static Log logger = LogFactory.getLog(SpnegoAuthenticator.class);
 
 	protected static final String SPNEGO_METHOD = "SPNEGO";
-	protected static final String NEGOTIATE_HEADER = "Negotiate";
+	protected static final String NEGOTIATE_AUTH_SCHEME = "Negotiate";
 
 	protected String loginEntryName;
 	protected boolean storeDelegatedCredential = true;
@@ -99,7 +99,7 @@ public class SpnegoAuthenticator extends AuthenticatorBase {
 	}
 
 	protected void setUnauthorizedHeader(Response response, String message) throws IOException {
-		response.setHeader("WWW-Authenticate", NEGOTIATE_HEADER);
+		response.setHeader("WWW-Authenticate", NEGOTIATE_AUTH_SCHEME);
 		response.sendError(HttpServletResponse.SC_UNAUTHORIZED, message);
 	}
 
@@ -144,12 +144,12 @@ public class SpnegoAuthenticator extends AuthenticatorBase {
 
 		String authorization = request.getHeader("Authorization");
 
-		if (!StringUtils.startsWithIgnoreCase(authorization, NEGOTIATE_HEADER)) {
+		if (!StringUtils.startsWithIgnoreCase(authorization, NEGOTIATE_AUTH_SCHEME)) {
 			setUnauthorizedHeader(response, "Unauthorized");
 			return false;
 		}
 
-		String authorizationValue = StringUtils.substringAfter(authorization, NEGOTIATE_HEADER);
+		String authorizationValue = StringUtils.substringAfter(authorization, NEGOTIATE_AUTH_SCHEME);
 		authorizationValue = StringUtils.trim(authorizationValue);
 
 		if (StringUtils.isEmpty(authorizationValue)) {
@@ -257,7 +257,7 @@ public class SpnegoAuthenticator extends AuthenticatorBase {
 			if (ArrayUtils.isNotEmpty(outToken)) {
 				// Send response token on success only
 				response.setHeader("WWW-Authenticate",
-						NEGOTIATE_HEADER + " " + Base64.encode(outToken));
+						NEGOTIATE_AUTH_SCHEME + " " + Base64.encode(outToken));
 				// Connection must be closed due to
 				// https://issues.apache.org/bugzilla/show_bug.cgi?id=54076
 				response.addHeader("Connection", "close");
