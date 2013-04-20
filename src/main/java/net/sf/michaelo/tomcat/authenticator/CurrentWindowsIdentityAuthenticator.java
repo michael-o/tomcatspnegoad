@@ -55,7 +55,7 @@ public class CurrentWindowsIdentityAuthenticator extends AuthenticatorBase {
 
 	private static Log logger = LogFactory.getLog(CurrentWindowsIdentityAuthenticator.class);
 
-	protected static final String WINDOWS_IDENTITY_METHOD = "WINDOWS_IDENTITY";
+	protected static final String CURRENT_WINDOWS_IDENTITY_METHOD = "CURRENT_WINDOWS_IDENTITY";
 
 	private String loginEntryName;
 
@@ -163,7 +163,7 @@ public class CurrentWindowsIdentityAuthenticator extends AuthenticatorBase {
 		}
 
 		if (principal != null) {
-			register(request, response, principal, WINDOWS_IDENTITY_METHOD, principal.getName(),
+			register(request, response, principal, CURRENT_WINDOWS_IDENTITY_METHOD, principal.getName(),
 					null);
 			return true;
 		}
