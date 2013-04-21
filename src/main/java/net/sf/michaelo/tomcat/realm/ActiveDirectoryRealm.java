@@ -49,21 +49,19 @@ import org.apache.juli.logging.LogFactory;
 import org.ietf.jgss.GSSCredential;
 
 /**
- * A Realm which offers access to the Active Directory.
+ * A realm which retrieves authenticated users from Active Directory.
+ *
  * <p>
- * <li>{@code strippableRoleNamePrefixes}: Role name prefixes which can be stripped during retrieval
- * (optional). Separate prefixes with comma.</li>
- * <li>{@code useDelegatedCredential}: Use client's/initiator's credential instead of server's to
- * authenticate against Active Directory (optional). Make sure that the user principal is an
- * instance of {@link ActiveDirectoryPrincipal}. Valid values are {@code true}, {@code false}.
- * Default value is {@code false}.</li>
+ * Following options can be configured:
+ * <li>{@code resourceName}: The name of the {@link DirContextSource} in JNDI with which users will
+ * be retrieved.</li>
+ * <li>{@code localResource}: Whether this resource is locally in the {@code context.xml} or
+ * globally configured if the {@code server.xml} (optional). Default value is {@code false}.</li>
+ * <li>{@code strippableRoleNamePrefixes}: Role name prefixes (comma-seperated) which can be
+ * stripped during retrieval (optional).</li>
  * </ul>
  * </p>
  * <p>
- * <b>Authentication chaining</b>: If you set both {@code useDelegatedCredential} <i>and</i>
- * {@code loginEntryName}, the realm will try the delegated credential first and if none is supplied
- * the login entry will be used as fallback.
- * </p>
  *
  * @version $Id$
  */
@@ -84,14 +82,6 @@ public class ActiveDirectoryRealm extends GssApiAwareRealm<DirContextSource> {
 	@Override
 	protected String getName() {
 		return "ActiveDirectoryRealm";
-	}
-
-	public void setDirContextSourceName(String dirContextSourceName) {
-		setResourceName(dirContextSourceName);
-	}
-
-	public void setLocalDirContextSource(boolean localDirContextSource) {
-		setLocalResource(localDirContextSource);
 	}
 
 	/**

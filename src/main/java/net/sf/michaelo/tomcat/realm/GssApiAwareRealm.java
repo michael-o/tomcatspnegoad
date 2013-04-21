@@ -32,6 +32,7 @@ import org.ietf.jgss.GSSException;
 import org.ietf.jgss.GSSName;
 
 /**
+ * Base realm which is able to retrieve principals from GSS contexts and credentials.
  *
  * @version $Id$
  */
@@ -65,9 +66,12 @@ public abstract class GssApiAwareRealm<T> extends RealmBase {
 	}
 
 	/**
+	 * Authenticates a user from the given GSS context and eventually store his/her GSS credential.
 	 *
 	 * @param gssContext
+	 *            GSS context established with the user
 	 * @param storeDelegatedCredential
+	 *            whether to store user's delegated credential
 	 * @return the retrieved principal
 	 * @throws RuntimeException
 	 *             wraps GSSException and NamingException
@@ -85,7 +89,7 @@ public abstract class GssApiAwareRealm<T> extends RealmBase {
 					if (gssContext.getCredDelegState()) {
 						gssCredential = gssContext.getDelegCred();
 					} else
-						logger.debug(String.format("Credential of '%s' is not delegable", gssName));
+						logger.debug(String.format("Credential of '%s' is not delegable though storing was requested", gssName));
 				}
 
 				String username = gssName.toString();
@@ -101,8 +105,10 @@ public abstract class GssApiAwareRealm<T> extends RealmBase {
 	}
 
 	/**
+	 * Authenticates a user from the given GSS credential and stores it.
 	 *
 	 * @param gssCredential
+	 *            user's GSS credential
 	 * @throws RuntimeException
 	 *             wraps GSSException and NamingException
 	 * @return the retrieved principal

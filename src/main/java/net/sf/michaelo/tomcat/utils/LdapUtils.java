@@ -20,6 +20,7 @@ import javax.naming.NamingException;
 import javax.naming.directory.DirContext;
 
 /**
+ * Utilities for closing LDAP resources.
  *
  * @version $Id$
  */

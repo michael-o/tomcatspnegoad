@@ -32,6 +32,7 @@ import org.apache.juli.logging.LogFactory;
 import org.ietf.jgss.GSSCredential;
 
 /**
+ * A GSS-API-aware {@link UserDatabaseRealm}.
  *
  * @version $Id$
  */

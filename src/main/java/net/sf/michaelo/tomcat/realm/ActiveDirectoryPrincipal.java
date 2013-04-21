@@ -27,6 +27,16 @@ import org.ietf.jgss.GSSCredential;
 
 /**
  * Represents a principal from Active Directory with a list of roles.
+ * <p>
+ * A Active Directory principal is comprised of the following items:
+ * <ul>
+ * <li>a Kerberos principal,</li>
+ * <li>a distinguished name (DN) in the forest,</li>
+ * <li>a security identifier (SID),</li>
+ * <li>an optional GSS credential for credential delegation (impersonation),</li>
+ * <li>and a list of roles ({@code memberOf}) the user has been assigned to. Only the common name
+ * (CN) is stored.
+ * </p>
  *
  * @version $Id$
  */
@@ -41,7 +51,7 @@ public class ActiveDirectoryPrincipal implements Principal, Serializable {
 	private List<String> roles;
 
 	/**
-	 * Constructs a new principal.
+	 * Constructs a new principal for the given parameters.
 	 *
 	 * @param principal
 	 *            the underlying principal
@@ -89,10 +99,20 @@ public class ActiveDirectoryPrincipal implements Principal, Serializable {
 		return principal.getName();
 	}
 
+	/**
+	 * Returns the distinguished name of the principal.
+	 *
+	 * @return the distinguished name
+	 */
 	public String getDn() {
 		return dn;
 	}
 
+	/**
+	 * Return the security identifier (SID) of the principal.
+	 *
+	 * @return the
+	 */
 	public byte[] getSid() {
 		return ArrayUtils.clone(sid);
 	}
@@ -107,6 +127,12 @@ public class ActiveDirectoryPrincipal implements Principal, Serializable {
 		return principal.toString();
 	}
 
+	/**
+	 * Returns the delegated credential if the server is trusted for delegation and the credential
+	 * was intended to be stored.
+	 *
+	 * @return the delegated credential
+	 */
 	public GSSCredential getDelegatedCredential() {
 		return gssCredential;
 	}
