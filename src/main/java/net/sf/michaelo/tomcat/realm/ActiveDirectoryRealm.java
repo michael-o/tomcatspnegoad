@@ -49,14 +49,14 @@ import org.apache.juli.logging.LogFactory;
 import org.ietf.jgss.GSSCredential;
 
 /**
- * A realm which retrieves authenticated users from Active Directory.
+ * A realm which retrieves authenticated user principals from Active Directory.
  *
  * <p>
  * Following options can be configured:
- * <li>{@code resourceName}: The name of the {@link DirContextSource} in JNDI with which users will
- * be retrieved.</li>
- * <li>{@code localResource}: Whether this resource is locally in the {@code context.xml} or
- * globally configured if the {@code server.xml} (optional). Default value is {@code false}.</li>
+ * <li>{@code resourceName}: The name of the {@link DirContextSource} in JNDI with which principals
+ * will be retrieved.</li>
+ * <li>{@code localResource}: Whether this resource is locally configured in the {@code context.xml}
+ * or globally configured in the {@code server.xml} (optional). Default value is {@code false}.</li>
  * <li>{@code strippableRoleNamePrefixes}: Role name prefixes (comma-seperated) which can be
  * stripped during retrieval (optional).</li>
  * </ul>

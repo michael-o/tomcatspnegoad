@@ -28,7 +28,7 @@ import org.ietf.jgss.GSSCredential;
 /**
  * Represents a principal from Active Directory with a list of roles.
  * <p>
- * A Active Directory principal is comprised of the following items:
+ * An Active Directory principal is comprised of the following items:
  * <ul>
  * <li>a Kerberos principal,</li>
  * <li>a distinguished name (DN) in the forest,</li>
@@ -36,6 +36,7 @@ import org.ietf.jgss.GSSCredential;
  * <li>an optional GSS credential for credential delegation (impersonation),</li>
  * <li>and a list of roles ({@code memberOf}) the user has been assigned to. Only the common name
  * (CN) is stored.
+ * </ul>
  * </p>
  *
  * @version $Id$
