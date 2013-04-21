@@ -16,6 +16,7 @@
 package net.sf.michaelo.tomcat.authenticator;
 
 /**
+ * Authentication exception for server-side issues.
  *
  * @version $Id$
  */

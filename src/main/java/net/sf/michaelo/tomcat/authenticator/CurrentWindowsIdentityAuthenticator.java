@@ -27,14 +27,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import net.sf.michaelo.tomcat.realm.GssApiAwareRealm;
 
-import org.apache.catalina.Globals;
-import org.apache.catalina.authenticator.AuthenticatorBase;
 import org.apache.catalina.authenticator.Constants;
 import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.Response;
 import org.apache.catalina.deploy.LoginConfig;
-import org.apache.juli.logging.Log;
-import org.apache.juli.logging.LogFactory;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
 import org.ietf.jgss.GSSManager;
@@ -51,31 +47,13 @@ import org.ietf.jgss.Oid;
  *
  * @version $Id$
  */
-public class CurrentWindowsIdentityAuthenticator extends AuthenticatorBase {
-
-	private static Log logger = LogFactory.getLog(CurrentWindowsIdentityAuthenticator.class);
+public class CurrentWindowsIdentityAuthenticator extends GssApiAwareAuthenticator {
 
 	protected static final String CURRENT_WINDOWS_IDENTITY_METHOD = "CURRENT_WINDOWS_IDENTITY";
-
-	private String loginEntryName;
-
-	public String getLoginEntryName() {
-		return loginEntryName;
-	}
-
-	public void setLoginEntryName(String loginEntryName) {
-		this.loginEntryName = loginEntryName;
-	}
 
 	@Override
 	public String getInfo() {
 		return "net.sf.michaelo.tomcat.authenticator.CurrentWindowsIdentityAuthenticator/0.9";
-	}
-
-	protected void setException(Request request, Response response, AuthenticationException e)
-			throws IOException {
-		request.setAttribute(Globals.EXCEPTION_ATTR, e);
-		response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 	}
 
 	@Override
@@ -119,7 +97,7 @@ public class CurrentWindowsIdentityAuthenticator extends AuthenticatorBase {
 
 				AuthenticationException ae = new AuthenticationException(
 						"Unable to login as the user principal", e);
-				setException(request, response, ae);
+				sendException(request, response, ae);
 				return false;
 			}
 
@@ -134,24 +112,30 @@ public class CurrentWindowsIdentityAuthenticator extends AuthenticatorBase {
 				}
 			};
 
-			GSSCredential gssCredential = Subject.doAs(lc.getSubject(), action);
+			GSSCredential gssCredential = null;
 
-			GssApiAwareRealm<?> realm = (GssApiAwareRealm<?>) context.getRealm();
-			principal = realm.authenticate(gssCredential);
+			try {
+				gssCredential = Subject.doAs(lc.getSubject(), action);
+			} catch (PrivilegedActionException e) {
+				logger.error("Unable to obtain the user credential", e.getException());
 
-		} catch (PrivilegedActionException e) {
-			logger.error("Unable to login as the user principal", e.getException());
+				AuthenticationException ae = new AuthenticationException(
+						"Unable to obtain the user credential", e.getException());
+				sendException(request, response, ae);
+				return false;
+			}
 
-			AuthenticationException ae = new AuthenticationException(
-					"Unable to login as the user principal", e);
-			setException(request, response, ae);
-			return false;
-		} catch (RuntimeException e) {
-			// Logging happens already in the Realm
-			AuthenticationException ae = new AuthenticationException(
-					"Unable to perform principal search", e.getCause());
-			setException(request, response, ae);
-			return false;
+			try {
+				GssApiAwareRealm<?> realm = (GssApiAwareRealm<?>) context.getRealm();
+				principal = realm.authenticate(gssCredential);
+			} catch (RuntimeException e) {
+				// Logging happens already in the Realm
+				AuthenticationException ae = new AuthenticationException(
+						"Unable to perform user principal search", e.getCause());
+				sendException(request, response, ae);
+				return false;
+			}
+
 		} finally {
 			if (lc != null) {
 				try {
@@ -163,12 +147,12 @@ public class CurrentWindowsIdentityAuthenticator extends AuthenticatorBase {
 		}
 
 		if (principal != null) {
-			register(request, response, principal, CURRENT_WINDOWS_IDENTITY_METHOD, principal.getName(),
-					null);
+			register(request, response, principal, CURRENT_WINDOWS_IDENTITY_METHOD,
+					principal.getName(), null);
 			return true;
 		}
 
-		response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+		response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
 		return false;
 	}
 
