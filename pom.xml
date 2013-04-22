@@ -203,6 +203,7 @@
 				<configuration>
 					<links>
 						<link>https://tomcat.apache.org/tomcat-6.0-doc/api</link>
+						<link>http://dirctxsrc.sourceforge.net/apidocs</link>
 					</links>
 				</configuration>
 			</plugin>
@@ -216,6 +217,7 @@
 				<configuration>
 					<links>
 						<link>https://tomcat.apache.org/tomcat-6.0-doc/api</link>
+						<link>http://dirctxsrc.sourceforge.net/apidocs</link>
 					</links>
 				</configuration>
 			</plugin>
