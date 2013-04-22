@@ -21,6 +21,10 @@ import javax.naming.directory.DirContext;
 import org.apache.commons.lang3.StringUtils;
 
 /**
+ * A mapper for the AD attribute {@code userPrincipalName}. This mapper maps the Kerberos principal
+ * (which is also called implicit UPN) to the AD attribute {@code userPrincipalName} which by
+ * default contains the iUPN unless it's modified. No assumption is made about the root DN set in
+ * the given context, so you can narrow down your search base if you like.
  *
  * @version $Id$
  */

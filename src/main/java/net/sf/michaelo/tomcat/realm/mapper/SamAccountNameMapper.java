@@ -16,6 +16,7 @@
 package net.sf.michaelo.tomcat.realm.mapper;
 
 /**
+ * A base mapper for the AD attribute {@code sAMAccountName} and the realm.
  *
  * @version $Id$
  */

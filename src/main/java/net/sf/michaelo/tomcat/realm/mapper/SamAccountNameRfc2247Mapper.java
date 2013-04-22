@@ -28,6 +28,13 @@ import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 
 /**
+ * A mapper for the AD attribute {@code sAMAccountName} and the realm. This mapper splits the
+ * Kerberos principal in the primary and realm components. The instance component is completely
+ * ignored. The primary component is assigned to the {@code sAMAccountName} and the realm is
+ * transformed to a search base according to <a href="http://www.ietf.org/rfc/rfc2247.txt">RFC
+ * 2247</a>. <br/>
+ * This mapper requires to operate from the {@code RootDSE} of a domain controller or better yet, a
+ * GC. No root DN normalization (stripping DC components) happens here (yet).
  *
  * @version $Id$
  */
