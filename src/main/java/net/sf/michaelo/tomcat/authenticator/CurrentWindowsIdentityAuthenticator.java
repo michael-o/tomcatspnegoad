@@ -37,7 +37,7 @@ import org.ietf.jgss.GSSManager;
 import org.ietf.jgss.Oid;
 
 /**
- * Windows Identitiy Authenticator which utilizes GSS-API to retrieve to currently logged in user.
+ * Windows Identitiy Authenticator which uses GSS-API to retrieve to currently logged in user.
  * <p>
  * This authenticator has the following configuration options:
  * <ul>

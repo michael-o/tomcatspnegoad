@@ -57,7 +57,7 @@ import org.ietf.jgss.GSSCredential;
  * will be retrieved.</li>
  * <li>{@code localResource}: Whether this resource is locally configured in the {@code context.xml}
  * or globally configured in the {@code server.xml} (optional). Default value is {@code false}.</li>
- * <li>{@code strippableRoleNamePrefixes}: Role name prefixes (comma-seperated) which can be
+ * <li>{@code strippableRoleNamePrefixes}: Role name prefixes (comma-separated) which can be
  * stripped during retrieval (optional).</li>
  * </ul>
  * </p>

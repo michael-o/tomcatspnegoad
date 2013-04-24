@@ -27,7 +27,7 @@ import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 
 /**
- * Base authenticator for GSS-API-based authenticators which holds the login entry name.
+ * Base authenticator for GSS-API-based authenticators, which holds the login entry name.
  *
  * @version $Id$
  */
