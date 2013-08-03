@@ -35,8 +35,9 @@ User Guide
 
     []
 
-    [Notice] Make sure that the machine running the Tomcat instance (a) has joined a domain, (b) has
-             the Kerberos properly configured and (c) the JVM has all necessary properties set.
+    [Attention] Make sure that the machine running the Tomcat instance (a) has joined a domain, (b)
+                an appropriate SPN set, (c) has the Kerberos properly configured and (d) the JVM has
+                all necessary properties set.
 
   This site will guide you through the components of this library:
 
@@ -47,6 +48,8 @@ User Guide
         Active Directory or any other user repository.
 
   []
+
+  Your will need <both> configured properly to enjoy SSO in your company network too.
 
   Before using this library, make sure that the artifact and its dependencies are in the class path
   of your Tomcat installation, i.e., in <<<$CATALINA_BASE/lib>>>.

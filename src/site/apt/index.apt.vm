@@ -43,3 +43,6 @@ About ${project.name}
   Portions of this project have been {{{https://issues.apache.org/bugzilla/show_bug.cgi?id=48685}integrated}}
   into Apache Tomcat 7. Though, this project covers much more, doesn't stop with an authenticator
   and works in Apache Tomcat 6 too.
+
+  This library have served me very well for many years and still does a great job in a complex
+  multi-realm enviroment, hopefully it will do for you too.
