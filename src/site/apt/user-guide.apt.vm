@@ -1,0 +1,52 @@
+#*
+ * Copyright 2013 Michael Osipov
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *#
+
+## $Id$
+
+                            ----------------------
+                                 User Guide
+                            ----------------------
+                               Michael Osipov
+                            ----------------------
+                                 2013-08-03
+                            ----------------------
+
+#macro(property $property)${project.properties.get($property)}#end
+
+User Guide
+
+  To make use of this library you must run at least Java #property("maven.compiler.target").
+
+    [Notice] I have not tried this in any other version except Apache Tomcat 6.0.x but this in newer
+             versions too. I would be glad to hear other success stories.
+
+    []
+
+    [Notice] Make sure that the machine running the Tomcat instance (a) has joined a domain, (b) has
+             the Kerberos properly configured and (c) the JVM has all necessary properties set.
+
+  This site will guide you through the components of this library:
+
+  [[1]] {{{./authenticators.html}Authenticators}}: An authenticator challenges a client to present
+        the necessary Kerberos security token to verify its identity.
+
+  [[2]] {{{./realms.html}Realms}}: A realm looks up the metadata and roles of a verified user in the
+        Active Directory or any other user repository.
+
+  []
+
+  Before using this library, make sure that the artifact and its dependencies are in the class path
+  of your Tomcat installation, i.e., in <<<$CATALINA_BASE/lib>>>.
