@@ -48,7 +48,7 @@ import org.ietf.jgss.Oid;
  * <li>{@code loginEntryName}: Login entry name with a configured {@code Krb5LoginModule}.</li>
  * <li>{@code storeDelegatedCredential}: Store the client's/initiator's delegated credential in the
  * user principal (optional). Valid values are {@code true}, {@code false}. Default value is
- * {@code true}.</li>
+ * {@code false}.</li>
  * </ul>
  * </p>
  *
@@ -64,7 +64,7 @@ public class SpnegoAuthenticator extends GssApiAwareAuthenticator {
 	protected static final String SPNEGO_METHOD = "SPNEGO";
 	protected static final String NEGOTIATE_AUTH_SCHEME = "Negotiate";
 
-	protected boolean storeDelegatedCredential = true;
+	protected boolean storeDelegatedCredential;
 
 	/**
 	 * Sets the storage of client's/initiator's delegated credential in the user principal.
