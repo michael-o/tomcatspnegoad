@@ -84,7 +84,7 @@ public class UserDatabaseRealm extends GssApiAwareRealm<UserDatabase> {
 				roles.add(role.getName());
 			}
 		}
-		return new GenericPrincipal(this, username, user.getPassword(), roles, user);
+		return new GenericPrincipal(this, username, null, roles, user);
 	}
 
 	public boolean hasRole(Principal principal, String role) {
