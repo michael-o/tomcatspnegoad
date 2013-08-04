@@ -63,14 +63,13 @@ Using and Choosing Authenticators
   you need to perform further operations on the user's behalf (impersonation). Default value is
   <<<false>>>. Keep in mind that Active Directory accounts have to be explicitly enabled for this.
 
-  Now you have successfully configured the <<<SpnegoAuthenticator>>> in your webapp. It is now
-  ready to use.
+  You have successfully configured the <<<SpnegoAuthenticator>>> in your webapp. It is now ready to use.
 
 * Using an Authenticator During Development
 
   You have now examined the authenticator above and probably ask yourself: How do you use that
   on my local development machine? Well, Generally, you can't in Windows due to {{{http://stackoverflow.com/q/17705727/696632}this}}
-  stupidity. Unix GSS-API should not suffer from this.
+  stupidity.
 
   Meet the savior {{{./apidocs/net/sf/michaelo/tomcat/authenticator/CurrentWindowsIdentityAuthenticator.html}<<<CurrentWindowsIdentityAuthenticator>>>}}.
   It will automatically obtain the GSS credential of the currently logged in domain user and auto-login
