@@ -29,7 +29,7 @@
 Using and Choosing Authenticators
 
   Choose an authenticator to determine a user's identity. Usually, the {{{The_SPNEGO_Authenticator}<<<SpnegoAuthenticator>>>}}
-  will do but during local development, you will find the {{{Using_an_Authenticator_During_Development}<<<CurrentWindowsIdentityAuthenticator>>>}}
+  will do but during local development you will find the {{{Using_an_Authenticator_During_Development}<<<CurrentWindowsIdentityAuthenticator>>>}}
   very handy.
 
 * The SPNEGO Authenticator
@@ -47,13 +47,13 @@ Using and Choosing Authenticators
   Open or create your app's <<<context.xml>>> and add:
 
 +----------------------------
-[$ellipsis]
 <Context>
+[$ellipsis]
   <!-- Add this -->
   <Valve className="net.sf.michaelo.tomcat.authenticator.SpnegoAuthenticator"
     loginEntryName="a-login-entry" storeDelegatedCredential="true|false" />
-</Context>
 [$ellipsis]
+</Context>
 +----------------------------
 
   Provide the login entry name from your <<<login.conf>>> configured for the machine account

@@ -53,3 +53,9 @@ User Guide
 
   Before using this library, make sure that the artifact and its dependencies are in the class path
   of your Tomcat installation, i.e., in <<<$CATALINA_BASE/lib>>>.
+  
+* Not using Active Directory but another Kerberos KDC implementation?
+
+  If you happen not to use Active Directory but MIT Kerberos or Heimdal as your central KDC, no problem.
+  The authenticators are not tied the Active Directory but simply require a working KDC. As for
+  the realm, read the chapter on {{{./realms.html#Alternative_Realm_Implemenations}alternative realm implemenations}}.
