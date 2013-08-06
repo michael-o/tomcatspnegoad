@@ -1,0 +1,119 @@
+#*
+ * Copyright 2013 Michael Osipov
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *#
+
+## $Id$
+
+                            ----------------------
+                                    Realms
+                            ----------------------
+                               Michael Osipov
+                            ----------------------
+                                 2013-08-04
+                            ----------------------
+
+#set($ellipsis = $esc.unicode('\u2026'))
+
+Using and Choosing Realms
+
+  After the authenticator has established a user's identity, it's time to search for him in a user
+  repository to get his roles and other data. Usually, the {{{The_Active_Directory_Realm}<<<ActiveDirectoryRealm>>>}}
+  will do but for testing purposes you will find the {{{Using_a_Realm_for_Testing_Purposes}<<<UserDatabaseRealm>>>}}
+  very handy.
+
+    [Tip] I strongly recommend to try the {{{Using_a_Realm_for_Testing_Purposes}<<<UserDatabaseRealm>>>}}
+          first, you'll see whether the authenticator works at all. If it does, go on to the
+          {{{The_Active_Directory_Realm}<<<ActiveDirectoryRealm>>>}}.
+
+* The Active Directory Realm
+
+  The {{{./apidocs/net/sf/michaelo/tomcat/realm/ActiveDirectoryRealm.html}<<<ActiveDirectoryRealm>>>}}
+  will query your Active Directory for the {{{http://msdn.microsoft.com/en-us/library/windows/desktop/aa380525%28v=vs.85%29.aspx#user_principal_name}UPN}}
+  of a user and retrieve its metadata.
+
+  It requires two steps of setup: First, you will need to configure a <<<DirContextSourceFactory>>>
+  with the parameters of your Active Direcory. Second, the realm itself pointing to that Active Directory.
+
+** Configuring a Directory Context Source Factory
+
+  Please read the documentation of the {{{http://dirctxsrc.sourceforge.net/dircontextsourcefactory.html}<<<DirContextSourceFactory>>>}}
+  on how to configure it in detail. Here is a minimal working configuration:
+
++----------------------------
+[$ellipsis]
+  <!-- Add this -->
+  <Resource name="my-active-directory" type="net.sf.michaelo.dirctxsrc.DirContextSource"
+    factory="net.sf.michaelo.dirctxsrc.DirContextSourceFactory"
+    urls="ldap://hostname" auth="gssapi" loginEntryName="my-client" />
+[$ellipsis]
++----------------------------
+
+    [Note] I strongly recommend using the Global Catalog (port 3268) otherwise data might be missing
+           and you will end chasing referrals all way long.
+
+** Configuring the Realm
+
+  Now we need to wire that to the realm. Open or create your app's <<<context.xml>>> and add:
+
++----------------------------
+<Context>
+[$ellipsis]
+  <!-- Add this -->
+  <Realm className="net.sf.michaelo.tomcat.realm.ActiveDirectoryRealm"
+    resourceName="my-active-directory" localResource="true|false" />
+[$ellipsis]
+</Context>
++----------------------------
+
+  Provide the <<<resourceName>>> your have configured for the <<<DirContextSource>>> above and hint
+  whether this resource has been configured {{{http://dirctxsrc.sourceforge.net/dircontextsourcefactory.html#Resource_Declaration_Examples}locally or globally}}.
+  Default value is <<<false>>>.
+
+  You have successfully configured the <<<ActiveDirectoryRealm>>> in your webapp. It is now ready to use.
+
+* Using a Realm for Testing Purposes
+
+  In most cases, you are not able to modify Active Directory entries easily, e.g., adding and removing
+  groups. Therefore, I have modified the default {{{https://tomcat.apache.org/tomcat-6.0-doc/realm-howto.html#UserDatabaseRealm}<<<UserDatabaseRealm>>>}}
+  to a GSS-API-aware realm to make it work with my authenticators. You can fiddle quickly with users
+  and roles to test your application.
+
+  Follow the Tomcat documenation and configure a <<<users.xml>>> file with the according resource
+  declaration. Type in the user UPNs and groups but leave the password out.
+
+  Open or create your app's <<<context.xml>>> and add:
+
++----------------------------
+<Context>
+[$ellipsis]
+  <!-- Add this -->
+  <Realm className="net.sf.michaelo.tomcat.realm.UserDatabaseRealm"
+    resourceName="my-users-xml" />
+[$ellipsis]
+</Context>
++----------------------------
+
+  You have successfully configured the <<<UserDatabaseRealm>>> in your webapp. It is now ready to use.
+
+* Alternative Realm Implemenations
+
+  If you are not using the Active Directory as a user repository (e.g. database or another directory
+  server) and can still still make use of this library. Extend the abstract {{{./apidocs/net/sf/michaelo/tomcat/realm/GssApiAwareRealm.html}<<<GssApiAwareRealm>>>}}
+  class and implement the abstract method <<<getPrincipal(String, GSSCredential)>>>.
+
+The Next Step
+
+  Now your have freed your users from typing usernames and passwords over and over again. Go on and
+  try your new SSO setup.
