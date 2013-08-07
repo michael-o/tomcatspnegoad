@@ -238,7 +238,7 @@ public class SpnegoAuthenticator extends GssApiAwareAuthenticator {
 			} catch (RuntimeException e) {
 				// TODO No logging necessary, it happens already in the realm. Maybe move to here.
 				AuthenticationException ae = new AuthenticationException(
-						"Unable to perform user principal search", e.getCause());
+						"Unable to perform user principal search", e);
 				sendException(request, response, ae);
 				return false;
 			}

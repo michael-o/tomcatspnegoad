@@ -20,8 +20,6 @@ import java.security.Principal;
 import java.util.Collections;
 import java.util.List;
 
-import javax.security.auth.kerberos.KerberosPrincipal;
-
 import org.apache.commons.lang3.ArrayUtils;
 import org.ietf.jgss.GSSCredential;
 
@@ -45,7 +43,7 @@ public class ActiveDirectoryPrincipal implements Principal, Serializable {
 
 	private static final long serialVersionUID = 3096263076868974289L;
 
-	private KerberosPrincipal principal;
+	private Principal principal;
 	private String dn;
 	private byte[] sid;
 	private transient GSSCredential gssCredential;
@@ -61,7 +59,7 @@ public class ActiveDirectoryPrincipal implements Principal, Serializable {
 	 * @param roles
 	 *            the roles retrieved from Active Directory
 	 */
-	public ActiveDirectoryPrincipal(KerberosPrincipal principal, String dn, byte[] sid,
+	public ActiveDirectoryPrincipal(Principal principal, String dn, byte[] sid,
 			GSSCredential gssCredential, List<String> roles) {
 		this.principal = principal;
 		this.dn = dn;
@@ -75,7 +73,8 @@ public class ActiveDirectoryPrincipal implements Principal, Serializable {
 	 *
 	 * @return the underlying principal
 	 */
-	public KerberosPrincipal getKerberosPrincipal() {
+	// TODO Give this method a better name
+	public Principal getPrincipal() {
 		return principal;
 	}
 

@@ -43,8 +43,6 @@ public abstract class GssApiAwareRealm<T> extends RealmBase {
 	protected boolean localResource;
 	protected String resourceName;
 
-	private T resource;
-
 	public void setLocalResource(boolean localResource) {
 		this.localResource = localResource;
 	}
@@ -137,22 +135,18 @@ public abstract class GssApiAwareRealm<T> extends RealmBase {
 	 * http://www.mail-archive.com/users@tomcat.apache.org/msg98380.html
 	 */
 	@SuppressWarnings("unchecked")
-	protected synchronized T lookupResource() throws NamingException {
+	protected T lookupResource() throws NamingException {
 		Context context = null;
 
-		if (resource == null) {
-			if (localResource) {
-				context = ContextBindings.getClassLoader();
-				context = (Context) context.lookup("comp/env");
-			} else {
-				StandardServer server = (StandardServer) ServerFactory.getServer();
-				context = server.getGlobalNamingContext();
-			}
-
-			resource = (T) context.lookup(resourceName);
+		if (localResource) {
+			context = ContextBindings.getClassLoader();
+			context = (Context) context.lookup("comp/env");
+		} else {
+			StandardServer server = (StandardServer) ServerFactory.getServer();
+			context = server.getGlobalNamingContext();
 		}
 
-		return resource;
+		return (T) context.lookup(resourceName);
 	}
 
 }

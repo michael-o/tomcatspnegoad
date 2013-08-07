@@ -131,7 +131,7 @@ public class CurrentWindowsIdentityAuthenticator extends GssApiAwareAuthenticato
 			} catch (RuntimeException e) {
 				// Logging happens already in the Realm
 				AuthenticationException ae = new AuthenticationException(
-						"Unable to perform user principal search", e.getCause());
+						"Unable to perform user principal search", e);
 				sendException(request, response, ae);
 				return false;
 			}
