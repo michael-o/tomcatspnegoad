@@ -105,9 +105,9 @@ public class CurrentWindowsIdentityAuthenticator extends GssApiAwareAuthenticato
 			final PrivilegedExceptionAction<GSSCredential> action = new PrivilegedExceptionAction<GSSCredential>() {
 				@Override
 				public GSSCredential run() throws GSSException {
-					// Oid spnegoOid = new Oid("1.3.6.1.5.5.2");
-					Oid krb5Oid = new Oid("1.2.840.113554.1.2.2");
-					return manager.createCredential(null, GSSCredential.DEFAULT_LIFETIME, krb5Oid,
+					Oid spnegoOid = new Oid("1.3.6.1.5.5.2");
+					//Oid krb5Oid = new Oid("1.2.840.113554.1.2.2");
+					return manager.createCredential(null, GSSCredential.DEFAULT_LIFETIME, spnegoOid,
 							GSSCredential.INITIATE_ONLY);
 				}
 			};
