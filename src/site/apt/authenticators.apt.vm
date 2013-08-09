@@ -26,9 +26,9 @@
 
 #set($ellipsis = $esc.unicode('\u2026'))
 
-Using and Choosing Authenticators
+Choosing and Using Authenticators
 
-  Choose an authenticator to determine a user's identity. Usually, the {{{The_SPNEGO_Authenticator}<<<SpnegoAuthenticator>>>}}
+  Choose an authenticator which will determine a user's identity. Usually, the {{{The_SPNEGO_Authenticator}<<<SpnegoAuthenticator>>>}}
   will do but during local development you will find the {{{Using_an_Authenticator_During_Development}<<<CurrentWindowsIdentityAuthenticator>>>}}
   very handy.
 
@@ -36,12 +36,12 @@ Using and Choosing Authenticators
 
   The {{{./apidocs/net/sf/michaelo/tomcat/authenticator/SpnegoAuthenticator.html}<<<SpnegoAuthenticator>>>}}
   challenges the client to perform {{{http://tools.ietf.org/html/rfc4178}SPNEGO}} authentication. In
-  turn the server establishes a GSS context and validates the security token and responds with a
-  proper message to the client.
+  turn the server accepts a GSS context, validates the security token and responds with a proper
+  message to the client.
 
     [Attention] Though SPNEGO is intended to negotiate a mechanism, the Oracle JVM currently supports
-                Kerberos 5 only and not NTLM additionally due to its proprietary nature. Furthermore,
-                it is {{{http://blogs.technet.com/b/authentication/archive/2006/04/07/ntlm-s-time-has-passed.aspx}not advised by Microsoft}}
+                Kerberos 5 only and not NTLM additionally due to its proprietary nature. Anyway, it
+                is discouraged by Microsoft ({{{http://blogs.technet.com/b/authentication/archive/2006/04/07/ntlm-s-time-has-passed.aspx}1}}, {{{http://serverfault.com/a/384721/116898}2}})
                 to rely on NTLM anymore.
 
   Open or create your app's <<<context.xml>>> and add:
@@ -57,7 +57,7 @@ Using and Choosing Authenticators
 +----------------------------
 
   Provide the login entry name from your <<<login.conf>>> configured for the machine account
-  accepting GSS contexts with Kerberos.
+  capable of accepting GSS contexts with SPNEGO/Kerberos.
 
   Additionally, you may instruct the authenticator to store the delegated credential of a user if
   you need to perform further operations on the user's behalf (impersonation). Default value is
@@ -67,14 +67,13 @@ Using and Choosing Authenticators
 
 * Using an Authenticator During Development
 
-  You have now examined the authenticator above and probably ask yourself: How do you use that
-  on my local development machine? Well, Generally, you can't in Windows due to {{{http://stackoverflow.com/q/17705727/696632}this}}
-  stupidity.
-
-  Meet the savior {{{./apidocs/net/sf/michaelo/tomcat/authenticator/CurrentWindowsIdentityAuthenticator.html}<<<CurrentWindowsIdentityAuthenticator>>>}}.
+  After examining the authenticator above and probably ask yourself: How do I use that on my local
+  development machine? Generally, you can't in Windows due to {{{http://stackoverflow.com/q/17705727/696632}this}}
+  stupidity. But there is {{{./apidocs/net/sf/michaelo/tomcat/authenticator/CurrentWindowsIdentityAuthenticator.html}<<<CurrentWindowsIdentityAuthenticator>>>}}.
   It will automatically obtain the GSS credential of the currently logged in domain user and auto-login
-  you in the application. This is very handy when you are running your Tomcat from Eclipse. There is
-  no hassle with any other authentication mechanism different to the one above.
+  you in the application. This is very handy when you are running your Tomcat instance inside Eclipse.
+
+  Open or create your app's <<<context.xml>>> and add:
 
 +----------------------------
 [$ellipsis]
@@ -86,8 +85,8 @@ Using and Choosing Authenticators
 [$ellipsis]
 +----------------------------
 
-  Provide the login entry name from your <<<login.conf>>> configured for your user account initiating
-  GSS contexts with Kerberos.
+  Provide the login entry name from your <<<login.conf>>> configured for your user account capable of
+  initiating GSS contexts with SPNEGO/Kerberos.
 
     [Warning] Do not use this in production. This has been development for the ease of development
               and testing purposes only.

@@ -26,8 +26,7 @@
 
 About ${project.name}
 
-  ${project.description} It integrates your Java webapp into your Active Direcory environment with
-  ease.
+  ${project.description} It integrates your Java webapp in your Active Direcory environment with ease.
 
 * Getting Started
 
@@ -38,10 +37,10 @@ About ${project.name}
 
   Working in a corporate environment leaves you virtually no option of not having real SSO for a
   (Java) webapp, especially when this works in the Microsoft IIS with a single click. Unfortunately,
-  the Apache Tomcat did not have anything like this out of the box. After a deep dive in Kerberos,
-  GSS-API, Active Directory and LDAP in Java, I made a custom component for that problem field.
-  Portions of this project have been {{{https://issues.apache.org/bugzilla/show_bug.cgi?id=48685}integrated}}
-  into Apache Tomcat 7. Though, this project covers much more, doesn't stop with an authenticator
+  the Apache Tomcat did not have anything like this out of the box for years.\
+  After a deep dive into Kerberos, GSS-API, Active Directory and LDAP in Java, I made a custom component
+  to fill that gap. Portions of this project have been {{{https://issues.apache.org/bugzilla/show_bug.cgi?id=48685}integrated}}
+  into Apache Tomcat 7. Though, this project covers much more, doesn't stop with a sole authenticator
   and works in Apache Tomcat 6 too.
 
   This library have served me very well for many years and still does a great job in a complex
