@@ -36,8 +36,9 @@ User Guide
     []
 
     [Prerequisites] Make sure that the machine running the Tomcat instance (a) has joined a domain,
-                    (b) has an appropriate SPN set, (c) has Kerberos properly configured and (d) the
-                    JVM has all necessary system properties set.
+                    (b) has an appropriate {{{http://msdn.microsoft.com/en-us/library/windows/desktop/ms677949%28v=vs.85%29.aspx}SPN}}
+                    set, (c) has Kerberos properly configured and (d) the JVM has all necessary
+                    system properties set.
 
   This site will guide you through the components of this library:
 
@@ -56,6 +57,6 @@ User Guide
 
 * Not using Active Directory but another Kerberos KDC implementation?
 
-  If you happen <not> to use Active Directory but MIT Kerberos or Heimdal as your KDC &#2013; no
+  If you happen <not> to use Active Directory but MIT Kerberos or Heimdal as your KDC &#x2013; no
   problem, the authenticators are not tied the Active Directory but simply require a working Kerberos
-  setup. As for the realm, read the chapter on {{{./realms.html#Alternative_Realm_Implemenations}alternative realm implemenations}}.
+  setup. As for the realm, read the chapter on {{{./realms.html#Alternative_Realm_Implementations}alternative realm implementations}}.

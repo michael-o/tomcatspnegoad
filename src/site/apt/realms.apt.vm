@@ -60,7 +60,7 @@ Choosing and Using Realms
 +----------------------------
 
     [Note] I strongly recommend using the Global Catalog (port 3268) otherwise data might be missing
-           and/or youe will end chasing referrals.
+           and/or you will end chasing referrals.
 
 ** Configuring the Realm
 
@@ -84,12 +84,12 @@ Choosing and Using Realms
 
 * Using a Realm for Testing Purposes
 
-  In most cases, you are not able to modify Active Directory entries easily, e.g., adding and removing
-  groups. Therefore, I have modified the default {{{https://tomcat.apache.org/tomcat-6.0-doc/realm-howto.html#UserDatabaseRealm}<<<UserDatabaseRealm>>>}}
+  Usually, you are not able to modify Active Directory entries easily (only admins can), e.g.,adding
+  and removing groups. Therefore, I have modified the default {{{https://tomcat.apache.org/tomcat-6.0-doc/realm-howto.html#UserDatabaseRealm}<<<UserDatabaseRealm>>>}}
   to a GSS-API-aware realm to make it work with my authenticators. You can fiddle quickly with users
   and roles to test your application.
 
-  Follow the Tomcat documenation and configure a <<<users.xml>>> file with the according resource
+  Follow the Tomcat documentation and configure a <<<users.xml>>> file with the according resource
   declaration. Type in the UPNs and groups but leave the password out.
 
   Open or create your app's <<<context.xml>>> and add:
@@ -106,10 +106,10 @@ Choosing and Using Realms
 
   You have successfully configured the <<<UserDatabaseRealm>>> in your webapp. It is now ready to use.
 
-* Alternative Realm Implemenations
+* Alternative Realm Implementations
 
   If you are not using the Active Directory as a user repository (e.g. database or another directory
-  server) and can still still make use of this library. Extend the {{{./apidocs/net/sf/michaelo/tomcat/realm/GssApiAwareRealm.html}<<<GssApiAwareRealm>>>}}
+  server) and can still make use of this library. Extend the {{{./apidocs/net/sf/michaelo/tomcat/realm/GssApiAwareRealm.html}<<<GssApiAwareRealm>>>}}
   class and implement the abstract method <<<getPrincipal(String, GSSCredential)>>>.
 
 The Next Step
