@@ -22,15 +22,18 @@ import java.util.List;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.ietf.jgss.GSSCredential;
+import org.ietf.jgss.GSSName;
+import org.ietf.jgss.Oid;
 
 /**
  * Represents a principal from Active Directory with a list of roles.
  * <p>
  * An Active Directory principal is comprised of the following items:
  * <ul>
- * <li>a Kerberos principal,</li>
- * <li>a distinguished name (DN) in the forest,</li>
+ * <li>a GSS name,</li>
+ * <li>a mechanism OID with which the authentication has been performed,</li>
  * <li>a security identifier (SID),</li>
+ * <li>a distinguished name (DN) in the forest,</li>
  * <li>an optional GSS credential for credential delegation (impersonation),</li>
  * <li>and a list of roles ({@code memberOf}) the user has been assigned to. Only the common name
  * (CN) is stored.
@@ -43,43 +46,88 @@ public class ActiveDirectoryPrincipal implements Principal, Serializable {
 
 	private static final long serialVersionUID = 3096263076868974289L;
 
-	private Principal principal;
-	private String dn;
+	private GSSName gssName;
+	private Oid mech;
 	private byte[] sid;
+	private String dn;
 	private transient GSSCredential gssCredential;
 	private List<String> roles;
 
 	/**
 	 * Constructs a new principal for the given parameters.
 	 *
-	 * @param principal
-	 *            the underlying principal
+	 * @param gssName
+	 *            the underlying GSS name
+	 * @param mech
+	 *            the underlying (negotiated) mechanism OID of the authentication
 	 * @param dn
-	 *            TODO
+	 *            the user's distinguished name in the Active Directory forest
 	 * @param roles
 	 *            the roles retrieved from Active Directory
 	 */
-	public ActiveDirectoryPrincipal(Principal principal, String dn, byte[] sid,
+	public ActiveDirectoryPrincipal(GSSName gssName, Oid mech, byte[] sid, String dn,
 			GSSCredential gssCredential, List<String> roles) {
-		this.principal = principal;
-		this.dn = dn;
+		this.gssName = gssName;
+		this.mech = mech;
 		this.sid = ArrayUtils.clone(sid);
+		this.dn = dn;
 		this.gssCredential = gssCredential;
 		this.roles = Collections.unmodifiableList(roles);
 	}
 
-	/**
-	 * Returns the underlying principal.
-	 *
-	 * @return the underlying principal
-	 */
-	// TODO Give this method a better name
-	public Principal getPrincipal() {
-		return principal;
+	@Override
+	public String getName() {
+		return gssName.toString();
 	}
 
 	/**
-	 * Grants access if supplied role is associated with this pricipal.
+	 * Returns the underlying GSS name.
+	 *
+	 * @return the underlying GSS name
+	 */
+	public GSSName getGssName() {
+		return gssName;
+	}
+
+	/**
+	 * Returns the underlying (negotiated) mechanism OID of the authentication.
+	 *
+	 * @return the underlying (negotiated) mechanism OID of the authentication
+	 */
+	public Oid getMech() {
+		return mech;
+	}
+
+	/**
+	 * Return the security identifier (SID) of the principal.
+	 *
+	 * @return the
+	 */
+	public byte[] getSid() {
+		return ArrayUtils.clone(sid);
+	}
+
+	/**
+	 * Returns the distinguished name of the principal.
+	 *
+	 * @return the distinguished name
+	 */
+	public String getDn() {
+		return dn;
+	}
+
+	/**
+	 * Returns the delegated credential if the server is trusted for delegation and the credential
+	 * was intended to be stored.
+	 *
+	 * @return the delegated credential
+	 */
+	public GSSCredential getDelegatedCredential() {
+		return gssCredential;
+	}
+
+	/**
+	 * Grants access if supplied role is associated with this principal.
 	 *
 	 * @param role
 	 *            the role to check
@@ -95,46 +143,13 @@ public class ActiveDirectoryPrincipal implements Principal, Serializable {
 	}
 
 	@Override
-	public String getName() {
-		return principal.getName();
-	}
-
-	/**
-	 * Returns the distinguished name of the principal.
-	 *
-	 * @return the distinguished name
-	 */
-	public String getDn() {
-		return dn;
-	}
-
-	/**
-	 * Return the security identifier (SID) of the principal.
-	 *
-	 * @return the
-	 */
-	public byte[] getSid() {
-		return ArrayUtils.clone(sid);
-	}
-
-	@Override
 	public int hashCode() {
-		return principal.hashCode();
+		return gssName.hashCode();
 	}
 
 	@Override
 	public String toString() {
-		return principal.toString();
-	}
-
-	/**
-	 * Returns the delegated credential if the server is trusted for delegation and the credential
-	 * was intended to be stored.
-	 *
-	 * @return the delegated credential
-	 */
-	public GSSCredential getDelegatedCredential() {
-		return gssCredential;
+		return gssName.toString();
 	}
 
 }

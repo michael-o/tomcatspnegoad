@@ -27,11 +27,11 @@ import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 
 /**
- * Base authenticator for GSS-API-based authenticators, which holds the login entry name.
+ * Base authenticator for GSS-based authenticators, which holds the login entry name.
  *
  * @version $Id$
  */
-public abstract class GssApiAwareAuthenticator extends AuthenticatorBase {
+abstract class GssAwareAuthenticatorBase extends AuthenticatorBase {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 

@@ -26,19 +26,19 @@ import org.apache.catalina.realm.RealmBase;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 import org.apache.naming.ContextBindings;
-import org.ietf.jgss.GSSContext;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
 import org.ietf.jgss.GSSName;
+import org.ietf.jgss.Oid;
 
 /**
- * Base realm which is able to retrieve principals from GSS contexts and credentials.
+ * Base realm which is able to retrieve principals from {@link GSSName GSSNames}.
  *
  * @version $Id$
  */
-public abstract class GssApiAwareRealm<T> extends RealmBase {
+public abstract class GssAwareRealmBase<T> extends RealmBase {
 
-	private static final Log logger = LogFactory.getLog(GssApiAwareRealm.class);
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	protected boolean localResource;
 	protected String resourceName;
@@ -51,8 +51,6 @@ public abstract class GssApiAwareRealm<T> extends RealmBase {
 		this.resourceName = resourceName;
 	}
 
-	abstract protected Principal getPrincipal(String username, GSSCredential gssCredential);
-
 	@Override
 	protected String getPassword(String password) {
 		throw new UnsupportedOperationException("This method is not supported by this realm");
@@ -60,75 +58,24 @@ public abstract class GssApiAwareRealm<T> extends RealmBase {
 
 	@Override
 	protected Principal getPrincipal(String username) {
-		return getPrincipal(username, null);
+		throw new UnsupportedOperationException("This method is not supported by this realm");
 	}
 
 	/**
-	 * Authenticates a user from the given GSS context and eventually store his/her GSS credential.
+	 * Authenticates a user from the given GSS name and eventually store his/her GSS credential.
 	 *
-	 * @param gssContext
-	 *            GSS context established with the user
-	 * @param storeDelegatedCredential
-	 *            whether to store user's delegated credential
+	 * @param gssName
+	 *            the GSS name of the context initiator (client)
+	 * @param mech
+	 *            the used (negotiated) GSS mechanism of this context
+	 * @param delegatedCredential
+	 *            an eventually available delegated GSS credential
 	 * @return the retrieved principal
 	 * @throws RuntimeException
-	 *             wraps GSSException and NamingException
+	 *             wraps {@link GSSException} and {@link NamingException}
 	 */
-	public Principal authenticate(GSSContext gssContext, boolean storeDelegatedCredential) {
-
-		try {
-
-			GSSName gssName = gssContext.getSrcName();
-
-			if (gssName != null) {
-
-				GSSCredential gssCredential = null;
-				if (storeDelegatedCredential) {
-					if (gssContext.getCredDelegState()) {
-						gssCredential = gssContext.getDelegCred();
-					} else
-						logger.debug(String.format("Credential of '%s' is not delegable though storing was requested", gssName));
-				}
-
-				String username = gssName.toString();
-
-				return getPrincipal(username, gssCredential);
-			}
-
-		} catch (GSSException e) {
-			throw new RuntimeException(e);
-		}
-
-		return null;
-	}
-
-	/**
-	 * Authenticates a user from the given GSS credential and stores it.
-	 *
-	 * @param gssCredential
-	 *            user's GSS credential
-	 * @throws RuntimeException
-	 *             wraps GSSException and NamingException
-	 * @return the retrieved principal
-	 */
-	public Principal authenticate(GSSCredential gssCredential) {
-
-		try {
-
-			GSSName gssName = gssCredential.getName();
-
-			if (gssName != null) {
-				String username = gssName.toString();
-
-				return getPrincipal(username, gssCredential);
-			}
-
-		} catch (GSSException e) {
-			throw new RuntimeException(e);
-		}
-
-		return null;
-	}
+	abstract public Principal authenticate(GSSName gssName, Oid mech,
+			GSSCredential delegatedCredential);
 
 	/*
 	 * Must be accessed like this due to

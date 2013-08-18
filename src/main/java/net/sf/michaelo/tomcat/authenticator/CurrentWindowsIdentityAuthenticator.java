@@ -25,7 +25,7 @@ import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 import javax.servlet.http.HttpServletResponse;
 
-import net.sf.michaelo.tomcat.realm.GssApiAwareRealm;
+import net.sf.michaelo.tomcat.realm.GssAwareRealmBase;
 
 import org.apache.catalina.authenticator.Constants;
 import org.apache.catalina.connector.Request;
@@ -34,6 +34,7 @@ import org.apache.catalina.deploy.LoginConfig;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
 import org.ietf.jgss.GSSManager;
+import org.ietf.jgss.GSSName;
 import org.ietf.jgss.Oid;
 
 /**
@@ -47,7 +48,7 @@ import org.ietf.jgss.Oid;
  *
  * @version $Id$
  */
-public class CurrentWindowsIdentityAuthenticator extends GssApiAwareAuthenticator {
+public class CurrentWindowsIdentityAuthenticator extends GssAwareAuthenticatorBase {
 
 	protected static final String CURRENT_WINDOWS_IDENTITY_METHOD = "CURRENT_WINDOWS_IDENTITY";
 
@@ -105,9 +106,8 @@ public class CurrentWindowsIdentityAuthenticator extends GssApiAwareAuthenticato
 			final PrivilegedExceptionAction<GSSCredential> action = new PrivilegedExceptionAction<GSSCredential>() {
 				@Override
 				public GSSCredential run() throws GSSException {
-					Oid spnegoOid = new Oid("1.3.6.1.5.5.2");
-					//Oid krb5Oid = new Oid("1.2.840.113554.1.2.2");
-					return manager.createCredential(null, GSSCredential.DEFAULT_LIFETIME, spnegoOid,
+					Oid krb5Mech = new Oid("1.2.840.113554.1.2.2");
+					return manager.createCredential(null, GSSCredential.DEFAULT_LIFETIME, krb5Mech,
 							GSSCredential.INITIATE_ONLY);
 				}
 			};
@@ -126,8 +126,20 @@ public class CurrentWindowsIdentityAuthenticator extends GssApiAwareAuthenticato
 			}
 
 			try {
-				GssApiAwareRealm<?> realm = (GssApiAwareRealm<?>) context.getRealm();
-				principal = realm.authenticate(gssCredential);
+				GssAwareRealmBase<?> realm = (GssAwareRealmBase<?>) context.getRealm();
+				GSSName srcName = gssCredential.getName();
+				Oid krb5Mech = new Oid("1.2.840.113554.1.2.2");
+
+				principal = realm.authenticate(srcName, krb5Mech, gssCredential);
+			} catch (GSSException e) {
+				logger.warn(
+						"Failed to retrive GSSName form GSSCredential of the user", e);
+
+				// TODO Maybe a 401 is better suited here?
+				AuthenticationException ae = new AuthenticationException(
+						"Failed to retrive GSSName form GSSCredential of the user", e);
+				sendException(request, response, ae);
+				return false;
 			} catch (RuntimeException e) {
 				// Logging happens already in the Realm
 				AuthenticationException ae = new AuthenticationException(

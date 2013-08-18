@@ -19,12 +19,13 @@ import javax.naming.NamingException;
 import javax.naming.directory.DirContext;
 
 import org.apache.commons.lang3.StringUtils;
+import org.ietf.jgss.GSSName;
 
 /**
- * A mapper for the AD attribute {@code userPrincipalName}. This mapper maps the Kerberos principal
- * (which is also called implicit UPN) to the AD attribute {@code userPrincipalName} which by
- * default contains the iUPN unless it's modified. No assumption is made about the root DN set in
- * the given context, so you can narrow down your search base if you like.
+ * A mapper for the AD attribute {@code userPrincipalName}. This mapper maps the GSS name to the AD
+ * attribute {@code userPrincipalName} which by default contains the iUPN unless it's modified. No
+ * assumption is made about the root DN set in the given context, so you can narrow down your search
+ * base if you like.
  *
  * @version $Id$
  */
@@ -55,10 +56,10 @@ public class UserPrincipalNameSearchMapper implements UsernameSearchMapper {
 
 	}
 
-	public synchronized MappedValues map(DirContext context, String username)
+	public synchronized MappedValues map(DirContext context, GSSName gssName)
 			throws NamingException {
 
-		return new UserPrincipalNameMappedValues(username);
+		return new UserPrincipalNameMappedValues(gssName.toString());
 
 	}
 

@@ -25,7 +25,7 @@ import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 import javax.servlet.http.HttpServletResponse;
 
-import net.sf.michaelo.tomcat.realm.GssApiAwareRealm;
+import net.sf.michaelo.tomcat.realm.GssAwareRealmBase;
 import net.sf.michaelo.tomcat.utils.Base64;
 
 import org.apache.catalina.authenticator.Constants;
@@ -38,6 +38,7 @@ import org.ietf.jgss.GSSContext;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
 import org.ietf.jgss.GSSManager;
+import org.ietf.jgss.GSSName;
 import org.ietf.jgss.Oid;
 
 /**
@@ -59,7 +60,7 @@ import org.ietf.jgss.Oid;
  * http://www.mail-archive.com/users@tomcat.apache.org/msg98308.html Solution:
  * net.sf.michaelo.tomcat.extras.valves.EnhancedErrorReportValve
  */
-public class SpnegoAuthenticator extends GssApiAwareAuthenticator {
+public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 
 	protected static final String SPNEGO_METHOD = "SPNEGO";
 	protected static final String NEGOTIATE_AUTH_SCHEME = "Negotiate";
@@ -179,10 +180,9 @@ public class SpnegoAuthenticator extends GssApiAwareAuthenticator {
 			final PrivilegedExceptionAction<GSSCredential> serverCredentialAction = new PrivilegedExceptionAction<GSSCredential>() {
 				@Override
 				public GSSCredential run() throws GSSException {
-					Oid spnegoOid = new Oid("1.3.6.1.5.5.2");
-					// Oid krb5Oid = new Oid("1.2.840.113554.1.2.2");
+					Oid spnegoMech = new Oid("1.3.6.1.5.5.2");
 					return manager.createCredential(null, GSSCredential.DEFAULT_LIFETIME,
-							spnegoOid, GSSCredential.ACCEPT_ONLY);
+							spnegoMech, GSSCredential.ACCEPT_ONLY);
 				}
 			};
 
@@ -221,8 +221,19 @@ public class SpnegoAuthenticator extends GssApiAwareAuthenticator {
 					response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
 					return false;
 				} else {
-					GssApiAwareRealm<?> realm = (GssApiAwareRealm<?>) context.getRealm();
-					principal = realm.authenticate(gssContext, isStoreDelegatedCredential());
+					GssAwareRealmBase<?> realm = (GssAwareRealmBase<?>) context.getRealm();
+					GSSName srcName = gssContext.getSrcName();
+					Oid negotiatedMech = gssContext.getMech();
+
+					GSSCredential delegatedCredential = null;
+					if (storeDelegatedCredential) {
+						if (gssContext.getCredDelegState()) {
+							delegatedCredential = gssContext.getDelegCred();
+						} else
+							logger.debug(String.format("Credential of '%s' is not delegable though storing was requested", srcName));
+					}
+
+					principal = realm.authenticate(srcName, negotiatedMech, delegatedCredential);
 				}
 
 			} catch (GSSException e) {

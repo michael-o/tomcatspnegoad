@@ -27,31 +27,30 @@ import org.apache.catalina.Role;
 import org.apache.catalina.User;
 import org.apache.catalina.UserDatabase;
 import org.apache.catalina.realm.GenericPrincipal;
-import org.apache.juli.logging.Log;
-import org.apache.juli.logging.LogFactory;
+import org.apache.catalina.realm.UserDatabaseRealm;
 import org.ietf.jgss.GSSCredential;
+import org.ietf.jgss.GSSName;
+import org.ietf.jgss.Oid;
 
 /**
- * A GSS-API-aware {@link UserDatabaseRealm}.
+ * A GSS-aware {@link UserDatabaseRealm}.
  *
  * @version $Id$
  */
-public class UserDatabaseRealm extends GssApiAwareRealm<UserDatabase> {
-
-	private static final Log logger = LogFactory.getLog(UserDatabaseRealm.class);
+public class GssAwareUserDatabaseRealm extends GssAwareRealmBase<UserDatabase> {
 
 	@Override
 	public String getInfo() {
-		return "net.sf.michaelo.realm.UserDatabaseRealm/0.9";
+		return "net.sf.michaelo.realm.GssAwareUserDatabaseRealm/0.9";
 	}
 
 	@Override
 	protected String getName() {
-		return "UserDatabaseRealm";
+		return "GssAwareUserDatabaseRealm";
 	}
 
 	@Override
-	protected Principal getPrincipal(String username, GSSCredential gssCredential) {
+	public Principal authenticate(GSSName gssName, Oid mech, GSSCredential delegatedCredential) {
 
 		UserDatabase database = null;
 
@@ -64,6 +63,7 @@ public class UserDatabaseRealm extends GssApiAwareRealm<UserDatabase> {
 					resourceName), e);
 		}
 
+		String username = gssName.toString();
 		User user = database.findUser(username);
 		if (user == null) {
 			return null;

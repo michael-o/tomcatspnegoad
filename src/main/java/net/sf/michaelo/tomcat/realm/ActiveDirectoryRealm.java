@@ -32,7 +32,6 @@ import javax.naming.directory.Attribute;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
-import javax.security.auth.kerberos.KerberosPrincipal;
 
 import net.sf.michaelo.dirctxsrc.DirContextSource;
 import net.sf.michaelo.tomcat.realm.mapper.SamAccountNameRfc2247Mapper;
@@ -44,12 +43,12 @@ import net.sf.michaelo.tomcat.utils.LdapUtils;
 import org.apache.catalina.util.HexUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.juli.logging.Log;
-import org.apache.juli.logging.LogFactory;
 import org.ietf.jgss.GSSCredential;
+import org.ietf.jgss.GSSName;
+import org.ietf.jgss.Oid;
 
 /**
- * A realm which retrieves authenticated user principals from Active Directory.
+ * A realm which retrieves authenticated user from Active Directory.
  *
  * <p>
  * Following options can be configured:
@@ -65,12 +64,10 @@ import org.ietf.jgss.GSSCredential;
  *
  * @version $Id$
  */
-public class ActiveDirectoryRealm extends GssApiAwareRealm<DirContextSource> {
+public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 
 	private static final UsernameSearchMapper[] USERNAME_SEARCH_MAPPERS = {
 			new SamAccountNameRfc2247Mapper(), new UserPrincipalNameSearchMapper() };
-
-	private static final Log logger = LogFactory.getLog(ActiveDirectoryRealm.class);
 
 	private String[] strippableRoleNamePrefixes;
 
@@ -97,8 +94,8 @@ public class ActiveDirectoryRealm extends GssApiAwareRealm<DirContextSource> {
 		List<String> roles = new LinkedList<String>();
 
 		if (logger.isTraceEnabled())
-			logger.trace(String.format("Retrieving roles for username '%s' with DN '%s'",
-					user.getUsername(), user.getDn()));
+			logger.trace(String.format("Retrieving roles for user '%s' with DN '%s'",
+					user.getGssName(), user.getDn()));
 
 		for (String role : user.getRoles()) {
 			role = StringUtils.substringBetween(role, "CN=", ",");
@@ -113,11 +110,11 @@ public class ActiveDirectoryRealm extends GssApiAwareRealm<DirContextSource> {
 		}
 
 		if (logger.isDebugEnabled())
-			logger.debug(String.format("Found %s roles for username '%s'", roles.size(),
-					user.getUsername()));
+			logger.debug(String.format("Found %s roles for user '%s'", roles.size(),
+					user.getGssName()));
 		if (logger.isTraceEnabled())
-			logger.debug(String.format("Found following roles %s for username '%s'", roles,
-					user.getUsername()));
+			logger.debug(String.format("Found following roles %s for user '%s'", roles,
+					user.getGssName()));
 
 		return roles;
 	}
@@ -132,11 +129,10 @@ public class ActiveDirectoryRealm extends GssApiAwareRealm<DirContextSource> {
 		boolean result = adp.hasRole(role);
 
 		if (logger.isDebugEnabled()) {
-			String name = principal.getName();
 			if (result)
-				logger.debug(String.format("Principal '%s' does not have role '%s'", name, role));
+				logger.debug(String.format("Principal '%s' does not have role '%s'", principal, role));
 			else
-				logger.debug(String.format("Principal '%s' has role '%s'", name, role));
+				logger.debug(String.format("Principal '%s' has role '%s'", principal, role));
 		}
 
 		return result;
@@ -152,16 +148,8 @@ public class ActiveDirectoryRealm extends GssApiAwareRealm<DirContextSource> {
 		this.strippableRoleNamePrefixes = StringUtils.split(prefixes, ",");
 	}
 
-	/**
-	 *
-	 * @param username
-	 * @param gssCredential
-	 * @return the retrieved principal
-	 * @throws RuntimeException
-	 *             wraps NamingException
-	 */
 	@Override
-	protected Principal getPrincipal(String username, GSSCredential gssCredential) {
+	public Principal authenticate(GSSName gssName, Oid mech, GSSCredential delegatedCredential) {
 
 		DirContextSource dirContextSource = null;
 		try {
@@ -184,10 +172,19 @@ public class ActiveDirectoryRealm extends GssApiAwareRealm<DirContextSource> {
 
 		Principal principal = null;
 		try {
-			principal = getPrincipal(context, username, gssCredential);
+			User user = getUser(context, gssName);
+			List<String> roles = null;
+			if (user != null)
+				roles = getRoles(user);
+
+			if (user != null) {
+				principal = new ActiveDirectoryPrincipal(gssName, mech, user.getSid(),
+						user.getDn(), delegatedCredential, roles);
+			}
+
 		} catch (NamingException e) {
 			logger.error(
-					String.format("Unable to perform principal search for username '%s'", username), e);
+					String.format("Unable to perform principal search for user '%s'", gssName), e);
 			throw new RuntimeException(e);
 		} finally {
 			LdapUtils.close(context);
@@ -196,25 +193,7 @@ public class ActiveDirectoryRealm extends GssApiAwareRealm<DirContextSource> {
 		return principal;
 	}
 
-	protected synchronized Principal getPrincipal(DirContext context, String username,
-			GSSCredential gssCredential) throws NamingException {
-
-		User user = getUser(context, username);
-
-		List<String> roles = null;
-		if (user != null)
-			roles = getRoles(user);
-
-		if (user != null) {
-			KerberosPrincipal krbPrincipal = new KerberosPrincipal(user.getUsername());
-			return new ActiveDirectoryPrincipal(krbPrincipal, user.getDn(), user.getSid(),
-					gssCredential, roles);
-		}
-
-		return null;
-	}
-
-	protected User getUser(DirContext context, String username) throws NamingException {
+	protected User getUser(DirContext context, GSSName gssName) throws NamingException {
 
 		SearchControls searchCtls = new SearchControls();
 		searchCtls.setSearchScope(SearchControls.SUBTREE_SCOPE);
@@ -229,7 +208,7 @@ public class ActiveDirectoryRealm extends GssApiAwareRealm<DirContextSource> {
 		MappedValues mappedValues;
 		NamingEnumeration<SearchResult> results = null;
 		for (UsernameSearchMapper mapper : USERNAME_SEARCH_MAPPERS) {
-			mappedValues = mapper.map(context, username);
+			mappedValues = mapper.map(context, gssName);
 
 			searchBase = getRelativeName(context, mappedValues.getSearchBase());
 			searchAttributeName = mappedValues.getSearchAttributeName();
@@ -256,27 +235,27 @@ public class ActiveDirectoryRealm extends GssApiAwareRealm<DirContextSource> {
 		}
 
 		if (results == null || !results.hasMore()) {
-			logger.info(String.format("Username '%s' not found", username));
+			logger.info(String.format("User '%s' not found", gssName));
 			return null;
 		}
 
 		SearchResult result = results.next();
 
 		if (results.hasMore()) {
-			logger.warn(String.format("Username '%s' has multiple entries", username));
+			logger.warn(String.format("User '%s' has multiple entries", gssName));
 			return null;
 		}
 
 		String dn = getDistinguishedName(context, searchBase, result);
 
 		if (logger.isDebugEnabled())
-			logger.debug(String.format("Entry found for username '%s' with DN '%s'", username, dn));
+			logger.debug(String.format("Entry found for user '%s' with DN '%s'", gssName, dn));
 
 		byte[] sid = (byte[]) result.getAttributes().get("objectSid;binary").get();
 
 		if (logger.isDebugEnabled()) {
-			logger.debug(String.format("Found sid '%s' for username '%s'", HexUtils.convert(sid),
-					username));
+			logger.debug(String.format("Found SID '%s' for user '%s'", HexUtils.convert(sid),
+					gssName));
 		}
 
 		Attribute memberOfAttr = result.getAttributes().get("memberOf");
@@ -289,7 +268,7 @@ public class ActiveDirectoryRealm extends GssApiAwareRealm<DirContextSource> {
 
 		LdapUtils.close(memberOfValues);
 
-		return new User(username, dn, sid, roles);
+		return new User(gssName, sid, dn, roles);
 	}
 
 	/**
@@ -383,15 +362,15 @@ public class ActiveDirectoryRealm extends GssApiAwareRealm<DirContextSource> {
 	}
 
 	protected static class User {
-		private final String username;
-		private final String dn;
+		private final GSSName gssName;
 		private final byte[] sid;
+		private final String dn;
 		private final List<String> roles;
 
-		public User(String username, String dn, byte[] sid, List<String> roles) {
-			this.username = username;
-			this.dn = dn;
+		public User(GSSName gssName, byte[] sid, String dn, List<String> roles) {
+			this.gssName = gssName;
 			this.sid = ArrayUtils.clone(sid);
+			this.dn = dn;
 
 			if (roles == null || roles.isEmpty())
 				this.roles = Collections.emptyList();
@@ -399,8 +378,12 @@ public class ActiveDirectoryRealm extends GssApiAwareRealm<DirContextSource> {
 				this.roles = Collections.unmodifiableList(roles);
 		}
 
-		public String getUsername() {
-			return username;
+		public GSSName getGssName() {
+			return gssName;
+		}
+
+		public byte[] getSid() {
+			return ArrayUtils.clone(sid);
 		}
 
 		public String getDn() {
@@ -409,10 +392,6 @@ public class ActiveDirectoryRealm extends GssApiAwareRealm<DirContextSource> {
 
 		public List<String> getRoles() {
 			return roles;
-		}
-
-		public byte[] getSid() {
-			return ArrayUtils.clone(sid);
 		}
 
 	}

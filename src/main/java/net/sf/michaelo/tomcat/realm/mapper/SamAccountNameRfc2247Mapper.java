@@ -26,10 +26,11 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
+import org.ietf.jgss.GSSName;
 
 /**
  * A mapper for the AD attribute {@code sAMAccountName} and the realm. This mapper splits the
- * Kerberos principal in the primary and realm components. The instance component is completely
+ * GSS name in the primary and realm components. The instance component is completely
  * ignored. The primary component is assigned to the {@code sAMAccountName} and the realm is
  * transformed to a search base according to <a href="http://www.ietf.org/rfc/rfc2247.txt">RFC
  * 2247</a>. <br/>
@@ -42,11 +43,12 @@ public class SamAccountNameRfc2247Mapper extends SamAccountNameMapper {
 
 	private static final Log logger = LogFactory.getLog(SamAccountNameRfc2247Mapper.class);
 
-	public synchronized MappedValues map(DirContext context, String username)
+	public synchronized MappedValues map(DirContext context, GSSName gssName)
 			throws NamingException {
 
-		String searchUsername = StringUtils.substringBefore(username, "@");
-		String realm = StringUtils.substringAfter(username, "@");
+		// TODO Maybe use a Kerberos principal to extract components?
+		String searchUsername = StringUtils.substringBefore(gssName.toString(), "@");
+		String realm = StringUtils.substringAfter(gssName.toString(), "@");
 		String searchBase = StringUtils.EMPTY;
 
 		if (logger.isTraceEnabled())

@@ -30,9 +30,9 @@ Choosing and Using Realms
 
   After the authenticator has established a user's identity, it's time to search for him/her. Usually,
   the {{{The_Active_Directory_Realm}<<<ActiveDirectoryRealm>>>}} will do but for testing purposes you
-  will find the {{{Using_a_Realm_for_Testing_Purposes}<<<UserDatabaseRealm>>>}} very handy.
+  will find the {{{Using_a_Realm_for_Testing_Purposes}<<<GssAwareUserDatabaseRealm>>>}} very handy.
 
-    [Tip] I strongly recommend to try the {{{Using_a_Realm_for_Testing_Purposes}<<<UserDatabaseRealm>>>}}
+    [Tip] I strongly recommend to try the {{{Using_a_Realm_for_Testing_Purposes}<<<GssAwareUserDatabaseRealm>>>}}
           first, you'll see whether the authenticator works at all. If it does, go on to the
           {{{The_Active_Directory_Realm}<<<ActiveDirectoryRealm>>>}}.
 
@@ -84,9 +84,9 @@ Choosing and Using Realms
 
 * Using a Realm for Testing Purposes
 
-  Usually, you are not able to modify Active Directory entries easily (only admins can), e.g.,adding
+  Usually, you are not able to modify Active Directory entries easily (only admins can), e.g., adding
   and removing groups. Therefore, I have modified the default {{{https://tomcat.apache.org/tomcat-6.0-doc/realm-howto.html#UserDatabaseRealm}<<<UserDatabaseRealm>>>}}
-  to a GSS-API-aware realm to make it work with my authenticators. You can fiddle quickly with users
+  to a GSS-aware realm to make it work with my authenticators. You can fiddle quickly with users
   and roles to test your application.
 
   Follow the Tomcat documentation and configure a <<<users.xml>>> file with the according resource
@@ -98,19 +98,19 @@ Choosing and Using Realms
 <Context>
 [$ellipsis]
   <!-- Add this -->
-  <Realm className="net.sf.michaelo.tomcat.realm.UserDatabaseRealm"
+  <Realm className="net.sf.michaelo.tomcat.realm.GssAwareUserDatabaseRealm"
     resourceName="my-users-xml" />
 [$ellipsis]
 </Context>
 +----------------------------
 
-  You have successfully configured the <<<UserDatabaseRealm>>> in your webapp. It is now ready to use.
+  You have successfully configured the <<<GssAwareUserDatabaseRealm>>> in your webapp. It is now ready to use.
 
 * Alternative Realm Implementations
 
   If you are not using the Active Directory as a user repository (e.g. database or another directory
-  server) and can still make use of this library. Extend the {{{./apidocs/net/sf/michaelo/tomcat/realm/GssApiAwareRealm.html}<<<GssApiAwareRealm>>>}}
-  class and implement the abstract method <<<getPrincipal(String, GSSCredential)>>>.
+  server) and can still make use of this library. Extend the {{{./apidocs/net/sf/michaelo/tomcat/realm/GssAwareRealmBase.html}<<<GssAwareRealmBase>>>}}
+  class and implement the abstract method <<<authenticate(GSSName, Oid, GSSCredential)>>>.
 
 The Next Step
 
