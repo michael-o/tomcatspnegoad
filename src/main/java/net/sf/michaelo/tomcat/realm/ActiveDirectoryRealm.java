@@ -32,6 +32,7 @@ import javax.naming.directory.Attribute;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
+import javax.naming.ldap.LdapName;
 
 import net.sf.michaelo.dirctxsrc.DirContextSource;
 import net.sf.michaelo.tomcat.realm.mapper.SamAccountNameRfc2247Mapper;
@@ -246,7 +247,7 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 			return null;
 		}
 
-		String dn = getDistinguishedName(context, searchBase, result);
+		LdapName dn = getDistinguishedName(context, searchBase, result);
 
 		if (logger.isDebugEnabled())
 			logger.debug(String.format("Entry found for user '%s' with DN '%s'", gssName, dn));
@@ -282,7 +283,7 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 	 *            The search result
 	 * @return String containing the distinguished name
 	 */
-	protected String getDistinguishedName(DirContext context, String base, SearchResult result)
+	protected LdapName getDistinguishedName(DirContext context, String base, SearchResult result)
 			throws NamingException {
 		// Get the entry's distinguished name. For relative results, this means
 		// we need to composite a name with the base name, the context name, and
@@ -300,7 +301,7 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 
 			Name name = contextName.addAll(baseName);
 			name = name.addAll(entryName);
-			return name.toString();
+			return (LdapName) name;
 		} else {
 			String absoluteName = result.getName();
 			if (logger.isTraceEnabled())
@@ -317,7 +318,7 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 							"Search returned unparseable absolute name '%s'", absoluteName));
 				}
 				Name name = parser.parse(pathComponent.substring(1));
-				return name.toString();
+				return (LdapName) name;
 			} catch (URISyntaxException e) {
 				throw new InvalidNameException(String.format(
 						"Search returned unparseable absolute name '%s'", absoluteName));
@@ -364,13 +365,13 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 	protected static class User {
 		private final GSSName gssName;
 		private final byte[] sid;
-		private final String dn;
+		private final LdapName dn;
 		private final List<String> roles;
 
-		public User(GSSName gssName, byte[] sid, String dn, List<String> roles) {
+		public User(GSSName gssName, byte[] sid, LdapName dn, List<String> roles) {
 			this.gssName = gssName;
 			this.sid = ArrayUtils.clone(sid);
-			this.dn = dn;
+			this.dn = (LdapName) dn.clone();
 
 			if (roles == null || roles.isEmpty())
 				this.roles = Collections.emptyList();
@@ -386,8 +387,8 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 			return ArrayUtils.clone(sid);
 		}
 
-		public String getDn() {
-			return dn;
+		public LdapName getDn() {
+			return (LdapName) dn.clone();
 		}
 
 		public List<String> getRoles() {

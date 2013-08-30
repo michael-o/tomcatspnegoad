@@ -20,6 +20,8 @@ import java.security.Principal;
 import java.util.Collections;
 import java.util.List;
 
+import javax.naming.ldap.LdapName;
+
 import org.apache.commons.lang3.ArrayUtils;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSName;
@@ -49,7 +51,7 @@ public class ActiveDirectoryPrincipal implements Principal, Serializable {
 	private GSSName gssName;
 	private Oid mech;
 	private byte[] sid;
-	private String dn;
+	private LdapName dn;
 	private transient GSSCredential gssCredential;
 	private List<String> roles;
 
@@ -65,12 +67,12 @@ public class ActiveDirectoryPrincipal implements Principal, Serializable {
 	 * @param roles
 	 *            the roles retrieved from Active Directory
 	 */
-	public ActiveDirectoryPrincipal(GSSName gssName, Oid mech, byte[] sid, String dn,
+	public ActiveDirectoryPrincipal(GSSName gssName, Oid mech, byte[] sid, LdapName dn,
 			GSSCredential gssCredential, List<String> roles) {
 		this.gssName = gssName;
 		this.mech = mech;
 		this.sid = ArrayUtils.clone(sid);
-		this.dn = dn;
+		this.dn = (LdapName) dn.clone();
 		this.gssCredential = gssCredential;
 		this.roles = Collections.unmodifiableList(roles);
 	}
@@ -112,8 +114,8 @@ public class ActiveDirectoryPrincipal implements Principal, Serializable {
 	 *
 	 * @return the distinguished name
 	 */
-	public String getDn() {
-		return dn;
+	public LdapName getDn() {
+		return (LdapName) dn.clone();
 	}
 
 	/**
