@@ -32,16 +32,13 @@
 			<source>LICENSE.txt</source>
 		</file>
 	</files>
-	<fileSets>
-		<fileSet>
-			<directory>${project.build.directory}</directory>
+	<dependencySets>
+		<dependencySet>
 			<outputDirectory>lib</outputDirectory>
-			<includes>
-				<include>${project.artifactId}-${project.version}.jar</include>
-				<include>${project.artifactId}-${project.version}-sources.jar</include>
-				<include>${project.artifactId}-${project.version}-javadoc.jar</include>
-			</includes>
-		</fileSet>
-	</fileSets>
-	
+			<useProjectAttachments>true</useProjectAttachments>
+			<excludes>
+				<exclude>org.apache.commons:commons-lang3</exclude>
+			</excludes>
+		</dependencySet>
+	</dependencySets>
 </assembly>

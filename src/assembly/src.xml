@@ -26,9 +26,10 @@
 	<fileSets>
 		<fileSet>
 			<excludes>
-				<exclude>**/${project.build.directory}/**</exclude>
-				<exclude>**/.settings/**</exclude>
-				<exclude>**/.*/**</exclude>
+				<exclude>src/sf-release/</exclude>
+				<exclude>${project.build.directory}/</exclude>
+				<exclude>.settings/</exclude>
+				<exclude>.*</exclude>
 				<exclude>dependency-reduced-pom.xml</exclude>
 			</excludes>
 		</fileSet>
