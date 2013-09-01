@@ -15,7 +15,6 @@
  */
 package net.sf.michaelo.tomcat.realm;
 
-import java.io.Serializable;
 import java.security.Principal;
 import java.util.Collections;
 import java.util.List;
@@ -44,7 +43,7 @@ import org.ietf.jgss.Oid;
  *
  * @version $Id$
  */
-public class ActiveDirectoryPrincipal implements Principal, Serializable {
+public class ActiveDirectoryPrincipal implements Principal {
 
 	private static final long serialVersionUID = 3096263076868974289L;
 
@@ -52,8 +51,7 @@ public class ActiveDirectoryPrincipal implements Principal, Serializable {
 	private Oid mech;
 	private byte[] sid;
 	private LdapName dn;
-	// Not serializable
-	private transient GSSCredential gssCredential;
+	private GSSCredential gssCredential;
 	private List<String> roles;
 
 	/**
