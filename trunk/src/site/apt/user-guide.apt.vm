@@ -1,0 +1,62 @@
+#*
+ * Copyright 2013 Michael Osipov
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *#
+
+## $Id$
+
+                            ----------------------
+                                 User Guide
+                            ----------------------
+                               Michael Osipov
+                            ----------------------
+                                 2013-08-03
+                            ----------------------
+
+#macro(property $property)${project.properties.get($property)}#end
+
+User Guide
+
+  To make use of this library you must run at least Java #property("maven.compiler.target").
+
+    [Notice] I have not tried this in any other major version except Apache Tomcat 6.0 but it should
+             work in newer versions too. I would be glad to hear your success stories.
+
+    []
+
+    [Prerequisites] Make sure that the machine running the Tomcat instance (a) has joined a domain,
+                    (b) has an appropriate {{{http://msdn.microsoft.com/en-us/library/windows/desktop/ms677949%28v=vs.85%29.aspx}SPN}}
+                    set, (c) has Kerberos properly configured and (d) the JVM has all necessary
+                    system properties set.
+
+  This site will guide you through the components of this library:
+
+  [[1]] {{{./authenticators.html}Authenticators}}: An authenticator challenges a client to present
+        the necessary security token to verify its identity.
+
+  [[2]] {{{./realms.html}Realms}}: A realm looks up the roles and other data of a user in the
+        Active Directory or any other user repository.
+
+  []
+
+  Your will need <both> components configured properly to enjoy SSO in your company network too.
+
+  Before using this library, make sure that the main artifact and its dependencies are in the class
+  path of your Tomcat instance, i.e., in <<<$CATALINA_BASE/lib>>> or <<<$CATALINA_HOME/lib>>>.
+
+* Not using Active Directory but another Kerberos KDC implementation?
+
+  If you happen <not> to use Active Directory but MIT Kerberos or Heimdal as your KDC &#x2013; no
+  problem, the authenticators are not tied the Active Directory but simply require a working Kerberos
+  setup. As for the realm, read the chapter on {{{./realms.html#Alternative_Realm_Implementations}alternative realm implementations}}.
