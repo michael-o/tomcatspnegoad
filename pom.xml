@@ -14,8 +14,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -26,7 +25,7 @@
 
 	<groupId>net.sf.michael-o.tomcat</groupId>
 	<artifactId>tomcat-authnz-spnego-ad</artifactId>
-	<version>0.9-SNAPSHOT</version>
+	<version>0.9</version>
 	<packaging>jar</packaging>
 
 	<name>SPNEGO/Kerberos Authenticator and Active Directory Realm for Apache Tomcat</name>
@@ -62,9 +61,9 @@
 	</prerequisites>
 
 	<scm>
-		<connection>scm:svn:http://svn.code.sf.net/p/tomcatspnegoad/code/trunk</connection>
-		<developerConnection>scm:svn:https://svn.code.sf.net/p/tomcatspnegoad/code/trunk</developerConnection>
-		<url>http://sourceforge.net/p/tomcatspnegoad/code/HEAD/tree/trunk</url>
+		<connection>scm:svn:http://svn.code.sf.net/p/tomcatspnegoad/code/tags/0.9</connection>
+		<developerConnection>scm:svn:https://svn.code.sf.net/p/tomcatspnegoad/code/tags/0.9</developerConnection>
+		<url>http://sourceforge.net/p/tomcatspnegoad/code/HEAD/tree/tags/0.9</url>
 	</scm>
 	<issueManagement>
 		<system>SourceForge.net Tickets</system>
