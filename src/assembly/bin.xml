@@ -38,6 +38,7 @@
 			<useProjectAttachments>true</useProjectAttachments>
 			<excludes>
 				<exclude>org.apache.commons:commons-lang3</exclude>
+				<exclude>${project.groupId}:${project.artifactId}:*.asc</exclude>
 			</excludes>
 		</dependencySet>
 	</dependencySets>
