@@ -60,7 +60,7 @@ Choosing and Using Realms
 +----------------------------
 
     [Note] I strongly recommend using the Global Catalog (port 3268) otherwise data might be missing
-           and/or you will end chasing referrals.
+           and/or you will end up chasing referrals.
 
 ** Configuring the Realm
 

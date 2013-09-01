@@ -52,6 +52,7 @@ public class ActiveDirectoryPrincipal implements Principal, Serializable {
 	private Oid mech;
 	private byte[] sid;
 	private LdapName dn;
+	// Not serializable
 	private transient GSSCredential gssCredential;
 	private List<String> roles;
 
