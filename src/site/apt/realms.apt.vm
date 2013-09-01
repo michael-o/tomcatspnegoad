@@ -82,6 +82,12 @@ Choosing and Using Realms
 
   You have successfully configured the <<<ActiveDirectoryRealm>>> in your webapp. It is now ready to use.
 
+** Authenticated Principal
+
+  After successful authentication and retrieval, this realm will create an <<<ActiveDirectoryPrincipal>>>
+  with several attributes besides the default name. Refer to the {{{./apidocs/net/sf/michaelo/tomcat/realm/ActiveDirectoryPrincipal.html}Javadocs}}
+  for details.
+
 * Using a Realm for Testing Purposes
 
   Usually, you are not able to modify Active Directory entries easily (only admins can), e.g., adding
