@@ -20,7 +20,7 @@
 	<parent>
 		<groupId>net.sf.michael-o</groupId>
 		<artifactId>michael-o-parent</artifactId>
-		<version>5</version>
+		<version>6</version>
 	</parent>
 
 	<groupId>net.sf.michael-o.tomcat</groupId>
@@ -109,7 +109,7 @@
 		<dependency>
 			<groupId>net.sf.michael-o.dirctxsrc</groupId>
 			<artifactId>dircontextsource</artifactId>
-			<version>0.10.3</version>
+			<version>0.10.4</version>
 		</dependency>
 	</dependencies>
 
