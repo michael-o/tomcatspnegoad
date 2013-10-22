@@ -107,7 +107,8 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 					else
 						roles.add(role);
 				}
-			}
+			} else
+				roles.add(role);
 		}
 
 		if (logger.isDebugEnabled())

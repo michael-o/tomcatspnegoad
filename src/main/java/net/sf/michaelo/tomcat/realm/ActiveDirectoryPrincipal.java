@@ -45,8 +45,6 @@ import org.ietf.jgss.Oid;
  */
 public class ActiveDirectoryPrincipal implements Principal {
 
-	private static final long serialVersionUID = 3096263076868974289L;
-
 	private GSSName gssName;
 	private Oid mech;
 	private byte[] sid;
