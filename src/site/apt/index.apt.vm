@@ -44,4 +44,4 @@ About ${project.name}
   and works in Apache Tomcat 6 too.
 
   This library have served me very well for many years and still does a great job in a complex
-  multi-realm enviroment, hopefully it will do for you too.
+  multi-realm environment, hopefully it will do for you too.
