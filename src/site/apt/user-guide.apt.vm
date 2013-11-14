@@ -30,8 +30,7 @@ User Guide
 
   To make use of this library you must run at least Java #property("maven.compiler.target").
 
-    [Notice] I have not tried this in any other major version except Apache Tomcat 6.0 but it should
-             work in newer versions too. I would be glad to hear your success stories.
+    [Warning] This works with Apache Tomcat <<6.0 only>> due to ABI changes in version 7.0.
 
     []
 

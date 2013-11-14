@@ -40,8 +40,8 @@ About ${project.name}
   the Apache Tomcat did not have anything like this out of the box for years.\
   After a deep dive into Kerberos, GSS-API, Active Directory and LDAP in Java, I made a custom component
   to fill that gap. Portions of this project have been {{{https://issues.apache.org/bugzilla/show_bug.cgi?id=48685}integrated}}
-  into Apache Tomcat 7. Though, this project covers much more, doesn't stop with a sole authenticator
-  and works in Apache Tomcat 6 too.
+  into Apache Tomcat 7. Though, this project covers much more than an authenticator and works even
+  in Apache Tomcat 6 too.
 
   This library have served me very well for many years and still does a great job in a complex
   multi-realm environment, hopefully it will do for you too.
