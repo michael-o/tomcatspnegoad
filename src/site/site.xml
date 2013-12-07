@@ -25,6 +25,7 @@
 			<item name="User Guide" collapse="true" href="user-guide.html">
 				<item name="Authenticators" href="authenticators.html" />
 				<item name="Realms" href="realms.html" />
+				<item name="Sample Webapp" href="sample-webapp.html" />
 			</item>
 		</menu>
 

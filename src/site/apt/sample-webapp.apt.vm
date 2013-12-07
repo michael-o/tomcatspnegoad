@@ -1,0 +1,122 @@
+#*
+ * Copyright 2013 Michael Osipov
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *#
+
+## $Id$
+
+                            ----------------------
+                                 User Guide
+                            ----------------------
+                               Michael Osipov
+                            ----------------------
+                                 2013-12-07
+                            ----------------------
+
+#set($ellipsis = $esc.unicode('\u2026'))
+
+Sample Webapp
+
+  It is quite easy to test your setup now.
+  
+* Prerequisites
+
+  Create a Servlet 2.5 compatible webapp project with a method of your choice, .e.g., Maven archetype
+  or Eclipse project wizard. Configure the resources (authenticator and realm).
+  
+* Modifying the Deployment Descriptor (<<<web.xml>>>)
+
+  Let's now add some security constraints to your sample webapp. Open the app's <<<web.xml>>> and add:
+
++----------------------------
+[$ellipsis]
+  <!-- Add these -->
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>general</web-resource-name>
+      <url-pattern>/index.jsp</url-pattern>
+    </web-resource-collection>
+    <auth-constraint>
+      <!-- Every authenticated user can view this page -->
+      <role-name>*</role-name>
+    </auth-constraint>
+  </security-constraint>
+
+<security-constraint>
+    <web-resource-collection>
+      <web-resource-name>specific</web-resource-name>
+      <url-pattern>/specific.jsp</url-pattern>
+    </web-resource-collection>
+    <auth-constraint>
+      <!-- Every user in the $AD_GROUP can view this specific page -->
+      <!-- Replace $AD_GROUP with a CN of a group you are actually a member of -->
+      <role-name>$AD_GROUP</role-name>
+    </auth-constraint>
+  </security-constraint>
+
+<security-constraint>
+    <web-resource-collection>
+      <web-resource-name>bogus</web-resource-name>
+      <url-pattern>/bogus.jsp</url-pattern>
+    </web-resource-collection>
+    <auth-constraint>
+      <!-- No user can view this page -->
+      <role-name>Bogus</role-name>
+    </auth-constraint>
+  </security-constraint>
+[$ellipsis]
++----------------------------
+
+* Creating the Necessary JSPs
+
+  Create the following JSPs in the root of your webapp: \
+  \
+  <<<index.jsp>>>:
+
++----------------------------
+[$ellipsis]
+Hello ${pageContext.request.remoteUser}!
+[$ellipsis]
++----------------------------
+
+  <<<specific.jsp>>>:
+
++----------------------------
+[$ellipsis]
+Hello ${pageContext.request.remoteUser}, you are member of $AD_GROUP!
+[$ellipsis]
++----------------------------
+
+  <<<bogus.jsp>>>:
+
++----------------------------
+[$ellipsis]
+Hello ${pageContext.request.remoteUser}, you should not see this!
+[$ellipsis]
++----------------------------
+
+* Packaging and Deployment
+
+  Now package your webapp and deploy it to your remote Tomcat instance.
+  
+* Verification
+
+  Open every single URL with a properly configured client like IE, Firefox, Chrome or even
+  cURL on Windows. Your output should be as follows:\
+  \
+  <<<index.jsp>>>: HTTP/1.1 200 OK, every user should see a response.\
+  <<<specific.jsp>>>: HTTP/1.1 403 Forbidden <<or>> HTTP/1.1 200 OK, depending whether a user is
+  in the specific group, it should be a response or an error page.\
+  <<<bogus.jsp>>>: HTTP/1.1 403 Forbidden, every user should see an error page.
+  

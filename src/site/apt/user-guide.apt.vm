@@ -30,7 +30,10 @@ User Guide
 
   To make use of this library you must run at least Java #property("maven.compiler.target").
 
-    [Warning] This works with Apache Tomcat <<6.0 only>> due to ABI changes in version 7.0.
+    [Warning] This works with Apache Tomcat <<6.0 only>> due to ABI changes in version 7.0. \
+              A compatible version is in preparation and can be checked out from the
+              {{{http://sourceforge.net/p/tomcatspnegoad/code/HEAD/tree/branches/tomcat-7/}Subversion repo}}
+              for testing purposes.
 
     []
 
@@ -53,6 +56,10 @@ User Guide
 
   Before using this library, make sure that the main artifact and its dependencies are in the class
   path of your Tomcat instance, i.e., in <<<$CATALINA_BASE/lib>>> or <<<$CATALINA_HOME/lib>>>.
+
+* Sample Webapp
+
+  Finally configured all components, now need to verify your setup? Read the {{{./sample-webapp.html}sample webapp setup}}.
 
 * Not using Active Directory but another Kerberos KDC implementation?
 

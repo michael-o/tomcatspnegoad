@@ -39,8 +39,8 @@ Choosing and Using Realms
 * The Active Directory Realm
 
   The {{{./apidocs/net/sf/michaelo/tomcat/realm/ActiveDirectoryRealm.html}<<<ActiveDirectoryRealm>>>}}
-  will query your Active Directory for the {{{http://msdn.microsoft.com/en-us/library/windows/desktop/aa380525%28v=vs.85%29.aspx#user_principal_name}UPN}}
-  of a user.
+  will query your Active Directory for a user by his/her mechanism-specific name ({{{http://msdn.microsoft.com/en-us/library/windows/desktop/aa380525%28v=vs.85%29.aspx#user_principal_name}UPN}})
+  and retrieve all the necessary information, e.g. his/her roles (common name (CN) only).
 
   It requires two steps of setup: First, you will need to configure a <<<DirContextSourceFactory>>>
   with the parameters of your Active Direcory. Second, the realm itself pointing to that Active Directory.
@@ -85,7 +85,7 @@ Choosing and Using Realms
 ** Authenticated Principal
 
   After successful authentication and retrieval, this realm will create an <<<ActiveDirectoryPrincipal>>>
-  with several attributes besides the default name. Refer to the {{{./apidocs/net/sf/michaelo/tomcat/realm/ActiveDirectoryPrincipal.html}Javadocs}}
+  with several attributes besides the mechanism-specific name. Refer to the {{{./apidocs/net/sf/michaelo/tomcat/realm/ActiveDirectoryPrincipal.html}Javadocs}}
   for details.
 
 * Using a Realm for Testing Purposes
@@ -121,4 +121,4 @@ Choosing and Using Realms
 The Next Step
 
   You have freed your users from typing usernames and passwords over and over again. Go on and try
-  your new SSO setup.
+  your new {{{./sample-webapp.html}SSO setup}}.
