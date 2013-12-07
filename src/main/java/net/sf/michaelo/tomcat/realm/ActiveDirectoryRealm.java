@@ -49,7 +49,7 @@ import org.ietf.jgss.GSSName;
 import org.ietf.jgss.Oid;
 
 /**
- * A realm which retrieves authenticated user from Active Directory.
+ * A realm which retrieves authenticated users from Active Directory.
  *
  * <p>
  * Following options can be configured:
@@ -63,6 +63,7 @@ import org.ietf.jgss.Oid;
  * </p>
  * <p>
  *
+ * @see ActiveDirectoryPrincipal
  * @version $Id$
  */
 public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
@@ -83,8 +84,8 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 	}
 
 	/**
-	 * Retrieves the roles for a specific user from Active Directory. The roles will be stripped by
-	 * the CN by default.
+	 * Retrieves the roles for a specific user from Active Directory. The roles will be stored by
+	 * the common name (CN) only.
 	 *
 	 * @param user
 	 *            the user for role retrievement
