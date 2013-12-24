@@ -20,7 +20,7 @@
 	<parent>
 		<groupId>net.sf.michael-o</groupId>
 		<artifactId>michael-o-parent</artifactId>
-		<version>6</version>
+		<version>7</version>
 	</parent>
 
 	<groupId>net.sf.michael-o.tomcat</groupId>
@@ -54,11 +54,6 @@
 			<archive>http://sourceforge.net/p/tomcatspnegoad/discussion/general</archive>
 		</mailingList>
 	</mailingLists>
-
-	<!-- Not inherited due to http://jira.codehaus.org/browse/MNG-2423 -->
-	<prerequisites>
-		<maven>2.2.1</maven>
-	</prerequisites>
 
 	<scm>
 		<connection>scm:svn:http://svn.code.sf.net/p/tomcatspnegoad/code/trunk</connection>
