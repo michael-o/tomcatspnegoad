@@ -32,10 +32,4 @@
 		<menu ref="reports" />
 	</body>
 
-	<custom>
-		<fluidoSkin>
-			<profile>pre-release</profile>
-		</fluidoSkin>
-	</custom>
-
 </project>
