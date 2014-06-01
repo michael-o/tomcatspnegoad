@@ -34,6 +34,7 @@ public class LdapUtils {
 		try {
 			context.close();
 		} catch (NamingException e) {
+			; // Ignore
 		}
 
 	}
@@ -46,6 +47,7 @@ public class LdapUtils {
 		try {
 			results.close();
 		} catch (NamingException e) {
+			; // Ignore
 		}
 
 	}

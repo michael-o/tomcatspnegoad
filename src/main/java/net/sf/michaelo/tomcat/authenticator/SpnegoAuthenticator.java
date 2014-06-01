@@ -170,7 +170,7 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 		if (inToken.length >= NTLM_TYPE1_TOKEN_START.length) {
 			boolean ntlm = false;
 			for (int i = 0; i < NTLM_TYPE1_TOKEN_START.length; i++) {
-				ntlm = (inToken[i] == NTLM_TYPE1_TOKEN_START[i]);
+				ntlm = inToken[i] == NTLM_TYPE1_TOKEN_START[i];
 			}
 
 			if (ntlm) {
@@ -283,14 +283,14 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 				try {
 					gssContext.dispose();
 				} catch (GSSException e) {
-					// Ignore
+					; // Ignore
 				}
 			}
 			if (lc != null) {
 				try {
 					lc.logout();
 				} catch (LoginException e) {
-					// Ignore
+					; // Ignore
 				}
 			}
 		}

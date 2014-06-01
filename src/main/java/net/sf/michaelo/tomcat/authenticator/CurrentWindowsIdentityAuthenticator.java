@@ -144,7 +144,7 @@ public class CurrentWindowsIdentityAuthenticator extends GssAwareAuthenticatorBa
 				try {
 					lc.logout();
 				} catch (LoginException e) {
-					// Ignore
+					; // Ignore
 				}
 			}
 		}
