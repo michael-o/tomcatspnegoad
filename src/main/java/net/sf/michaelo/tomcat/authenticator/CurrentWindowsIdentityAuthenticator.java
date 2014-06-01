@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Michael Osipov
+ * Copyright 2013–2014 Michael Osipov
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,8 +103,8 @@ public class CurrentWindowsIdentityAuthenticator extends GssAwareAuthenticatorBa
 			final PrivilegedExceptionAction<GSSCredential> action = new PrivilegedExceptionAction<GSSCredential>() {
 				@Override
 				public GSSCredential run() throws GSSException {
-					return manager.createCredential(null, GSSCredential.DEFAULT_LIFETIME, KRB5_MECHANISM,
-							GSSCredential.INITIATE_ONLY);
+					return manager.createCredential(null, GSSCredential.DEFAULT_LIFETIME,
+							KRB5_MECHANISM, GSSCredential.INITIATE_ONLY);
 				}
 			};
 
@@ -125,10 +125,10 @@ public class CurrentWindowsIdentityAuthenticator extends GssAwareAuthenticatorBa
 
 				principal = realm.authenticate(srcName, KRB5_MECHANISM, gssCredential);
 			} catch (GSSException e) {
-				logger.error(
-						"Failed to inquire user details from the user credential", e);
+				logger.error("Failed to inquire user details from the user credential", e);
 
-				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to inquire user details from the user credential");
+				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+						"Failed to inquire user details from the user credential");
 				return false;
 			} catch (RuntimeException e) {
 				// TODO Rethink how realm throws exceptions

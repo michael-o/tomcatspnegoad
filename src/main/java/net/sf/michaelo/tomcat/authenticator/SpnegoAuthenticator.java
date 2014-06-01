@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 Michael Osipov
+ * Copyright 2013–2014 Michael Osipov
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -149,14 +149,17 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 		byte[] inToken = null;
 
 		if (logger.isDebugEnabled())
-			logger.debug("Processing Negotiate (SPNEGO) authentication token: " + authorizationValue);
+			logger.debug("Processing Negotiate (SPNEGO) authentication token: "
+					+ authorizationValue);
 
 		try {
 			inToken = Base64.decode(authorizationValue);
 		} catch (Exception e) {
-			logger.warn("The Negotiate (SPNEGO) authentication token is encoded incorrectly: " + authorizationValue, e);
+			logger.warn("The Negotiate (SPNEGO) authentication token is encoded incorrectly: "
+					+ authorizationValue, e);
 
-			sendUnauthorizedHeader(response, "The Negotiate (SPNEGO) authentication token is encoded incorrectly");
+			sendUnauthorizedHeader(response,
+					"The Negotiate (SPNEGO) authentication token is encoded incorrectly");
 			return false;
 		}
 
@@ -170,7 +173,8 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 			} catch (LoginException e) {
 				logger.error("Unable to obtain the service credential", e);
 
-				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Unable to obtain the service credential");
+				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+						"Unable to obtain the service credential");
 				return false;
 			}
 
@@ -184,26 +188,29 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 			};
 
 			try {
-				gssContext = manager.createContext(Subject.doAs(lc.getSubject(),
-						action));
+				gssContext = manager.createContext(Subject.doAs(lc.getSubject(), action));
 			} catch (PrivilegedActionException e) {
 				logger.error("Unable to obtain the service credential", e.getException());
 
-				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Unable to obtain the service credential");
+				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+						"Unable to obtain the service credential");
 				return false;
 			} catch (GSSException e) {
 				logger.error("Failed to create a security context", e);
 
-				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to create a security context");
+				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+						"Failed to create a security context");
 				return false;
 			}
 
 			try {
 				outToken = gssContext.acceptSecContext(inToken, 0, inToken.length);
-			} catch(GSSException e) {
-				logger.warn("The Negotiate (SPNEGO) authentication token is invalid: " + authorizationValue, e);
+			} catch (GSSException e) {
+				logger.warn("The Negotiate (SPNEGO) authentication token is invalid: "
+						+ authorizationValue, e);
 
-				sendUnauthorizedHeader(response, "The Negotiate (SPNEGO) authentication token is invalid");
+				sendUnauthorizedHeader(response,
+						"The Negotiate (SPNEGO) authentication token is invalid");
 				return false;
 			}
 
@@ -218,7 +225,8 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 
 					response.setHeader("WWW-Authenticate",
 							NEGOTIATE_AUTH_SCHEME + " " + Base64.encode(outToken));
-					response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Security context not fully established, continue needed");
+					response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
+							"Security context not fully established, continue needed");
 					return false;
 				} else {
 					GssAwareRealmBase<?> realm = (GssAwareRealmBase<?>) context.getRealm();
@@ -230,17 +238,19 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 						if (gssContext.getCredDelegState()) {
 							delegatedCredential = gssContext.getDelegCred();
 						} else
-							logger.debug(String.format("Credential of '%s' is not delegable though storing was requested", srcName));
+							logger.debug(String
+									.format("Credential of '%s' is not delegable though storing was requested",
+											srcName));
 					}
 
 					principal = realm.authenticate(srcName, negotiatedMech, delegatedCredential);
 				}
 
 			} catch (GSSException e) {
-				logger.error(
-						"Failed to inquire user details from the security context", e);
+				logger.error("Failed to inquire user details from the security context", e);
 
-				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to inquire user details from the security context");
+				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+						"Failed to inquire user details from the security context");
 				return false;
 			} catch (RuntimeException e) {
 				// TODO Rethink how realm throws exceptions
