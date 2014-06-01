@@ -65,7 +65,7 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 	protected static final String SPNEGO_METHOD = "SPNEGO";
 	protected static final String NEGOTIATE_AUTH_SCHEME = "Negotiate";
 
-	protected static final byte[] NTLM_TYPE1_TOKEN_START = { (byte) 'N', (byte) 'T', (byte) 'L',
+	private static final byte[] NTLM_TYPE1_TOKEN_START = { (byte) 'N', (byte) 'T', (byte) 'L',
 			(byte) 'M', (byte) 'S', (byte) 'S', (byte) 'P', (byte) '\0', (byte) 0x01, (byte) 0x00,
 			(byte) 0x00, (byte) 0x00 };
 
