@@ -35,7 +35,6 @@ import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
 import org.ietf.jgss.GSSManager;
 import org.ietf.jgss.GSSName;
-import org.ietf.jgss.Oid;
 
 /**
  * Windows Identitiy Authenticator which uses GSS-API to retrieve to currently logged in user.
@@ -54,7 +53,7 @@ public class CurrentWindowsIdentityAuthenticator extends GssAwareAuthenticatorBa
 
 	@Override
 	public String getInfo() {
-		return "net.sf.michaelo.tomcat.authenticator.CurrentWindowsIdentityAuthenticator/0.9";
+		return "net.sf.michaelo.tomcat.authenticator.CurrentWindowsIdentityAuthenticator/0.10";
 	}
 
 	@Override
@@ -94,11 +93,9 @@ public class CurrentWindowsIdentityAuthenticator extends GssAwareAuthenticatorBa
 				lc = new LoginContext(getLoginEntryName());
 				lc.login();
 			} catch (LoginException e) {
-				logger.error("Unable to login as the user principal", e);
+				logger.error("Unable to obtain the user credential", e);
 
-				AuthenticationException ae = new AuthenticationException(
-						"Unable to login as the user principal", e);
-				sendException(request, response, ae);
+				response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unable to obtain the user credential");
 				return false;
 			}
 
@@ -106,8 +103,7 @@ public class CurrentWindowsIdentityAuthenticator extends GssAwareAuthenticatorBa
 			final PrivilegedExceptionAction<GSSCredential> action = new PrivilegedExceptionAction<GSSCredential>() {
 				@Override
 				public GSSCredential run() throws GSSException {
-					Oid krb5Mech = new Oid("1.2.840.113554.1.2.2");
-					return manager.createCredential(null, GSSCredential.DEFAULT_LIFETIME, krb5Mech,
+					return manager.createCredential(null, GSSCredential.DEFAULT_LIFETIME, KRB5_MECHANISM,
 							GSSCredential.INITIATE_ONLY);
 				}
 			};
@@ -119,29 +115,24 @@ public class CurrentWindowsIdentityAuthenticator extends GssAwareAuthenticatorBa
 			} catch (PrivilegedActionException e) {
 				logger.error("Unable to obtain the user credential", e.getException());
 
-				AuthenticationException ae = new AuthenticationException(
-						"Unable to obtain the user credential", e.getException());
-				sendException(request, response, ae);
+				response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unable to obtain the user credential");
 				return false;
 			}
 
 			try {
 				GssAwareRealmBase<?> realm = (GssAwareRealmBase<?>) context.getRealm();
 				GSSName srcName = gssCredential.getName();
-				Oid krb5Mech = new Oid("1.2.840.113554.1.2.2");
 
-				principal = realm.authenticate(srcName, krb5Mech, gssCredential);
+				principal = realm.authenticate(srcName, KRB5_MECHANISM, gssCredential);
 			} catch (GSSException e) {
-				logger.warn(
-						"Failed to retrive GSSName form GSSCredential of the user", e);
+				logger.error(
+						"Failed to inquire user details from the user credential", e);
 
-				// TODO Maybe a 401 is better suited here?
-				AuthenticationException ae = new AuthenticationException(
-						"Failed to retrive GSSName form GSSCredential of the user", e);
-				sendException(request, response, ae);
+				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to inquire user details from the user credential");
 				return false;
 			} catch (RuntimeException e) {
-				// Logging happens already in the Realm
+				// TODO Rethink how realm throws exceptions
+				// Logging happens already in the realm
 				AuthenticationException ae = new AuthenticationException(
 						"Unable to perform user principal search", e);
 				sendException(request, response, ae);

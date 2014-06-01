@@ -83,7 +83,7 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 
 	@Override
 	public String getInfo() {
-		return "net.sf.michaelo.tomcat.authenticator.SpnegoAuthenticator/0.9";
+		return "net.sf.michaelo.tomcat.authenticator.SpnegoAuthenticator/0.10";
 	}
 
 	protected void sendUnauthorizedHeader(Response response) throws IOException {
@@ -149,14 +149,14 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 		byte[] inToken = null;
 
 		if (logger.isDebugEnabled())
-			logger.debug("Processing Negotiate authentication token " + authorizationValue);
+			logger.debug("Processing Negotiate (SPNEGO) authentication token: " + authorizationValue);
 
 		try {
 			inToken = Base64.decode(authorizationValue);
 		} catch (Exception e) {
-			logger.error("The Negotiate authorization header value sent by the client was invalid: " + authorizationValue, e);
+			logger.warn("The Negotiate (SPNEGO) authentication token is encoded incorrectly: " + authorizationValue, e);
 
-			sendUnauthorizedHeader(response, "The Negotiate authorization header value was invalid");
+			sendUnauthorizedHeader(response, "The Negotiate (SPNEGO) authentication token is encoded incorrectly");
 			return false;
 		}
 
@@ -168,57 +168,57 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 				lc = new LoginContext(getLoginEntryName());
 				lc.login();
 			} catch (LoginException e) {
-				logger.error("Unable to login as the service principal", e);
+				logger.error("Unable to obtain the service credential", e);
 
-				AuthenticationException ae = new AuthenticationException(
-						"Unable to login as the service principal", e);
-				sendException(request, response, ae);
+				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Unable to obtain the service credential");
 				return false;
 			}
 
 			final GSSManager manager = GSSManager.getInstance();
-			final PrivilegedExceptionAction<GSSCredential> serverCredentialAction = new PrivilegedExceptionAction<GSSCredential>() {
+			final PrivilegedExceptionAction<GSSCredential> action = new PrivilegedExceptionAction<GSSCredential>() {
 				@Override
 				public GSSCredential run() throws GSSException {
-					Oid spnegoMech = new Oid("1.3.6.1.5.5.2");
 					return manager.createCredential(null, GSSCredential.DEFAULT_LIFETIME,
-							spnegoMech, GSSCredential.ACCEPT_ONLY);
+							SPNEGO_MECHANISM, GSSCredential.ACCEPT_ONLY);
 				}
 			};
 
 			try {
 				gssContext = manager.createContext(Subject.doAs(lc.getSubject(),
-						serverCredentialAction));
+						action));
 			} catch (PrivilegedActionException e) {
-				logger.error("Unable to obtain the server credential", e.getException());
+				logger.error("Unable to obtain the service credential", e.getException());
 
-				AuthenticationException ae = new AuthenticationException(
-						"Unable to obtain the server credential", e.getException());
-				sendException(request, response, ae);
+				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Unable to obtain the service credential");
 				return false;
 			} catch (GSSException e) {
 				logger.error("Failed to create a security context", e);
 
-				AuthenticationException ae = new AuthenticationException(
-						"Failed to create a security context", e);
-				sendException(request, response, ae);
+				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to create a security context");
 				return false;
 			}
 
 			try {
 				outToken = gssContext.acceptSecContext(inToken, 0, inToken.length);
+			} catch(GSSException e) {
+				logger.warn("The Negotiate (SPNEGO) authentication token is invalid: " + authorizationValue, e);
 
+				sendUnauthorizedHeader(response, "The Negotiate (SPNEGO) authentication token is invalid");
+				return false;
+			}
+
+			try {
 				/*
-				 * This might now work anyway because Tomcat does not support connection-level
-				 * authentication. One actually have to cache the GSSContext in the HTTP session.
+				 * This might not work anyway because Tomcat does not support connection-level
+				 * authentication. One actually has to cache the GSSContext in a HTTP session.
 				 */
 				if (!gssContext.isEstablished()) {
 					if (logger.isDebugEnabled())
-						logger.debug("Security context not yet established, continuing");
+						logger.debug("Security context not fully established, continue needed");
 
 					response.setHeader("WWW-Authenticate",
 							NEGOTIATE_AUTH_SCHEME + " " + Base64.encode(outToken));
-					response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+					response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Security context not fully established, continue needed");
 					return false;
 				} else {
 					GssAwareRealmBase<?> realm = (GssAwareRealmBase<?>) context.getRealm();
@@ -237,17 +237,14 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 				}
 
 			} catch (GSSException e) {
-				logger.warn(
-						"Failed to accept security context with client-supplied service ticket: "
-								+ authorizationValue, e);
+				logger.error(
+						"Failed to inquire user details from the security context", e);
 
-				// TODO Maybe a 401 is better suited here?
-				AuthenticationException ae = new AuthenticationException(
-						"Failed to accept security context with client-supplied service ticket", e);
-				sendException(request, response, ae);
+				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Failed to inquire user details from the security context");
 				return false;
 			} catch (RuntimeException e) {
-				// TODO No logging necessary, it happens already in the realm. Maybe move to here.
+				// TODO Rethink how realm throws exceptions
+				// Logging happens already in the realm
 				AuthenticationException ae = new AuthenticationException(
 						"Unable to perform user principal search", e);
 				sendException(request, response, ae);

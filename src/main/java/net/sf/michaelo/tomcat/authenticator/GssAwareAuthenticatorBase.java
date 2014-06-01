@@ -25,6 +25,8 @@ import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.Response;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
+import org.ietf.jgss.GSSException;
+import org.ietf.jgss.Oid;
 
 /**
  * Base authenticator for GSS-based authenticators, which holds the login entry name.
@@ -34,6 +36,22 @@ import org.apache.juli.logging.LogFactory;
 abstract class GssAwareAuthenticatorBase extends AuthenticatorBase {
 
 	protected final Log logger = LogFactory.getLog(getClass());
+	protected final static Oid KRB5_MECHANISM;
+	protected final static Oid SPNEGO_MECHANISM;
+
+	static {
+		try {
+			KRB5_MECHANISM = new Oid("1.2.840.113554.1.2.2");
+		} catch (GSSException e) {
+			throw new IllegalStateException("Failed to create OID for Kerberos 5 mechanism");
+		}
+
+		try {
+			SPNEGO_MECHANISM = new Oid("1.3.6.1.5.5.2");
+		} catch (GSSException e) {
+			throw new IllegalStateException("Failed to create OID for SPNEGO mechanism");
+		}
+	}
 
 	private String loginEntryName;
 
