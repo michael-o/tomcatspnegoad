@@ -65,6 +65,10 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 	protected static final String SPNEGO_METHOD = "SPNEGO";
 	protected static final String NEGOTIATE_AUTH_SCHEME = "Negotiate";
 
+	protected static final byte[] NTLM_TYPE1_TOKEN_START = { (byte) 'N', (byte) 'T', (byte) 'L',
+			(byte) 'M', (byte) 'S', (byte) 'S', (byte) 'P', (byte) '\0', (byte) 0x01, (byte) 0x00,
+			(byte) 0x00, (byte) 0x00 };
+
 	protected boolean storeDelegatedCredential;
 
 	/**
@@ -161,6 +165,19 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 			sendUnauthorizedHeader(response,
 					"The Negotiate (SPNEGO) authentication token is encoded incorrectly");
 			return false;
+		}
+
+		if (inToken.length >= NTLM_TYPE1_TOKEN_START.length) {
+			boolean ntlm = false;
+			for (int i = 0; i < NTLM_TYPE1_TOKEN_START.length; i++) {
+				ntlm = (inToken[i] == NTLM_TYPE1_TOKEN_START[i]);
+			}
+
+			if (ntlm) {
+				logger.warn("NTLM type 1 authentication token detected, NTLM authentication is not supported");
+				sendUnauthorizedHeader(response, "NTLM authentication is not supported");
+				return false;
+			}
 		}
 
 		LoginContext lc = null;
