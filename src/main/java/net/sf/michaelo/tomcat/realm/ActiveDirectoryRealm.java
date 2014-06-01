@@ -75,7 +75,7 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 
 	@Override
 	public String getInfo() {
-		return "net.sf.michaelo.tomcat.realm.ActiveDirectoryRealm/0.9";
+		return "net.sf.michaelo.tomcat.realm.ActiveDirectoryRealm/0.10";
 	}
 
 	@Override
