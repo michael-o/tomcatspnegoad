@@ -174,7 +174,7 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 			}
 
 			if (ntlm) {
-				logger.warn("NTLM type 1 authentication token detected, NTLM authentication is not supported");
+				logger.warn("NTLM (type 1) authentication token detected which is not supported");
 				sendUnauthorizedHeader(response, "NTLM authentication is not supported");
 				return false;
 			}
