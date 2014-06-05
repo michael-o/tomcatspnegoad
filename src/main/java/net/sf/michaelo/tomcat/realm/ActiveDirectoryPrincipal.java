@@ -31,12 +31,12 @@ import org.ietf.jgss.Oid;
  * <p>
  * An Active Directory principal is comprised of the following items:
  * <ul>
- * <li>a GSS name,</li>
- * <li>a mechanism OID with which the authentication has been performed,</li>
- * <li>a security identifier (SID),</li>
- * <li>a distinguished name (DN) in the forest,</li>
+ * <li>the GSS name,</li>
+ * <li>the mechanism OID with which the authentication has been performed,</li>
+ * <li>the security identifier (SID),</li>
+ * <li>the distinguished name (DN) in the forest,</li>
  * <li>an optional GSS credential for credential delegation (impersonation),</li>
- * <li>and a list of roles ({@code memberOf}) the user has been assigned to. Only the common name
+ * <li>and the list of roles ({@code memberOf}) the user has been assigned to. Only the common name
  * (CN) is stored.
  * </ul>
  * </p>

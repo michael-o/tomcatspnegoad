@@ -32,7 +32,7 @@ import org.ietf.jgss.GSSName;
 import org.ietf.jgss.Oid;
 
 /**
- * Base realm which is able to retrieve principals from {@link GSSName GSSNames}.
+ * Base realm which is able to retrieve principals from {@link GSSName GSS names}.
  *
  * @version $Id$
  */

@@ -56,7 +56,7 @@ public interface UsernameSearchMapper {
 	 *            the GSS name to be mapped
 	 * @return mapped values for user retrieval
 	 * @throws NamingException
-	 *             if context-related errors occured
+	 *             if a context-related error has occured
 	 */
 	MappedValues map(DirContext context, GSSName gssName) throws NamingException;
 
