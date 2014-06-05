@@ -41,7 +41,7 @@ public class GssAwareUserDatabaseRealm extends GssAwareRealmBase<UserDatabase> {
 
 	@Override
 	public String getInfo() {
-		return "net.sf.michaelo.realm.GssAwareUserDatabaseRealm/0.9";
+		return "net.sf.michaelo.realm.GssAwareUserDatabaseRealm/0.10";
 	}
 
 	@Override

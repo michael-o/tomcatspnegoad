@@ -52,7 +52,7 @@ public abstract class GssAwareRealmBase<T> extends RealmBase {
 	}
 
 	@Override
-	protected String getPassword(String password) {
+	protected String getPassword(String username) {
 		throw new UnsupportedOperationException("This method is not supported by this realm");
 	}
 
