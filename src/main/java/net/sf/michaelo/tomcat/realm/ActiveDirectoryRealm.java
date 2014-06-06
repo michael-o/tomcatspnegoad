@@ -262,14 +262,15 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 		}
 
 		Attribute memberOfAttr = result.getAttributes().get("memberOf");
-		NamingEnumeration<?> memberOfValues = memberOfAttr.getAll();
 
 		List<String> roles = new LinkedList<String>();
 
-		while (memberOfValues.hasMoreElements())
-			roles.add((String) memberOfValues.nextElement());
+		if(memberOfAttr != null && memberOfAttr.size() > 0) {
+			NamingEnumeration<?> memberOfValues = memberOfAttr.getAll();
 
-		LdapUtils.close(memberOfValues);
+			while (memberOfValues.hasMoreElements())
+				roles.add((String) memberOfValues.nextElement());
+		}
 
 		return new User(gssName, sid, dn, roles);
 	}
