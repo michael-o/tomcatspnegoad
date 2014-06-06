@@ -15,14 +15,7 @@
  */
 package net.sf.michaelo.tomcat.authenticator;
 
-import java.io.IOException;
-
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.catalina.Globals;
 import org.apache.catalina.authenticator.AuthenticatorBase;
-import org.apache.catalina.connector.Request;
-import org.apache.catalina.connector.Response;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 import org.ietf.jgss.GSSException;
