@@ -159,11 +159,11 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 		try {
 			inToken = Base64.decode(authorizationValue);
 		} catch (Exception e) {
-			logger.warn("The Negotiate (SPNEGO) authentication token is encoded incorrectly: "
+			logger.warn("The Negotiate (SPNEGO) authentication token is incorrectly encoded: "
 					+ authorizationValue, e);
 
 			sendUnauthorizedHeader(response,
-					"The Negotiate (SPNEGO) authentication token is encoded incorrectly");
+					"The Negotiate (SPNEGO) authentication token is incorrectly encoded");
 			return false;
 		}
 
