@@ -221,13 +221,13 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 			results = context.search(searchBase, searchFilter,
 					new Object[] { searchAttributeValue }, searchCtls);
 
-			if (results == null || !results.hasMore()) {
+			if (!results.hasMore()) {
 
 				if (logger.isDebugEnabled()) {
 					String shortClassName = StringUtils.substringAfterLast(mapper.getClass()
 							.getName(), ".");
 					logger.debug(String
-							.format("Username '%s' in search base '%s' and search attribute '%s' with mapper '%s' not found, trying fallback",
+							.format("User '%s' in search base '%s' and search attribute '%s' with mapper '%s' not found, trying fallback",
 									searchAttributeValue, searchBase, searchAttributeName,
 									shortClassName));
 				}
@@ -237,15 +237,19 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 				break;
 		}
 
-		if (results == null || !results.hasMore()) {
-			logger.info(String.format("User '%s' not found", gssName));
+		if (!results.hasMore()) {
+			logger.info(String.format("User '%s' has not been not found", gssName));
+
 			return null;
 		}
 
 		SearchResult result = results.next();
 
 		if (results.hasMore()) {
-			logger.warn(String.format("User '%s' has multiple entries", gssName));
+			// TODO Throw IllegalStateException? Should not happen actually
+			logger.error(String.format("User '%s' has multiple entries", gssName));
+
+			LdapUtils.close(results);
 			return null;
 		}
 
@@ -268,8 +272,8 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 		if(memberOfAttr != null && memberOfAttr.size() > 0) {
 			NamingEnumeration<?> memberOfValues = memberOfAttr.getAll();
 
-			while (memberOfValues.hasMoreElements())
-				roles.add((String) memberOfValues.nextElement());
+			while (memberOfValues.hasMore())
+				roles.add((String) memberOfValues.next());
 		}
 
 		return new User(gssName, sid, dn, roles);

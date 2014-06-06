@@ -74,10 +74,4 @@ abstract class GssAwareAuthenticatorBase extends AuthenticatorBase {
 		return loginEntryName;
 	}
 
-	protected void sendException(Request request, Response response, AuthenticationException e)
-			throws IOException {
-		request.setAttribute(Globals.EXCEPTION_ATTR, e);
-		response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-	}
-
 }

@@ -261,6 +261,12 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 					}
 
 					principal = realm.authenticate(srcName, negotiatedMech, delegatedCredential);
+
+					if(principal == null) {
+						response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
+									String.format("User '%s' has not been not found", srcName));
+						return false;
+					}
 				}
 
 			} catch (GSSException e) {
@@ -268,13 +274,6 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 
 				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
 						"Failed to inquire user details from the security context");
-				return false;
-			} catch (RuntimeException e) {
-				// TODO Rethink how realm throws exceptions
-				// Logging happens already in the realm
-				AuthenticationException ae = new AuthenticationException(
-						"Unable to perform user principal search", e);
-				sendException(request, response, ae);
 				return false;
 			}
 
