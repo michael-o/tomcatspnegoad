@@ -148,14 +148,9 @@ public class CurrentWindowsIdentityAuthenticator extends GssAwareAuthenticatorBa
 			}
 		}
 
-		if (principal != null) {
-			register(request, response, principal, CURRENT_WINDOWS_IDENTITY_METHOD,
-					principal.getName(), null);
-			return true;
-		}
-
-		response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-		return false;
+		register(request, response, principal, CURRENT_WINDOWS_IDENTITY_METHOD,
+				principal.getName(), null);
+		return true;
 	}
 
 }

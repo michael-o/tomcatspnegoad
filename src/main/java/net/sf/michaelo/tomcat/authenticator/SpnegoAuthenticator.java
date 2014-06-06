@@ -140,6 +140,7 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 			return false;
 		}
 
+		// FIXME Substring is case-sensitive
 		String authorizationValue = StringUtils
 				.substringAfter(authorization, NEGOTIATE_AUTH_SCHEME);
 		authorizationValue = StringUtils.trim(authorizationValue);
@@ -294,21 +295,17 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 			}
 		}
 
-		if (principal != null) {
-			register(request, response, principal, SPNEGO_METHOD, principal.getName(), null);
-			if (ArrayUtils.isNotEmpty(outToken)) {
-				// Send response token if there is one
-				response.setHeader("WWW-Authenticate",
-						NEGOTIATE_AUTH_SCHEME + " " + Base64.encode(outToken));
-				// Connection must be closed due to
-				// https://issues.apache.org/bugzilla/show_bug.cgi?id=54076
-				response.addHeader("Connection", "close");
-			}
-			return true;
+		register(request, response, principal, SPNEGO_METHOD, principal.getName(), null);
+		if (ArrayUtils.isNotEmpty(outToken)) {
+			// Send response token if there is one
+			response.setHeader("WWW-Authenticate",
+					NEGOTIATE_AUTH_SCHEME + " " + Base64.encode(outToken));
+			// Connection must be closed due to
+			// https://issues.apache.org/bugzilla/show_bug.cgi?id=54076
+			response.addHeader("Connection", "close");
 		}
 
-		sendUnauthorizedHeader(response);
-		return false;
+		return true;
 	}
 
 }
