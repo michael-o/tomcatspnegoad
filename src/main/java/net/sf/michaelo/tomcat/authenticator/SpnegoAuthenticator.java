@@ -200,7 +200,7 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 			final PrivilegedExceptionAction<GSSCredential> action = new PrivilegedExceptionAction<GSSCredential>() {
 				@Override
 				public GSSCredential run() throws GSSException {
-					return manager.createCredential(null, GSSCredential.DEFAULT_LIFETIME,
+					return manager.createCredential(null, GSSCredential.INDEFINITE_LIFETIME,
 							SPNEGO_MECHANISM, GSSCredential.ACCEPT_ONLY);
 				}
 			};
