@@ -120,7 +120,7 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 
 		// NOTE: We don't try to reauthenticate using any existing SSO session,
 		// because that will only work if the original authentication was
-		// BASIC or FORM, which are less secure than the DIGEST auth-type
+		// BASIC or FORM, which are less secure than the SPNEGO auth-type
 		// specified for this webapp
 
 		/*
