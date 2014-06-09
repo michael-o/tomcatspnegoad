@@ -84,64 +84,6 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 	}
 
 	/**
-	 * Retrieves the roles for a specific user from Active Directory. The roles will be stored by
-	 * the common name (CN) only.
-	 *
-	 * @param user
-	 *            the user for role retrievement
-	 * @return roles list for the given pricipal
-	 */
-	protected List<String> getRoles(User user) throws NamingException {
-
-		List<String> roles = new LinkedList<String>();
-
-		if (logger.isTraceEnabled())
-			logger.trace(String.format("Retrieving roles for user '%s' with DN '%s'",
-					user.getGssName(), user.getDn()));
-
-		for (String role : user.getRoles()) {
-			role = StringUtils.substringBetween(role, "CN=", ",");
-			if (strippableRoleNamePrefixes != null) {
-				for (String prefix : strippableRoleNamePrefixes) {
-					if (role.startsWith(prefix))
-						roles.add(StringUtils.substringAfter(role, prefix));
-					else
-						roles.add(role);
-				}
-			} else
-				roles.add(role);
-		}
-
-		if (logger.isDebugEnabled())
-			logger.debug(String.format("Found %s roles for user '%s'", roles.size(),
-					user.getGssName()));
-		if (logger.isTraceEnabled())
-			logger.debug(String.format("Found following roles %s for user '%s'", roles,
-					user.getGssName()));
-
-		return roles;
-	}
-
-	@Override
-	public boolean hasRole(Principal principal, String role) {
-
-		if (principal == null || role == null || !(principal instanceof ActiveDirectoryPrincipal))
-			return false;
-
-		ActiveDirectoryPrincipal adp = (ActiveDirectoryPrincipal) principal;
-		boolean result = adp.hasRole(role);
-
-		if (logger.isDebugEnabled()) {
-			if (result)
-				logger.debug(String.format("Principal '%s' does not have role '%s'", principal, role));
-			else
-				logger.debug(String.format("Principal '%s' has role '%s'", principal, role));
-		}
-
-		return result;
-	}
-
-	/**
 	 * Sets the role name prefixed which can be stripped during retrieval.
 	 *
 	 * @param prefixes
@@ -156,7 +98,7 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 
 		DirContextSource dirContextSource = null;
 		try {
-			dirContextSource = (DirContextSource) lookupResource();
+			dirContextSource = lookupResource();
 		} catch (NamingException e) {
 			logger.error(String.format(
 					"Could not retrieve the DirContextSource '%s' from JNDI context", resourceName));
@@ -194,6 +136,25 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 		}
 
 		return principal;
+	}
+
+	@Override
+	public boolean hasRole(Principal principal, String role) {
+
+		if (principal == null || role == null || !(principal instanceof ActiveDirectoryPrincipal))
+			return false;
+
+		ActiveDirectoryPrincipal adp = (ActiveDirectoryPrincipal) principal;
+		boolean result = adp.hasRole(role);
+
+		if (logger.isDebugEnabled()) {
+			if (result)
+				logger.debug(String.format("Principal '%s' does not have role '%s'", principal, role));
+			else
+				logger.debug(String.format("Principal '%s' has role '%s'", principal, role));
+		}
+
+		return result;
 	}
 
 	protected User getUser(DirContext context, GSSName gssName) throws NamingException {
@@ -277,6 +238,45 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 		}
 
 		return new User(gssName, sid, dn, roles);
+	}
+
+	/**
+	 * Retrieves the roles for a specific user from Active Directory. The roles will be stored by
+	 * the common name (CN) only.
+	 *
+	 * @param user
+	 *            the user for role retrievement
+	 * @return roles list for the given pricipal
+	 */
+	protected List<String> getRoles(User user) throws NamingException {
+
+		List<String> roles = new LinkedList<String>();
+
+		if (logger.isTraceEnabled())
+			logger.trace(String.format("Retrieving roles for user '%s' with DN '%s'",
+					user.getGssName(), user.getDn()));
+
+		for (String role : user.getRoles()) {
+			role = StringUtils.substringBetween(role, "CN=", ",");
+			if (strippableRoleNamePrefixes != null) {
+				for (String prefix : strippableRoleNamePrefixes) {
+					if (role.startsWith(prefix))
+						roles.add(StringUtils.substringAfter(role, prefix));
+					else
+						roles.add(role);
+				}
+			} else
+				roles.add(role);
+		}
+
+		if (logger.isDebugEnabled())
+			logger.debug(String.format("Found %s roles for user '%s'", roles.size(),
+					user.getGssName()));
+		if (logger.isTraceEnabled())
+			logger.debug(String.format("Found following roles %s for user '%s'", roles,
+					user.getGssName()));
+
+		return roles;
 	}
 
 	/**
