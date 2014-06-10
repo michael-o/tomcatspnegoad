@@ -16,6 +16,7 @@
 package net.sf.michaelo.tomcat.authenticator;
 
 import org.apache.catalina.authenticator.AuthenticatorBase;
+import org.apache.catalina.util.StringManager;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 import org.ietf.jgss.GSSException;
@@ -29,6 +30,8 @@ import org.ietf.jgss.Oid;
 abstract class GssAwareAuthenticatorBase extends AuthenticatorBase {
 
 	protected final Log logger = LogFactory.getLog(getClass());
+	protected final StringManager sm = StringManager.getManager(getClass().getPackage().getName());
+
 	protected final static Oid KRB5_MECHANISM;
 	protected final static Oid SPNEGO_MECHANISM;
 

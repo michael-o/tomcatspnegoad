@@ -111,7 +111,7 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 		// String ssoId = (String) request.getNote(Constants.REQ_SSOID_NOTE);
 		if (principal != null) {
 			if (logger.isDebugEnabled())
-				logger.debug(String.format("Already authenticated '%s'", principal));
+				logger.debug(sm.getString("authenticator.alreadyAuthenticated", principal));
 			String ssoId = (String) request.getNote(Constants.REQ_SSOID_NOTE);
 			if (ssoId != null)
 				associate(ssoId, request.getSessionInternal(true));
@@ -154,17 +154,16 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 		byte[] inToken = null;
 
 		if (logger.isDebugEnabled())
-			logger.debug("Processing Negotiate (SPNEGO) authentication token: "
-					+ authorizationValue);
+			logger.debug(sm.getString("spnegoAuthenticator.processingToken", authorizationValue));
 
 		try {
 			inToken = Base64.decode(authorizationValue);
 		} catch (Exception e) {
-			logger.warn("The Negotiate (SPNEGO) authentication token is incorrectly encoded: "
-					+ authorizationValue, e);
+			logger.warn(sm.getString("spnegoAuthenticator.incorrectlyEncodedToken",
+					authorizationValue), e);
 
 			sendUnauthorizedHeader(response,
-					"The Negotiate (SPNEGO) authentication token is incorrectly encoded");
+					sm.getString("spnegoAuthenticator.incorrectlyEncodedToken.responseMessage"));
 			return false;
 		}
 
@@ -175,8 +174,9 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 			}
 
 			if (ntlm) {
-				logger.warn("NTLM (type 1) authentication token detected which is not supported");
-				sendUnauthorizedHeader(response, "NTLM authentication is not supported");
+				logger.warn(sm.getString("spnegoAuthenticator.ntlmNotSupported"));
+				sendUnauthorizedHeader(response,
+						sm.getString("spnegoAuthenticator.ntlmNotSupported.responseMessage"));
 				return false;
 			}
 		}
@@ -189,10 +189,10 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 				lc = new LoginContext(getLoginEntryName());
 				lc.login();
 			} catch (LoginException e) {
-				logger.error("Unable to obtain the service credential", e);
+				logger.error(sm.getString("spnegoAuthenticator.obtainFailed"), e);
 
 				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-						"Unable to obtain the service credential");
+						sm.getString("spnegoAuthenticator.obtainFailed"));
 				return false;
 			}
 
@@ -208,27 +208,26 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 			try {
 				gssContext = manager.createContext(Subject.doAs(lc.getSubject(), action));
 			} catch (PrivilegedActionException e) {
-				logger.error("Unable to obtain the service credential", e.getException());
+				logger.error(sm.getString("spnegoAuthenticator.obtainFailed"), e.getException());
 
 				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-						"Unable to obtain the service credential");
+						sm.getString("spnegoAuthenticator.obtainFailed"));
 				return false;
 			} catch (GSSException e) {
-				logger.error("Failed to create a security context", e);
+				logger.error(sm.getString("spnegoAuthenticator.createContextFailed"), e);
 
 				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-						"Failed to create a security context");
+						sm.getString("spnegoAuthenticator.createContextFailed"));
 				return false;
 			}
 
 			try {
 				outToken = gssContext.acceptSecContext(inToken, 0, inToken.length);
 			} catch (GSSException e) {
-				logger.warn("The Negotiate (SPNEGO) authentication token is invalid: "
-						+ authorizationValue, e);
+				logger.warn(sm.getString("spnegoAuthenticator.invalidToken", authorizationValue), e);
 
 				sendUnauthorizedHeader(response,
-						"The Negotiate (SPNEGO) authentication token is invalid");
+						sm.getString("spnegoAuthenticator.invalidToken.responseMessage"));
 				return false;
 			}
 
@@ -239,12 +238,12 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 				 */
 				if (!gssContext.isEstablished()) {
 					if (logger.isDebugEnabled())
-						logger.debug("Security context not fully established, continue needed");
+						logger.debug(sm.getString("spnegoAuthenticator.continueContextNeeded"));
 
 					response.setHeader("WWW-Authenticate",
 							NEGOTIATE_AUTH_SCHEME + " " + Base64.encode(outToken));
 					response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
-							"Security context not fully established, continue needed");
+							sm.getString("spnegoAuthenticator.continueContextNeeded"));
 					return false;
 				} else {
 					GssAwareRealmBase<?> realm = (GssAwareRealmBase<?>) context.getRealm();
@@ -255,26 +254,25 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 					if (storeDelegatedCredential) {
 						if (gssContext.getCredDelegState()) {
 							delegatedCredential = gssContext.getDelegCred();
-						} else
-							logger.debug(String
-									.format("Credential of '%s' is not delegable though storing was requested",
-											srcName));
+						} else if (logger.isDebugEnabled())
+							logger.debug(sm.getString("spnegoAuthenticator.credentialNotDelegable",
+									srcName));
 					}
 
 					principal = realm.authenticate(srcName, negotiatedMech, delegatedCredential);
 
 					if(principal == null) {
 						response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
-									String.format("User '%s' has not been not found", srcName));
+								sm.getString("authenticator.userNotFound", srcName));
 						return false;
 					}
 				}
 
 			} catch (GSSException e) {
-				logger.error("Failed to inquire user details from the security context", e);
+				logger.error(sm.getString("spnegoAuthenticator.inquireFailed"), e);
 
 				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-						"Failed to inquire user details from the security context");
+						sm.getString("spnegoAuthenticator.inquireFailed"));
 				return false;
 			}
 

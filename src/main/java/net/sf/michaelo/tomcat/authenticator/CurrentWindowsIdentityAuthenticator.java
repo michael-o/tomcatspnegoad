@@ -64,7 +64,7 @@ public class CurrentWindowsIdentityAuthenticator extends GssAwareAuthenticatorBa
 		// String ssoId = (String) request.getNote(Constants.REQ_SSOID_NOTE);
 		if (principal != null) {
 			if (logger.isDebugEnabled())
-				logger.debug(String.format("Already authenticated '%s'", principal));
+				logger.debug(sm.getString("authenticator.alreadyAuthenticated", principal));
 			String ssoId = (String) request.getNote(Constants.REQ_SSOID_NOTE);
 			if (ssoId != null)
 				associate(ssoId, request.getSessionInternal(true));
@@ -93,9 +93,10 @@ public class CurrentWindowsIdentityAuthenticator extends GssAwareAuthenticatorBa
 				lc = new LoginContext(getLoginEntryName());
 				lc.login();
 			} catch (LoginException e) {
-				logger.error("Unable to obtain the user credential", e);
+				logger.error(sm.getString("cwiAuthenticator.obtainFailed"), e);
 
-				response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unable to obtain the user credential");
+				response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
+						sm.getString("cwiAuthenticator.obtainFailed"));
 				return false;
 			}
 
@@ -113,9 +114,10 @@ public class CurrentWindowsIdentityAuthenticator extends GssAwareAuthenticatorBa
 			try {
 				gssCredential = Subject.doAs(lc.getSubject(), action);
 			} catch (PrivilegedActionException e) {
-				logger.error("Unable to obtain the user credential", e.getException());
+				logger.error(sm.getString("cwiAuthenticator.obtainFailed"), e.getException());
 
-				response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unable to obtain the user credential");
+				response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
+						sm.getString("cwiAuthenticator.obtainFailed"));
 				return false;
 			}
 
@@ -127,14 +129,14 @@ public class CurrentWindowsIdentityAuthenticator extends GssAwareAuthenticatorBa
 
 				if(principal == null) {
 					response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
-								String.format("User '%s' has not been not found", srcName));
+							sm.getString("authenticator.userNotFound", srcName));
 					return false;
 				}
 			} catch (GSSException e) {
-				logger.error("Failed to inquire user details from the user credential", e);
+				logger.error(sm.getString("cwiAuthenticator.inquireFailed"), e);
 
 				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-						"Failed to inquire user details from the user credential");
+						sm.getString("cwiAuthenticator.inquireFailed"));
 				return false;
 			}
 
