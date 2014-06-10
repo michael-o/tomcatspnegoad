@@ -57,10 +57,9 @@ public class GssAwareUserDatabaseRealm extends GssAwareRealmBase<UserDatabase> {
 		try {
 			database = lookupResource();
 		} catch (NamingException e) {
-			logger.error(String.format(
-					"Could not retrieve the UserDatabase '%s' from JNDI context", resourceName));
-			throw new RuntimeException(String.format("Failed to retrieve resource '%s'",
-					resourceName), e);
+			logger.error(sm.getString("userDatabaseRealm.lookupFailed", resourceName), e);
+
+			return null;
 		}
 
 		String username = gssName.toString();
@@ -109,10 +108,9 @@ public class GssAwareUserDatabaseRealm extends GssAwareRealmBase<UserDatabase> {
 		try {
 			database = lookupResource();
 		} catch (NamingException e) {
-			logger.error(String.format(
-					"Could not retrieve the UserDatabase '%s' from JNDI context", resourceName));
-			throw new RuntimeException(String.format("Failed to retrieve resource '%s'",
-					resourceName), e);
+			logger.error(sm.getString("userDatabaseRealm.lookupFailed", resourceName), e);
+
+			return false;
 		}
 
 		Role dbrole = database.findRole(role);

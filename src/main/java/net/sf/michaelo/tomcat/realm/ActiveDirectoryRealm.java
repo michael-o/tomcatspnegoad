@@ -100,19 +100,18 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 		try {
 			dirContextSource = lookupResource();
 		} catch (NamingException e) {
-			logger.error(String.format(
-					"Could not retrieve the DirContextSource '%s' from JNDI context", resourceName));
-			throw new RuntimeException(String.format("Failed to retrieve resource '%s'",
-					resourceName), e);
+			logger.error(sm.getString("activeDirectoryealm.lookupFailed", resourceName), e);
+
+			return null;
 		}
 
 		DirContext context = null;
 		try {
 			context = dirContextSource.getDirContext();
 		} catch (NamingException e) {
-			logger.error(String.format("Could not retrieve DirContext from DirContextSource '%s'",
-					resourceName), e);
-			throw new RuntimeException(e);
+			logger.error(sm.getString("activeDirectoryRealm.obtainFailed", resourceName), e);
+
+			return null;
 		}
 
 		Principal principal = null;
@@ -128,9 +127,9 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 			}
 
 		} catch (NamingException e) {
-			logger.error(
-					String.format("Unable to perform principal search for user '%s'", gssName), e);
-			throw new RuntimeException(e);
+			logger.error(sm.getString("activeDirectoryRealm.principalSearchFailed", gssName), e);
+
+			return null;
 		} finally {
 			LdapUtils.close(context);
 		}
@@ -149,9 +148,9 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 
 		if (logger.isDebugEnabled()) {
 			if (result)
-				logger.debug(String.format("Principal '%s' does not have role '%s'", principal, role));
+				logger.debug(sm.getString("activeDirectoryRealm.hasRole", principal, role));
 			else
-				logger.debug(String.format("Principal '%s' has role '%s'", principal, role));
+				logger.debug(sm.getString("activeDirectoryRealm.notHasRole", principal, role));
 		}
 
 		return result;
@@ -185,12 +184,9 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 			if (!results.hasMore()) {
 
 				if (logger.isDebugEnabled()) {
-					String shortClassName = StringUtils.substringAfterLast(mapper.getClass()
-							.getName(), ".");
-					logger.debug(String
-							.format("User '%s' in search base '%s' and search attribute '%s' with mapper '%s' not found, trying fallback",
-									searchAttributeValue, searchBase, searchAttributeName,
-									shortClassName));
+					String simpleClassName = mapper.getClass().getSimpleName();
+					logger.debug(sm.getString("activeDirectoryRealm.usernameNotMapped",
+							searchAttributeValue, searchBase, searchAttributeName, simpleClassName));
 				}
 
 				LdapUtils.close(results);
@@ -199,7 +195,7 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 		}
 
 		if (!results.hasMore()) {
-			logger.info(String.format("User '%s' has not been not found", gssName));
+			logger.info(sm.getString("activeDirectoryRealm.userNotFound", gssName));
 
 			return null;
 		}
@@ -207,30 +203,24 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 		SearchResult result = results.next();
 
 		if (results.hasMore()) {
-			// TODO Throw IllegalStateException? Should not happen actually
-			logger.error(String.format("User '%s' has multiple entries", gssName));
+			logger.error(sm.getString("activeDirectoryRealm.duplicateUser", gssName));
 
 			LdapUtils.close(results);
 			return null;
 		}
 
 		LdapName dn = getDistinguishedName(context, searchBase, result);
-
-		if (logger.isDebugEnabled())
-			logger.debug(String.format("Entry found for user '%s' with DN '%s'", gssName, dn));
-
 		byte[] sid = (byte[]) result.getAttributes().get("objectSid;binary").get();
 
-		if (logger.isDebugEnabled()) {
-			logger.debug(String.format("Found SID '%s' for user '%s'", HexUtils.convert(sid),
-					gssName));
-		}
+		if (logger.isDebugEnabled())
+			logger.debug(sm.getString("activeDirectoryRealm.userFound", gssName, dn,
+					HexUtils.convert(sid)));
 
 		Attribute memberOfAttr = result.getAttributes().get("memberOf");
 
 		List<String> roles = new LinkedList<String>();
 
-		if(memberOfAttr != null && memberOfAttr.size() > 0) {
+		if (memberOfAttr != null && memberOfAttr.size() > 0) {
 			NamingEnumeration<?> memberOfValues = memberOfAttr.getAll();
 
 			while (memberOfValues.hasMore())
@@ -253,8 +243,7 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 		List<String> roles = new LinkedList<String>();
 
 		if (logger.isTraceEnabled())
-			logger.trace(String.format("Retrieving roles for user '%s' with DN '%s'",
-					user.getGssName(), user.getDn()));
+			logger.trace(sm.getString("activeDirectoryRealm.retrievingRoles", user.getGssName()));
 
 		for (String role : user.getRoles()) {
 			role = StringUtils.substringBetween(role, "CN=", ",");
@@ -270,11 +259,10 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 		}
 
 		if (logger.isDebugEnabled())
-			logger.debug(String.format("Found %s roles for user '%s'", roles.size(),
+			logger.debug(sm.getString("activeDirectoryRealm.foundRolesCount", roles.size(),
 					user.getGssName()));
 		if (logger.isTraceEnabled())
-			logger.debug(String.format("Found following roles %s for user '%s'", roles,
-					user.getGssName()));
+			logger.debug(sm.getString("activeDirectoryRealm.foundRoles", user.getGssName(), roles));
 
 		return roles;
 	}
@@ -296,9 +284,6 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 		// we need to composite a name with the base name, the context name, and
 		// the result name. For non-relative names, use the returned name.
 		if (result.isRelative()) {
-			if (logger.isTraceEnabled()) {
-				logger.trace(String.format("Search returned relative name '%s'", result.getName()));
-			}
 			NameParser parser = context.getNameParser(StringUtils.EMPTY);
 			Name contextName = parser.parse(context.getNameInNamespace());
 			Name baseName = parser.parse(base);
@@ -311,8 +296,6 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 			return (LdapName) name;
 		} else {
 			String absoluteName = result.getName();
-			if (logger.isTraceEnabled())
-				logger.trace(String.format("Search returned absolute name '%s'", result.getName()));
 			try {
 				// Normalize the name by running it through the name parser.
 				NameParser parser = context.getNameParser(StringUtils.EMPTY);
@@ -321,14 +304,14 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 				// Should not ever have an empty path component, since that is
 				// /{DN}
 				if (pathComponent.length() < 1) {
-					throw new InvalidNameException(String.format(
-							"Search returned unparseable absolute name '%s'", absoluteName));
+					throw new InvalidNameException(sm.getString(
+							"activeDirectoryRealm.unparseableName", absoluteName));
 				}
 				Name name = parser.parse(pathComponent.substring(1));
 				return (LdapName) name;
 			} catch (URISyntaxException e) {
-				throw new InvalidNameException(String.format(
-						"Search returned unparseable absolute name '%s'", absoluteName));
+				throw new InvalidNameException(sm.getString(
+						"activeDirectoryRealm.unparseableName", absoluteName));
 			}
 		}
 	}
