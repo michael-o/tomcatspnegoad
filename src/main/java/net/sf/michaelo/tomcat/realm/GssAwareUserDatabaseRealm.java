@@ -107,7 +107,7 @@ public class GssAwareUserDatabaseRealm extends GssAwareRealmBase<UserDatabase> {
 
 		UserDatabase database;
 		try {
-			database = (UserDatabase) lookupResource();
+			database = lookupResource();
 		} catch (NamingException e) {
 			logger.error(String.format(
 					"Could not retrieve the UserDatabase '%s' from JNDI context", resourceName));
