@@ -150,7 +150,7 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 			if (result)
 				logger.debug(sm.getString("activeDirectoryRealm.hasRole", principal, role));
 			else
-				logger.debug(sm.getString("activeDirectoryRealm.notHasRole", principal, role));
+				logger.debug(sm.getString("activeDirectoryRealm.hasNotRole", principal, role));
 		}
 
 		return result;
