@@ -35,9 +35,9 @@ Choosing and Using Authenticators
 * The SPNEGO Authenticator
 
   The {{{./apidocs/net/sf/michaelo/tomcat/authenticator/SpnegoAuthenticator.html}<<<SpnegoAuthenticator>>>}}
-  challenges the client to perform {{{http://tools.ietf.org/html/rfc4178}SPNEGO}} authentication. In
-  turn the server accepts a GSS context, validates the security token and responds with a proper
-  message to the client.
+  challenges the client to perform {{{http://tools.ietf.org/html/rfc4559}SPNEGO}} authentication. In
+  turn the server accepts a GSS context by validating a security token and responds with a proper
+  token to the client.
 
     [Attention] Though SPNEGO is intended to negotiate a mechanism, the Oracle JVM currently supports
                 Kerberos 5 only and not NTLM additionally due to its proprietary nature. Anyway, it
@@ -69,27 +69,29 @@ Choosing and Using Authenticators
 
   After examining the authenticator above and probably ask yourself: How do I use that on my local
   development machine? Generally, you can't in Windows due to {{{http://stackoverflow.com/q/17705727/696632}this}}
-  stupidity. But there is {{{./apidocs/net/sf/michaelo/tomcat/authenticator/CurrentWindowsIdentityAuthenticator.html}<<<CurrentWindowsIdentityAuthenticator>>>}}.
-  It will automatically obtain the GSS credential of the currently logged in domain user and auto-login
-  you in the application. This is very handy when you are running your Tomcat instance inside Eclipse.
+  stupidity. {{{./apidocs/net/sf/michaelo/tomcat/authenticator/CurrentWindowsIdentityAuthenticator.html}<<<CurrentWindowsIdentityAuthenticator>>>}}
+  to the rescue. It will automatically obtain the GSS credential of the currently logged in domain
+  user and auto-login you in the application. This is very handy when you are running your Tomcat
+  instance inside Eclipse.
 
   Open or create your app's <<<context.xml>>> and add:
 
 +----------------------------
-[$ellipsis]
+
 <Context>
+[$ellipsis]
   <!-- Add this -->
   <Valve className="net.sf.michaelo.tomcat.authenticator.CurrentWindowsIdentityAuthenticator"
     loginEntryName="a-login-entry" />
-</Context>
 [$ellipsis]
+</Context>
 +----------------------------
 
   Provide the login entry name from your <<<login.conf>>> configured for your user account capable of
   initiating GSS contexts with SPNEGO/Kerberos.
 
-    [Warning] Do not use this in production. This has been development for the ease of development
-              and testing purposes only.
+    [Warning] Do not use this in production. This has been crated for the ease of development and
+              testing purposes only.
 
   Now you have successfully configured the <<<CurrentWindowsIdentityAuthenticator>>> in your webapp.
   It is now ready to use.
