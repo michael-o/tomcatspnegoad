@@ -65,6 +65,8 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 	protected static final String SPNEGO_METHOD = "SPNEGO";
 	protected static final String NEGOTIATE_AUTH_SCHEME = "Negotiate";
 
+	protected static final String[] SUPPORTED_SCHEMES = { NEGOTIATE_AUTH_SCHEME };
+
 	private static final byte[] NTLM_TYPE1_MESSAGE_START = { (byte) 'N', (byte) 'T', (byte) 'L',
 			(byte) 'M', (byte) 'S', (byte) 'S', (byte) 'P', (byte) '\0', (byte) 0x01, (byte) 0x00,
 			(byte) 0x00, (byte) 0x00 };
@@ -90,14 +92,10 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 		return "net.sf.michaelo.tomcat.authenticator.SpnegoAuthenticator/0.10";
 	}
 
-	protected void sendUnauthorizedHeader(Response response) throws IOException {
-		response.setHeader("WWW-Authenticate", NEGOTIATE_AUTH_SCHEME);
-		response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-	}
-
-	protected void sendUnauthorizedHeader(Response response, String message) throws IOException {
-		response.setHeader("WWW-Authenticate", NEGOTIATE_AUTH_SCHEME);
-		response.sendError(HttpServletResponse.SC_UNAUTHORIZED, message);
+	protected void sendUnauthorizedToken(Response response, String scheme, byte[] token,
+			String messageKey, Object... params) throws IOException {
+		response.setHeader("WWW-Authenticate", scheme + " " + Base64.encode(token));
+		respondErrorMessage(response, HttpServletResponse.SC_UNAUTHORIZED, messageKey, params);
 	}
 
 	@Override
@@ -136,7 +134,7 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 		String authorization = request.getHeader("Authorization");
 
 		if (!StringUtils.startsWithIgnoreCase(authorization, NEGOTIATE_AUTH_SCHEME)) {
-			sendUnauthorizedHeader(response);
+			sendUnauthorized(response, SUPPORTED_SCHEMES);
 			return false;
 		}
 
@@ -146,7 +144,7 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 		authorizationValue = StringUtils.trim(authorizationValue);
 
 		if (StringUtils.isEmpty(authorizationValue)) {
-			sendUnauthorizedHeader(response);
+			sendUnauthorized(response, SUPPORTED_SCHEMES);
 			return false;
 		}
 
@@ -162,21 +160,22 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 			logger.warn(sm.getString("spnegoAuthenticator.incorrectlyEncodedToken",
 					authorizationValue), e);
 
-			sendUnauthorizedHeader(response,
-					sm.getString("spnegoAuthenticator.incorrectlyEncodedToken.responseMessage"));
+			sendUnauthorized(response, SUPPORTED_SCHEMES,
+					"spnegoAuthenticator.incorrectlyEncodedToken.responseMessage");
 			return false;
 		}
 
 		if (inToken.length >= NTLM_TYPE1_MESSAGE_START.length) {
-			boolean ntlm = false;
+			boolean ntlmDetected = false;
 			for (int i = 0; i < NTLM_TYPE1_MESSAGE_START.length; i++) {
-				ntlm = inToken[i] == NTLM_TYPE1_MESSAGE_START[i];
+				ntlmDetected = inToken[i] == NTLM_TYPE1_MESSAGE_START[i];
 			}
 
-			if (ntlm) {
+			if (ntlmDetected) {
 				logger.warn(sm.getString("spnegoAuthenticator.ntlmNotSupported"));
-				sendUnauthorizedHeader(response,
-						sm.getString("spnegoAuthenticator.ntlmNotSupported.responseMessage"));
+
+				sendUnauthorized(response, SUPPORTED_SCHEMES,
+						"spnegoAuthenticator.ntlmNotSupported.responseMessage");
 				return false;
 			}
 		}
@@ -191,8 +190,7 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 			} catch (LoginException e) {
 				logger.error(sm.getString("spnegoAuthenticator.obtainFailed"), e);
 
-				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-						sm.getString("spnegoAuthenticator.obtainFailed"));
+				sendInternalServerError(response, "spnegoAuthenticator.obtainFailed");
 				return false;
 			}
 
@@ -210,14 +208,12 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 			} catch (PrivilegedActionException e) {
 				logger.error(sm.getString("spnegoAuthenticator.obtainFailed"), e.getException());
 
-				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-						sm.getString("spnegoAuthenticator.obtainFailed"));
+				sendInternalServerError(response, "spnegoAuthenticator.obtainFailed");
 				return false;
 			} catch (GSSException e) {
 				logger.error(sm.getString("spnegoAuthenticator.createContextFailed"), e);
 
-				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-						sm.getString("spnegoAuthenticator.createContextFailed"));
+				sendInternalServerError(response, "spnegoAuthenticator.createContextFailed");
 				return false;
 			}
 
@@ -226,8 +222,8 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 			} catch (GSSException e) {
 				logger.warn(sm.getString("spnegoAuthenticator.invalidToken", authorizationValue), e);
 
-				sendUnauthorizedHeader(response,
-						sm.getString("spnegoAuthenticator.invalidToken.responseMessage"));
+				sendUnauthorized(response, SUPPORTED_SCHEMES,
+						"spnegoAuthenticator.invalidToken.responseMessage");
 				return false;
 			}
 
@@ -240,10 +236,8 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 					if (logger.isDebugEnabled())
 						logger.debug(sm.getString("spnegoAuthenticator.continueContextNeeded"));
 
-					response.setHeader("WWW-Authenticate",
-							NEGOTIATE_AUTH_SCHEME + " " + Base64.encode(outToken));
-					response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
-							sm.getString("spnegoAuthenticator.continueContextNeeded"));
+					sendUnauthorizedToken(response, NEGOTIATE_AUTH_SCHEME, outToken,
+							"spnegoAuthenticator.continueContextNeeded");
 					return false;
 				} else {
 					GssAwareRealmBase<?> realm = (GssAwareRealmBase<?>) context.getRealm();
@@ -262,8 +256,8 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 					principal = realm.authenticate(srcName, negotiatedMech, delegatedCredential);
 
 					if(principal == null) {
-						sendUnauthorizedHeader(response,
-								sm.getString("authenticator.userNotFound", srcName));
+						sendUnauthorized(response, SUPPORTED_SCHEMES, "authenticator.userNotFound",
+								srcName);
 						return false;
 					}
 				}
@@ -271,8 +265,7 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 			} catch (GSSException e) {
 				logger.error(sm.getString("spnegoAuthenticator.inquireFailed"), e);
 
-				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-						sm.getString("spnegoAuthenticator.inquireFailed"));
+				sendInternalServerError(response, "spnegoAuthenticator.inquireFailed");
 				return false;
 			}
 

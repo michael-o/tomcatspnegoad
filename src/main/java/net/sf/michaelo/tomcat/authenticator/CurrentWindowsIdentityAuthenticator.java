@@ -23,7 +23,6 @@ import java.security.PrivilegedExceptionAction;
 import javax.security.auth.Subject;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
-import javax.servlet.http.HttpServletResponse;
 
 import net.sf.michaelo.tomcat.realm.GssAwareRealmBase;
 
@@ -50,6 +49,9 @@ import org.ietf.jgss.GSSName;
 public class CurrentWindowsIdentityAuthenticator extends GssAwareAuthenticatorBase {
 
 	protected static final String CURRENT_WINDOWS_IDENTITY_METHOD = "CURRENT_WINDOWS_IDENTITY";
+	protected static final String CURRENT_WINDOWS_IDENTITY_AUTH_SCHEME = "CWI";
+
+	protected static final String[] SUPPORTED_SCHEMES = { CURRENT_WINDOWS_IDENTITY_AUTH_SCHEME };
 
 	@Override
 	public String getInfo() {
@@ -95,8 +97,7 @@ public class CurrentWindowsIdentityAuthenticator extends GssAwareAuthenticatorBa
 			} catch (LoginException e) {
 				logger.error(sm.getString("cwiAuthenticator.obtainFailed"), e);
 
-				response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
-						sm.getString("cwiAuthenticator.obtainFailed"));
+				sendUnauthorized(response, SUPPORTED_SCHEMES, "cwiAuthenticator.obtainFailed");
 				return false;
 			}
 
@@ -116,8 +117,7 @@ public class CurrentWindowsIdentityAuthenticator extends GssAwareAuthenticatorBa
 			} catch (PrivilegedActionException e) {
 				logger.error(sm.getString("cwiAuthenticator.obtainFailed"), e.getException());
 
-				response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
-						sm.getString("cwiAuthenticator.obtainFailed"));
+				sendUnauthorized(response, SUPPORTED_SCHEMES, "cwiAuthenticator.obtainFailed");
 				return false;
 			}
 
@@ -128,15 +128,13 @@ public class CurrentWindowsIdentityAuthenticator extends GssAwareAuthenticatorBa
 				principal = realm.authenticate(srcName, KRB5_MECHANISM, gssCredential);
 
 				if(principal == null) {
-					response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
-							sm.getString("authenticator.userNotFound", srcName));
+					sendUnauthorized(response, SUPPORTED_SCHEMES, "authenticator.userNotFound");
 					return false;
 				}
 			} catch (GSSException e) {
 				logger.error(sm.getString("cwiAuthenticator.inquireFailed"), e);
 
-				response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
-						sm.getString("cwiAuthenticator.inquireFailed"));
+				sendInternalServerError(response, "cwiAuthenticator.inquireFailed");
 				return false;
 			}
 

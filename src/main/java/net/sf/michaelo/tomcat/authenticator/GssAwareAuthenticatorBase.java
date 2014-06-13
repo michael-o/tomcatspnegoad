@@ -15,8 +15,14 @@
  */
 package net.sf.michaelo.tomcat.authenticator;
 
+import java.io.IOException;
+
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.catalina.authenticator.AuthenticatorBase;
+import org.apache.catalina.connector.Response;
 import org.apache.catalina.util.StringManager;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 import org.ietf.jgss.GSSException;
@@ -68,6 +74,34 @@ abstract class GssAwareAuthenticatorBase extends AuthenticatorBase {
 	 */
 	public String getLoginEntryName() {
 		return loginEntryName;
+	}
+
+	protected void respondErrorMessage(Response response, int statusCode, String messageKey,
+			Object... params) throws IOException {
+		String message = null;
+
+		if (StringUtils.isNotEmpty(messageKey))
+			message = sm.getString(messageKey, params);
+
+		response.sendError(statusCode, message);
+	}
+
+	protected void sendInternalServerError(Response response, String messageKey, Object... params)
+			throws IOException {
+		respondErrorMessage(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, messageKey,
+				params);
+	}
+
+	protected void sendUnauthorized(Response response, String[] schemes) throws IOException {
+		sendUnauthorized(response, schemes, null);
+	}
+
+	protected void sendUnauthorized(Response response, String[] schemes, String messageKey,
+			Object... params) throws IOException {
+		for (String scheme : schemes)
+			response.addHeader("WWW-Authenticate", scheme);
+
+		respondErrorMessage(response, HttpServletResponse.SC_UNAUTHORIZED, messageKey, params);
 	}
 
 }
