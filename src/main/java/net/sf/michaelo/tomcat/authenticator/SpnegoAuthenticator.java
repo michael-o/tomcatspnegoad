@@ -65,7 +65,7 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 	protected static final String SPNEGO_METHOD = "SPNEGO";
 	protected static final String NEGOTIATE_AUTH_SCHEME = "Negotiate";
 
-	private static final byte[] NTLM_TYPE1_TOKEN_START = { (byte) 'N', (byte) 'T', (byte) 'L',
+	private static final byte[] NTLM_TYPE1_MESSAGE_START = { (byte) 'N', (byte) 'T', (byte) 'L',
 			(byte) 'M', (byte) 'S', (byte) 'S', (byte) 'P', (byte) '\0', (byte) 0x01, (byte) 0x00,
 			(byte) 0x00, (byte) 0x00 };
 
@@ -167,10 +167,10 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 			return false;
 		}
 
-		if (inToken.length >= NTLM_TYPE1_TOKEN_START.length) {
+		if (inToken.length >= NTLM_TYPE1_MESSAGE_START.length) {
 			boolean ntlm = false;
-			for (int i = 0; i < NTLM_TYPE1_TOKEN_START.length; i++) {
-				ntlm = inToken[i] == NTLM_TYPE1_TOKEN_START[i];
+			for (int i = 0; i < NTLM_TYPE1_MESSAGE_START.length; i++) {
+				ntlm = inToken[i] == NTLM_TYPE1_MESSAGE_START[i];
 			}
 
 			if (ntlm) {
@@ -262,7 +262,7 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 					principal = realm.authenticate(srcName, negotiatedMech, delegatedCredential);
 
 					if(principal == null) {
-						response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
+						sendUnauthorizedHeader(response,
 								sm.getString("authenticator.userNotFound", srcName));
 						return false;
 					}
