@@ -56,6 +56,7 @@ abstract class GssAwareAuthenticatorBase extends AuthenticatorBase {
 	}
 
 	private String loginEntryName;
+	private boolean omitErrorMessages;
 
 	/**
 	 * Sets the login entry name which establishes the security context.
@@ -76,14 +77,38 @@ abstract class GssAwareAuthenticatorBase extends AuthenticatorBase {
 		return loginEntryName;
 	}
 
+	/**
+	 * Indicates whether error messages are responded to the client.
+	 *
+	 * @return indicator for error message omission
+	 */
+	public boolean isOmitErrorMessages() {
+		return omitErrorMessages;
+	}
+
+	/**
+	 * Sets whether error messages are responded to the client.
+	 *
+	 * @param omitErrorMessages
+	 *            indicator to error omit messages
+	 */
+	public void setOmitErrorMessages(boolean omitMessages) {
+		this.omitErrorMessages = omitMessages;
+	}
+
 	protected void respondErrorMessage(Response response, int statusCode, String messageKey,
 			Object... params) throws IOException {
-		String message = null;
 
-		if (StringUtils.isNotEmpty(messageKey))
-			message = sm.getString(messageKey, params);
+		if(omitErrorMessages) {
+			response.setStatus(statusCode);
+		} else {
+			String message = null;
 
-		response.sendError(statusCode, message);
+			if (StringUtils.isNotEmpty(messageKey))
+				message = sm.getString(messageKey, params);
+
+			response.sendError(statusCode, message);
+		}
 	}
 
 	protected void sendInternalServerError(Response response, String messageKey, Object... params)
