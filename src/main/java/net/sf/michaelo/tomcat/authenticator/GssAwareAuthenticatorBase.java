@@ -100,7 +100,7 @@ abstract class GssAwareAuthenticatorBase extends AuthenticatorBase {
 			Object... params) throws IOException {
 
 		if(omitErrorMessages) {
-			response.setStatus(statusCode);
+			response.sendError(statusCode);
 		} else {
 			String message = null;
 
