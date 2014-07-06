@@ -20,6 +20,7 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.catalina.authenticator.AuthenticatorBase;
+import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.Response;
 import org.apache.catalina.util.StringManager;
 import org.apache.commons.lang3.StringUtils;
@@ -57,6 +58,7 @@ abstract class GssAwareAuthenticatorBase extends AuthenticatorBase {
 
 	private String loginEntryName;
 	private boolean omitErrorMessages;
+	private boolean errorMessagesAsHeaders;
 
 	/**
 	 * Sets the login entry name which establishes the security context.
@@ -92,41 +94,94 @@ abstract class GssAwareAuthenticatorBase extends AuthenticatorBase {
 	 * @param omitErrorMessages
 	 *            indicator to error omit messages
 	 */
-	public void setOmitErrorMessages(boolean omitMessages) {
-		this.omitErrorMessages = omitMessages;
+	public void setOmitErrorMessages(boolean omitErrorMessages) {
+		this.omitErrorMessages = omitErrorMessages;
 	}
 
-	protected void respondErrorMessage(Response response, int statusCode, String messageKey,
-			Object... params) throws IOException {
+	/**
+	 * Indicates whether error messages will be responded as headers if the request contains a
+	 * 'X-Requested-With' header.
+	 *
+	 * @return indicates whether error messages will be responded as headers
+	 */
+	public boolean isErrorMessagesAsHeaders() {
+		return errorMessagesAsHeaders;
+	}
 
-		if(omitErrorMessages) {
-			response.sendError(statusCode);
-		} else {
-			String message = null;
+	/**
+	 * Sets whether error messages will be returned as headers if the request contains a
+	 * {@code X-Requested-With} header.
+	 *
+	 * <p>
+	 * It is not always desired or necessary to produce an error page, e.g., non-human clients do
+	 * not analyze it anyway but have to consume the response (wasted time and resources). When a
+	 * client issues a request and sets the {@code X-Requested-With} header with a non-empty value,
+	 * the server will write the error messages to two headers: {@code Auth-Error} and
+	 * {@code Server-Error}.
+	 * </p>
+	 *
+	 * <p>
+	 * Technically speaking, {@link HttpServletResponse#setStatus(int)} will be called instead of
+	 * {@link HttpServletResponse#sendError(int, String)}.
+	 * </p>
+	 *
+	 * @param errorMessagesAsHeaders
+	 *            indicates whether error messages will be responded as headers
+	 */
+	public void setErrorMessagesAsHeaders(boolean errorMessagesAsHeaders) {
+		this.errorMessagesAsHeaders = errorMessagesAsHeaders;
+	}
 
-			if (StringUtils.isNotEmpty(messageKey))
-				message = sm.getString(messageKey, params);
+	protected void respondErrorMessage(Request request, Response response, int statusCode,
+			String messageKey, Object... params) throws IOException {
 
+		String message = null;
+		if(!omitErrorMessages && StringUtils.isNotEmpty(messageKey))
+			message = sm.getString(messageKey, params);
+
+		String xRequestedWith = request.getHeader("X-Requested-With");
+		if (errorMessagesAsHeaders && StringUtils.isNotEmpty(xRequestedWith)) {
+			if (StringUtils.isNotEmpty(message)) {
+				String headerName;
+				switch (statusCode) {
+				case HttpServletResponse.SC_UNAUTHORIZED:
+					headerName = "Auth-Error";
+					break;
+				case HttpServletResponse.SC_INTERNAL_SERVER_ERROR:
+					headerName = "Server-Error";
+					break;
+				default:
+					throw new IllegalArgumentException(String.format(
+							"Status code %d not supported", statusCode));
+				}
+
+				response.setHeader(headerName, message);
+			}
+
+			response.setStatus(statusCode);
+		} else
 			response.sendError(statusCode, message);
-		}
+
 	}
 
-	protected void sendInternalServerError(Response response, String messageKey, Object... params)
-			throws IOException {
-		respondErrorMessage(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, messageKey,
-				params);
-	}
-
-	protected void sendUnauthorized(Response response, String[] schemes) throws IOException {
-		sendUnauthorized(response, schemes, null);
-	}
-
-	protected void sendUnauthorized(Response response, String[] schemes, String messageKey,
+	protected void sendInternalServerError(Request request, Response response, String messageKey,
 			Object... params) throws IOException {
+		respondErrorMessage(request, response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+				messageKey, params);
+	}
+
+	protected void sendUnauthorized(Request request, Response response, String[] schemes)
+			throws IOException {
+		sendUnauthorized(request, response, schemes, null);
+	}
+
+	protected void sendUnauthorized(Request request, Response response, String[] schemes,
+			String messageKey, Object... params) throws IOException {
 		for (String scheme : schemes)
 			response.addHeader("WWW-Authenticate", scheme);
 
-		respondErrorMessage(response, HttpServletResponse.SC_UNAUTHORIZED, messageKey, params);
+		respondErrorMessage(request, response, HttpServletResponse.SC_UNAUTHORIZED, messageKey,
+				params);
 	}
 
 }

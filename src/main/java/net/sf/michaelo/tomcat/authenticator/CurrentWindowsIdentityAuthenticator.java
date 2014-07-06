@@ -97,7 +97,8 @@ public class CurrentWindowsIdentityAuthenticator extends GssAwareAuthenticatorBa
 			} catch (LoginException e) {
 				logger.error(sm.getString("cwiAuthenticator.obtainFailed"), e);
 
-				sendUnauthorized(response, SUPPORTED_SCHEMES, "cwiAuthenticator.obtainFailed");
+				sendUnauthorized(request, response, SUPPORTED_SCHEMES,
+						"cwiAuthenticator.obtainFailed");
 				return false;
 			}
 
@@ -117,7 +118,8 @@ public class CurrentWindowsIdentityAuthenticator extends GssAwareAuthenticatorBa
 			} catch (PrivilegedActionException e) {
 				logger.error(sm.getString("cwiAuthenticator.obtainFailed"), e.getException());
 
-				sendUnauthorized(response, SUPPORTED_SCHEMES, "cwiAuthenticator.obtainFailed");
+				sendUnauthorized(request, response, SUPPORTED_SCHEMES,
+						"cwiAuthenticator.obtainFailed");
 				return false;
 			}
 
@@ -127,14 +129,15 @@ public class CurrentWindowsIdentityAuthenticator extends GssAwareAuthenticatorBa
 
 				principal = realm.authenticate(srcName, KRB5_MECHANISM, gssCredential);
 
-				if(principal == null) {
-					sendUnauthorized(response, SUPPORTED_SCHEMES, "authenticator.userNotFound");
+				if (principal == null) {
+					sendUnauthorized(request, response, SUPPORTED_SCHEMES,
+							"authenticator.userNotFound");
 					return false;
 				}
 			} catch (GSSException e) {
 				logger.error(sm.getString("cwiAuthenticator.inquireFailed"), e);
 
-				sendInternalServerError(response, "cwiAuthenticator.inquireFailed");
+				sendInternalServerError(request, response, "cwiAuthenticator.inquireFailed");
 				return false;
 			}
 
