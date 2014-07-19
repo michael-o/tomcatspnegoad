@@ -47,7 +47,7 @@ Download ${project.name}
   If you rather prefer building from source you either have to check out a working
   copy from the project's public {{{./source-repository.html}Subversion}} repository,
   or download a source tarball from the
-  {{{http://sourceforge.net/projects/tomcatspnegoad/files/${project.version}}SourceForge Files}} directory.
+  {{{http://sourceforge.net/projects/tomcatspnegoad/files/${project.version}}SourceForge.net Files}} directory.
 
   After you have obtained the source code, navigate to the source code directory
   and type <<<mvn install>>>. Prior to that, make sure that you have at least Maven
