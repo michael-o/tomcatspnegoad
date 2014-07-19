@@ -108,7 +108,7 @@
 		<dependency>
 			<groupId>net.sf.michael-o.dirctxsrc</groupId>
 			<artifactId>dircontextsource</artifactId>
-			<version>0.10.4</version>
+			<version>1.0</version>
 		</dependency>
 	</dependencies>
 
