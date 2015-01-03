@@ -1,5 +1,5 @@
 This directory contains release files of the ${project.name}
-project which is licensed under the Apache Software License, Version 2.0.
+project which is licensed under the Apache License, Version 2.0.
 
 The provided files are:
   - ${project.artifactId}-${project.version}-src.(zip|tar.gz):
