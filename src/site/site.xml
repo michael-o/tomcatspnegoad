@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-   Copyright 2013–2014 Michael Osipov
+   Copyright 2013–2015 Michael Osipov
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -16,7 +16,8 @@
 -->
 <project xmlns="http://maven.apache.org/DECORATION/1.4.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/DECORATION/1.4.0 http://maven.apache.org/xsd/decoration-1.4.0.xsd">
+	xsi:schemaLocation="http://maven.apache.org/DECORATION/1.4.0
+						http://maven.apache.org/xsd/decoration-1.4.0.xsd">
 
 	<body>
 		<menu name="${project.name}">
