@@ -295,7 +295,7 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 					NEGOTIATE_AUTH_SCHEME + " " + Base64.encode(outToken));
 			// Connection must be closed due to
 			// https://issues.apache.org/bugzilla/show_bug.cgi?id=54076
-			response.addHeader("Connection", "close");
+			response.setHeader("Connection", "close");
 		}
 
 		return true;
