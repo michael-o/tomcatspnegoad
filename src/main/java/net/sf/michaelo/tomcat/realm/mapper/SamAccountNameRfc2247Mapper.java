@@ -61,7 +61,7 @@ public class SamAccountNameRfc2247Mapper extends SamAccountNameMapper {
 
 		Name realmComponentName;
 		for (String realmComponent : realmComponents) {
-			realmComponentName = parser.parse("DC=" + realmComponent.toLowerCase(Locale.ENGLISH));
+			realmComponentName = parser.parse("DC=" + realmComponent.toLowerCase(Locale.ROOT));
 			searchBaseName.addAll(realmComponentName);
 		}
 
