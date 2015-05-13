@@ -218,6 +218,7 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 
 		Attribute memberOfAttr = result.getAttributes().get("memberOf");
 
+		// TODO Rather return DNs than strings
 		List<String> roles = new LinkedList<String>();
 
 		if (memberOfAttr != null && memberOfAttr.size() > 0) {
@@ -245,6 +246,7 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 		if (logger.isTraceEnabled())
 			logger.trace(sm.getString("activeDirectoryRealm.retrievingRoles", user.getGssName()));
 
+		// TODO retrieve the implicit (unique) UPN rather than the common name for an Actice Directory group
 		for (String role : user.getRoles()) {
 			role = StringUtils.substringBetween(role, "CN=", ",");
 			if (strippableRoleNamePrefixes != null) {
