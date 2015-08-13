@@ -18,9 +18,11 @@ package net.sf.michaelo.tomcat.realm;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 
 import javax.naming.CompositeName;
 import javax.naming.InvalidNameException;
@@ -29,10 +31,12 @@ import javax.naming.NameParser;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.directory.Attribute;
+import javax.naming.directory.Attributes;
 import javax.naming.directory.DirContext;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 import javax.naming.ldap.LdapName;
+import javax.naming.ldap.Rdn;
 
 import net.sf.michaelo.dirctxsrc.DirContextSource;
 import net.sf.michaelo.tomcat.realm.mapper.SamAccountNameRfc2247Mapper;
@@ -57,8 +61,6 @@ import org.ietf.jgss.Oid;
  * will be retrieved.</li>
  * <li>{@code localResource}: Whether this resource is locally configured in the {@code context.xml}
  * or globally configured in the {@code server.xml} (optional). Default value is {@code false}.</li>
- * <li>{@code strippableRoleNamePrefixes}: Role name prefixes (comma-separated) which can be
- * stripped during retrieval (optional).</li>
  * </ul>
  * </p>
  * <p>
@@ -71,8 +73,6 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 	private static final UsernameSearchMapper[] USERNAME_SEARCH_MAPPERS = {
 			new SamAccountNameRfc2247Mapper(), new UserPrincipalNameSearchMapper() };
 
-	private String[] strippableRoleNamePrefixes;
-
 	@Override
 	public String getInfo() {
 		return "net.sf.michaelo.tomcat.realm.ActiveDirectoryRealm/1.1";
@@ -81,16 +81,6 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 	@Override
 	protected String getName() {
 		return "ActiveDirectoryRealm";
-	}
-
-	/**
-	 * Sets the role name prefixed which can be stripped during retrieval.
-	 *
-	 * @param prefixes
-	 *            the strippable role name prefixes
-	 */
-	public void setStrippableRoleNamePrefixes(String prefixes) {
-		this.strippableRoleNamePrefixes = StringUtils.split(prefixes, ",");
 	}
 
 	@Override
@@ -117,11 +107,10 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 		Principal principal = null;
 		try {
 			User user = getUser(context, gssName);
-			List<String> roles = null;
-			if (user != null)
-				roles = getRoles(user);
 
 			if (user != null) {
+				List<String> roles = getRoles(context, user);
+
 				principal = new ActiveDirectoryPrincipal(gssName, mech, user.getSid(),
 						user.getDn(), delegatedCredential, roles);
 			}
@@ -230,40 +219,45 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 		return new User(gssName, sid, dn, roles);
 	}
 
-	/**
-	 * Retrieves the roles for a specific user from Active Directory. The roles will be stored by
-	 * the common name (CN) only.
-	 *
-	 * @param user
-	 *            the user for role retrievement
-	 * @return roles list for the given pricipal
-	 */
-	protected List<String> getRoles(User user) throws NamingException {
+	protected List<String> getRoles(DirContext context, User user) throws NamingException {
 
 		List<String> roles = new LinkedList<String>();
 
 		if (logger.isTraceEnabled())
 			logger.trace(sm.getString("activeDirectoryRealm.retrievingRoles", user.getGssName()));
 
-		// TODO retrieve the implicit (unique) UPN rather than the common name for an Actice Directory group
 		for (String role : user.getRoles()) {
-			role = StringUtils.substringBetween(role, "CN=", ",");
-			if (strippableRoleNamePrefixes != null) {
-				for (String prefix : strippableRoleNamePrefixes) {
-					if (role.startsWith(prefix))
-						roles.add(StringUtils.substringAfter(role, prefix));
-					else
-						roles.add(role);
-				}
-			} else
-				roles.add(role);
+			String roleRdn = getRelativeName(context, role);
+
+			Attributes roleAttributes = context.getAttributes(roleRdn, new String[] { "sAMAccountName" });
+			String samAccountName = (String) roleAttributes.get("sAMAccountName").get();
+
+			NameParser parser = context.getNameParser(StringUtils.EMPTY);
+			LdapName roleDn = (LdapName) parser.parse(role);
+
+			List<String> realmComponents = new ArrayList<String>();
+			for (Rdn rdn : roleDn.getRdns()) {
+				if (rdn.getType().equals("DC"))
+					realmComponents.add(0, ((String) rdn.getValue()).toUpperCase(Locale.ROOT));
+				else
+					break;
+			}
+
+			String realm = StringUtils.join(realmComponents, '.');
+
+			String principal = String.format("%s@%s", samAccountName, realm);
+			roles.add(principal);
+
+			if (logger.isTraceEnabled())
+				logger.trace(sm.getString("activeDirectoryRealm.foundRoleConverted", roleDn,
+						principal));
 		}
 
 		if (logger.isDebugEnabled())
 			logger.debug(sm.getString("activeDirectoryRealm.foundRolesCount", roles.size(),
 					user.getGssName()));
 		if (logger.isTraceEnabled())
-			logger.debug(sm.getString("activeDirectoryRealm.foundRoles", user.getGssName(), roles));
+			logger.trace(sm.getString("activeDirectoryRealm.foundRoles", user.getGssName(), roles));
 
 		return roles;
 	}
@@ -311,8 +305,8 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 				Name name = parser.parse(pathComponent.substring(1));
 				return (LdapName) name;
 			} catch (URISyntaxException e) {
-				throw new InvalidNameException(sm.getString(
-						"activeDirectoryRealm.unparseableName", absoluteName));
+				throw new InvalidNameException(sm.getString("activeDirectoryRealm.unparseableName",
+						absoluteName));
 			}
 		}
 	}
