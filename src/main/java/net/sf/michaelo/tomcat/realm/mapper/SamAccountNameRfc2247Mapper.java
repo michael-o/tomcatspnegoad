@@ -48,7 +48,7 @@ public class SamAccountNameRfc2247Mapper extends SamAccountNameMapper {
 	public synchronized MappedValues map(DirContext context, GSSName gssName)
 			throws NamingException {
 
-		String searchUsername = StringUtils.substringBefore(gssName.toString(), "@");
+		String samAccountName = StringUtils.substringBefore(gssName.toString(), "@");
 		String realm = StringUtils.substringAfter(gssName.toString(), "@");
 		String searchBase = StringUtils.EMPTY;
 
@@ -65,7 +65,7 @@ public class SamAccountNameRfc2247Mapper extends SamAccountNameMapper {
 
 		searchBase = searchBaseName.toString();
 
-		return new SamAccountNameMappedValues(searchBase, searchUsername);
+		return new SamAccountNameMappedValues(searchBase, samAccountName);
 
 	}
 }
