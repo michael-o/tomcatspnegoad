@@ -24,8 +24,6 @@ import javax.naming.directory.DirContext;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.juli.logging.Log;
-import org.apache.juli.logging.LogFactory;
 import org.ietf.jgss.GSSName;
 
 /**
