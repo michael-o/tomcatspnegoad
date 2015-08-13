@@ -139,8 +139,8 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 			return false;
 		}
 
-		String authorizationValue = StringUtils
-				.substring(authorization, NEGOTIATE_AUTH_SCHEME.length() + 1);
+		String authorizationValue = StringUtils.substring(authorization,
+				NEGOTIATE_AUTH_SCHEME.length() + 1);
 
 		if (StringUtils.isEmpty(authorizationValue)) {
 			sendUnauthorized(request, response, SUPPORTED_SCHEMES);
@@ -169,7 +169,7 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 			for (int i = 0; i < NTLM_TYPE1_MESSAGE_START.length; i++) {
 				ntlmDetected = (inToken[i] == NTLM_TYPE1_MESSAGE_START[i]);
 
-				if(!ntlmDetected)
+				if (!ntlmDetected)
 					break;
 			}
 
@@ -231,18 +231,7 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 			}
 
 			try {
-				/*
-				 * This might not work anyway because Tomcat does not support connection-level
-				 * authentication. One actually has to cache the GSSContext in a HTTP session.
-				 */
-				if (!gssContext.isEstablished()) {
-					if (logger.isDebugEnabled())
-						logger.debug(sm.getString("spnegoAuthenticator.continueContextNeeded"));
-
-					sendUnauthorizedToken(request, response, NEGOTIATE_AUTH_SCHEME, outToken,
-							"spnegoAuthenticator.continueContextNeeded");
-					return false;
-				} else {
+				if (gssContext.isEstablished()) {
 					GssAwareRealmBase<?> realm = (GssAwareRealmBase<?>) context.getRealm();
 					GSSName srcName = gssContext.getSrcName();
 					Oid negotiatedMech = gssContext.getMech();
@@ -263,6 +252,12 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 								"authenticator.userNotFound", srcName);
 						return false;
 					}
+				} else {
+					logger.error(sm.getString("spnegoAuthenticator.continueContextNotSupported"));
+
+					sendInternalServerError(request, response,
+							"spnegoAuthenticator.continueContextNotSupported.responseMessage");
+					return false;
 				}
 
 			} catch (GSSException e) {
