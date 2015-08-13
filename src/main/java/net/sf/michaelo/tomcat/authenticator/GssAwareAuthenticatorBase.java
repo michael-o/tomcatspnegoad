@@ -136,8 +136,7 @@ abstract class GssAwareAuthenticatorBase extends AuthenticatorBase {
 		if(!omitErrorMessages && StringUtils.isNotEmpty(messageKey))
 			message = sm.getString(messageKey, params);
 
-		String xRequestedWith = request.getHeader("X-Requested-With");
-		if (errorMessagesAsHeaders && StringUtils.isNotEmpty(xRequestedWith)) {
+		if (errorMessagesAsHeaders) {
 			if (StringUtils.isNotEmpty(message)) {
 				String headerName;
 				switch (statusCode) {
