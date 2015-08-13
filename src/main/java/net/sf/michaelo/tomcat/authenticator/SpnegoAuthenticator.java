@@ -286,9 +286,11 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 
 		register(request, response, principal, SPNEGO_METHOD, principal.getName(), null);
 		if (ArrayUtils.isNotEmpty(outToken)) {
+			// TODO Log that respond with a token here
 			// Send response token if there is one
 			response.setHeader("WWW-Authenticate",
 					NEGOTIATE_AUTH_SCHEME + " " + Base64.encode(outToken));
+			// TODO Remove that, the client has to handle this cleanly
 			// Connection must be closed due to
 			// https://issues.apache.org/bugzilla/show_bug.cgi?id=54076
 			response.setHeader("Connection", "close");
