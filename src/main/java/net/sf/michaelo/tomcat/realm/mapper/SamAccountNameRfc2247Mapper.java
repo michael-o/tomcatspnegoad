@@ -47,8 +47,6 @@ import org.ietf.jgss.GSSName;
  */
 public class SamAccountNameRfc2247Mapper extends SamAccountNameMapper {
 
-	private static final Log logger = LogFactory.getLog(SamAccountNameRfc2247Mapper.class);
-
 	public synchronized MappedValues map(DirContext context, GSSName gssName)
 			throws NamingException {
 
@@ -56,9 +54,6 @@ public class SamAccountNameRfc2247Mapper extends SamAccountNameMapper {
 		String searchUsername = StringUtils.substringBefore(gssName.toString(), "@");
 		String realm = StringUtils.substringAfter(gssName.toString(), "@");
 		String searchBase = StringUtils.EMPTY;
-
-		if (logger.isTraceEnabled())
-			logger.trace(String.format("Retrieving DN for realm '%s'", realm));
 
 		String[] realmComponents = StringUtils.split(realm, '.');
 		ArrayUtils.reverse(realmComponents);

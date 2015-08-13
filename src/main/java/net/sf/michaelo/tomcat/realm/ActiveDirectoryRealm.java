@@ -75,7 +75,7 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 
 	@Override
 	public String getInfo() {
-		return "net.sf.michaelo.tomcat.realm.ActiveDirectoryRealm/1.0";
+		return "net.sf.michaelo.tomcat.realm.ActiveDirectoryRealm/1.1";
 	}
 
 	@Override
@@ -218,7 +218,6 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 
 		Attribute memberOfAttr = result.getAttributes().get("memberOf");
 
-		// TODO Rather return DNs than strings
 		List<String> roles = new LinkedList<String>();
 
 		if (memberOfAttr != null && memberOfAttr.size() > 0) {

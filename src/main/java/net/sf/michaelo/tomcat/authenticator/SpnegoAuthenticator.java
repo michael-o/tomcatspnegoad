@@ -47,8 +47,8 @@ import org.ietf.jgss.Oid;
  * This authenticator has the following configuration options:
  * <ul>
  * <li>{@code loginEntryName}: Login entry name with a configured {@code Krb5LoginModule}.</li>
- * <li>{@code storeDelegatedCredential}: Store the client's/initiator's delegated credential in the
- * user principal (optional). Valid values are {@code true}, {@code false}. Default value is
+ * <li>{@code storeDelegatedCredential}: Store the client's (initiator's) delegated credential in
+ * the user principal (optional). Valid values are {@code true}, {@code false}. Default value is
  * {@code false}.</li>
  * </ul>
  * </p>
@@ -89,7 +89,7 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 
 	@Override
 	public String getInfo() {
-		return "net.sf.michaelo.tomcat.authenticator.SpnegoAuthenticator/1.0";
+		return "net.sf.michaelo.tomcat.authenticator.SpnegoAuthenticator/1.1";
 	}
 
 	protected void sendUnauthorizedToken(Request request, Response response, String scheme,

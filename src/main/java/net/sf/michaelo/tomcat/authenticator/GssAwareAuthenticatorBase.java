@@ -30,7 +30,7 @@ import org.ietf.jgss.GSSException;
 import org.ietf.jgss.Oid;
 
 /**
- * Base authenticator for GSS-based authenticators, which holds the login entry name.
+ * Base implementation for GSS-based authenticators which holds common configuration information.
  *
  * @version $Id$
  */
@@ -99,8 +99,7 @@ abstract class GssAwareAuthenticatorBase extends AuthenticatorBase {
 	}
 
 	/**
-	 * Indicates whether error messages will be responded as headers if the request contains a
-	 * 'X-Requested-With' header.
+	 * Indicates whether error messages will be responded as headers.
 	 *
 	 * @return indicates whether error messages will be responded as headers
 	 */
@@ -109,15 +108,13 @@ abstract class GssAwareAuthenticatorBase extends AuthenticatorBase {
 	}
 
 	/**
-	 * Sets whether error messages will be returned as headers if the request contains a
-	 * {@code X-Requested-With} header.
+	 * Sets whether error messages will be returned as headers.
 	 *
 	 * <p>
 	 * It is not always desired or necessary to produce an error page, e.g., non-human clients do
 	 * not analyze it anyway but have to consume the response (wasted time and resources). When a
-	 * client issues a request and sets the {@code X-Requested-With} header with a non-empty value,
-	 * the server will write the error messages to two headers: {@code Auth-Error} and
-	 * {@code Server-Error}.
+	 * client issues a request, the server will write the error messages to either one header:
+	 * {@code Auth-Error} or {@code Server-Error}.
 	 * </p>
 	 *
 	 * <p>

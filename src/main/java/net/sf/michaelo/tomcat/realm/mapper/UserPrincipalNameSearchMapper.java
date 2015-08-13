@@ -23,10 +23,10 @@ import org.ietf.jgss.GSSName;
 
 /**
  * A mapper for the AD attribute {@code userPrincipalName}. This mapper maps the GSS name to the AD
- * attribute {@code userPrincipalName} which by default contains the iUPN unless it's modified. No
- * assumption is made about the root DN set in the given context, so you can narrow down your search
- * base if you like.
- *
+ * attribute {@code userPrincipalName} which by default contains the implicit UPN unless it's
+ * overwritten by the explicit (enterprise) UPN. No assumption is made about the root DN set in the
+ * given context, so you can narrow down your search base if you like.
+ * 
  * @version $Id$
  */
 public class UserPrincipalNameSearchMapper implements UsernameSearchMapper {
@@ -60,7 +60,6 @@ public class UserPrincipalNameSearchMapper implements UsernameSearchMapper {
 			throws NamingException {
 
 		return new UserPrincipalNameMappedValues(gssName.toString());
-
 	}
 
 }

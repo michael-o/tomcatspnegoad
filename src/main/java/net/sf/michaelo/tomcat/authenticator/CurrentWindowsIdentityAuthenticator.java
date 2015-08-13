@@ -36,7 +36,7 @@ import org.ietf.jgss.GSSManager;
 import org.ietf.jgss.GSSName;
 
 /**
- * Windows Identitiy Authenticator which uses GSS-API to retrieve to currently logged in user.
+ * Windows Identity Authenticator which uses GSS-API to retrieve to currently logged in user.
  * <p>
  * This authenticator has the following configuration options:
  * <ul>
@@ -55,7 +55,7 @@ public class CurrentWindowsIdentityAuthenticator extends GssAwareAuthenticatorBa
 
 	@Override
 	public String getInfo() {
-		return "net.sf.michaelo.tomcat.authenticator.CurrentWindowsIdentityAuthenticator/1.0";
+		return "net.sf.michaelo.tomcat.authenticator.CurrentWindowsIdentityAuthenticator/1.1";
 	}
 
 	@Override
