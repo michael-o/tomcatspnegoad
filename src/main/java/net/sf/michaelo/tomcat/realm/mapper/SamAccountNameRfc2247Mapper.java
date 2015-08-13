@@ -48,7 +48,6 @@ public class SamAccountNameRfc2247Mapper extends SamAccountNameMapper {
 	public synchronized MappedValues map(DirContext context, GSSName gssName)
 			throws NamingException {
 
-		// TODO Maybe use a Kerberos principal to extract components?
 		String searchUsername = StringUtils.substringBefore(gssName.toString(), "@");
 		String realm = StringUtils.substringAfter(gssName.toString(), "@");
 		String searchBase = StringUtils.EMPTY;
