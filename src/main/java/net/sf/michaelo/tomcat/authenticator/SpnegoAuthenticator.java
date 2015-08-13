@@ -139,10 +139,8 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 			return false;
 		}
 
-		// FIXME Substring is case-sensitive
 		String authorizationValue = StringUtils
-				.substringAfter(authorization, NEGOTIATE_AUTH_SCHEME);
-		authorizationValue = StringUtils.trim(authorizationValue);
+				.substring(authorization, NEGOTIATE_AUTH_SCHEME.length() + 1);
 
 		if (StringUtils.isEmpty(authorizationValue)) {
 			sendUnauthorized(request, response, SUPPORTED_SCHEMES);
