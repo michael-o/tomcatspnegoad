@@ -167,7 +167,10 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 		if (inToken.length >= NTLM_TYPE1_MESSAGE_START.length) {
 			boolean ntlmDetected = false;
 			for (int i = 0; i < NTLM_TYPE1_MESSAGE_START.length; i++) {
-				ntlmDetected = inToken[i] == NTLM_TYPE1_MESSAGE_START[i];
+				ntlmDetected = (inToken[i] == NTLM_TYPE1_MESSAGE_START[i]);
+
+				if(!ntlmDetected)
+					break;
 			}
 
 			if (ntlmDetected) {
