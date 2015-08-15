@@ -232,6 +232,9 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 
 			try {
 				if (gssContext.isEstablished()) {
+					if (logger.isDebugEnabled())
+						logger.debug(sm.getString("spnegoAuthenticator.contextSuccessfullyEstablished"));
+
 					GssAwareRealmBase<?> realm = (GssAwareRealmBase<?>) context.getRealm();
 					GSSName srcName = gssContext.getSrcName();
 					Oid negotiatedMech = gssContext.getMech();
