@@ -294,10 +294,6 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 
 			response.setHeader("WWW-Authenticate",
 					NEGOTIATE_AUTH_SCHEME + " " + authenticationValue);
-			// TODO Remove that, the client has to handle this cleanly
-			// Connection must be closed due to
-			// https://issues.apache.org/bugzilla/show_bug.cgi?id=54076
-			response.setHeader("Connection", "close");
 		}
 
 		return true;
