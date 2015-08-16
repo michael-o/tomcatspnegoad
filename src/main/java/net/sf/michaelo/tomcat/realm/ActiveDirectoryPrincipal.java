@@ -36,8 +36,8 @@ import org.ietf.jgss.Oid;
  * <li>the security identifier (SID),</li>
  * <li>the distinguished name (DN) in the forest,</li>
  * <li>an optional GSS credential for credential delegation (impersonation),</li>
- * <li>and the list of roles ({@code memberOf}) the user has been assigned to. Only the common name
- * (CN) is stored.
+ * <li>and the list of roles ({@code memberOf}) the user has been assigned to, converted to a user
+ * principal name.
  * </ul>
  * </p>
  *
@@ -98,7 +98,7 @@ public class ActiveDirectoryPrincipal implements Principal {
 	}
 
 	/**
-	 * Return the security identifier (SID) of the principal.
+	 * Returns the security identifier (SID) of the principal.
 	 *
 	 * @return the
 	 */
@@ -139,6 +139,11 @@ public class ActiveDirectoryPrincipal implements Principal {
 		if (role.equals("*"))
 			return true;
 		return roles.contains(role);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return gssName.equals(obj);
 	}
 
 	@Override

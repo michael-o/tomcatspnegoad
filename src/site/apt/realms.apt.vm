@@ -19,16 +19,16 @@
                             ----------------------
                                     Realms
                             ----------------------
-                               Michael Osipov
+                                Michael Osipov
                             ----------------------
-                                 2013-08-04
+                                  2013-08-04
                             ----------------------
 
 #set($ellipsis = $esc.unicode('\u2026'))
 
 Choosing and Using Realms
 
-  After the authenticator has established a user's identity, it's time to search for him/her. Usually,
+  After the authenticator has established a user's identity, it's time to search for it. Usually,
   the {{{The_Active_Directory_Realm}<<<ActiveDirectoryRealm>>>}} will do but for testing purposes you
   will find the {{{Using_a_Realm_for_Testing_Purposes}<<<GssAwareUserDatabaseRealm>>>}} very handy.
 
@@ -39,8 +39,8 @@ Choosing and Using Realms
 * The Active Directory Realm
 
   The {{{./apidocs/net/sf/michaelo/tomcat/realm/ActiveDirectoryRealm.html}<<<ActiveDirectoryRealm>>>}}
-  will query your Active Directory for a user by his/her mechanism-specific name ({{{http://msdn.microsoft.com/en-us/library/windows/desktop/aa380525%28v=vs.85%29.aspx#user_principal_name}UPN}})
-  and retrieve all the necessary information, e.g. his/her roles (common name (CN) only).
+  will query your Active Directory for a user by his/her {{{http://msdn.microsoft.com/en-us/library/windows/desktop/aa380525%28v=vs.85%29.aspx#user_principal_name}UPN}}
+  and retrieve all the necessary information, e.g., his/her roles.
 
   It requires two steps of setup: First, you will need to configure a <<<DirContextSourceFactory>>>
   with the parameters of your Active Direcory. Second, the realm itself pointing to that Active Directory.
@@ -96,7 +96,7 @@ Choosing and Using Realms
   and roles to test your application.
 
   Follow the Tomcat documentation and configure a <<<users.xml>>> file with the according resource
-  declaration. Type in the UPNs and groups but leave the password out.
+  declaration. Type in the user and group principals but leave the password out.
 
   Open or create your app's <<<context.xml>>> and add:
 

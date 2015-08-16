@@ -57,6 +57,7 @@ import org.ietf.jgss.Oid;
  *
  * <p>
  * Following options can be configured:
+ * <ul>
  * <li>{@code resourceName}: The name of the {@link DirContextSource} in JNDI with which principals
  * will be retrieved.</li>
  * <li>{@code localResource}: Whether this resource is locally configured in the {@code context.xml}

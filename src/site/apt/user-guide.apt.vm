@@ -42,7 +42,7 @@ User Guide
   This site will guide you through the components of this library:
 
   [[1]] {{{./authenticators.html}Authenticators}}: an authenticator challenges a client to present
-        the necessary security token to verify its identity.
+        the necessary authentication token to prove its identity.
 
   [[2]] {{{./realms.html}Realms}}: a realm looks up the roles and other data of a user in the
         Active Directory or any other user repository.

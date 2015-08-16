@@ -23,7 +23,6 @@ import java.security.PrivilegedExceptionAction;
 import javax.security.auth.Subject;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
-import javax.servlet.http.HttpServletResponse;
 
 import net.sf.michaelo.tomcat.realm.GssAwareRealmBase;
 import net.sf.michaelo.tomcat.utils.Base64;
@@ -63,9 +62,9 @@ import org.ietf.jgss.Oid;
 public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 
 	protected static final String SPNEGO_METHOD = "SPNEGO";
-	protected static final String NEGOTIATE_AUTH_SCHEME = "Negotiate";
+	protected static final String SPNEGO_AUTH_SCHEME = "Negotiate";
 
-	protected static final String[] SUPPORTED_SCHEMES = { NEGOTIATE_AUTH_SCHEME };
+	protected static final String[] SUPPORTED_SCHEMES = { SPNEGO_AUTH_SCHEME };
 
 	private static final byte[] NTLM_TYPE1_MESSAGE_START = { (byte) 'N', (byte) 'T', (byte) 'L',
 			(byte) 'M', (byte) 'S', (byte) 'S', (byte) 'P', (byte) '\0', (byte) 0x01, (byte) 0x00,
@@ -74,7 +73,7 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 	protected boolean storeDelegatedCredential;
 
 	/**
-	 * Sets the storage of client's/initiator's delegated credential in the user principal.
+	 * Sets whether client's (initiator's) delegated credential is stored in the user principal.
 	 *
 	 * @param storeDelegatedCredential
 	 *            the store delegated credential indication
@@ -90,13 +89,6 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 	@Override
 	public String getInfo() {
 		return "net.sf.michaelo.tomcat.authenticator.SpnegoAuthenticator/1.1";
-	}
-
-	protected void sendUnauthorizedToken(Request request, Response response, String scheme,
-			byte[] token, String messageKey, Object... params) throws IOException {
-		response.setHeader("WWW-Authenticate", scheme + " " + Base64.encode(token));
-		respondErrorMessage(request, response, HttpServletResponse.SC_UNAUTHORIZED, messageKey,
-				params);
 	}
 
 	@Override
@@ -134,13 +126,13 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 
 		String authorization = request.getHeader("Authorization");
 
-		if (!StringUtils.startsWithIgnoreCase(authorization, NEGOTIATE_AUTH_SCHEME)) {
+		if (!StringUtils.startsWithIgnoreCase(authorization, SPNEGO_AUTH_SCHEME)) {
 			sendUnauthorized(request, response, SUPPORTED_SCHEMES);
 			return false;
 		}
 
 		String authorizationValue = StringUtils.substring(authorization,
-				NEGOTIATE_AUTH_SCHEME.length() + 1);
+				SPNEGO_AUTH_SCHEME.length() + 1);
 
 		if (StringUtils.isEmpty(authorizationValue)) {
 			sendUnauthorized(request, response, SUPPORTED_SCHEMES);
@@ -167,7 +159,7 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 		if (inToken.length >= NTLM_TYPE1_MESSAGE_START.length) {
 			boolean ntlmDetected = false;
 			for (int i = 0; i < NTLM_TYPE1_MESSAGE_START.length; i++) {
-				ntlmDetected = (inToken[i] == NTLM_TYPE1_MESSAGE_START[i]);
+				ntlmDetected = inToken[i] == NTLM_TYPE1_MESSAGE_START[i];
 
 				if (!ntlmDetected)
 					break;
@@ -296,7 +288,7 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 				logger.debug(sm.getString("spnegoAuthenticator.respondingWithToken", authenticationValue));
 
 			response.setHeader("WWW-Authenticate",
-					NEGOTIATE_AUTH_SCHEME + " " + authenticationValue);
+					SPNEGO_AUTH_SCHEME + " " + authenticationValue);
 		}
 
 		return true;

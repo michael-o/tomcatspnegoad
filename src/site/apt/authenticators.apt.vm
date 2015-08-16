@@ -17,11 +17,11 @@
 ## $Id$
 
                             ----------------------
-                                 Authenticators
+                                Authenticators
                             ----------------------
-                               Michael Osipov
+                                Michael Osipov
                             ----------------------
-                                 2013-08-03
+                                  2013-08-03
                             ----------------------
 
 #set($ellipsis = $esc.unicode('\u2026'))
@@ -36,8 +36,8 @@ Choosing and Using Authenticators
 
   The {{{./apidocs/net/sf/michaelo/tomcat/authenticator/SpnegoAuthenticator.html}<<<SpnegoAuthenticator>>>}}
   challenges the client to perform {{{http://tools.ietf.org/html/rfc4559}SPNEGO}} authentication. In
-  turn the server accepts a GSS context by validating a security token and responds with a proper
-  token to the client.
+  turn the server accepts a GSS context by validating an authentication token and responds with a
+  proper token to the client.
 
     [Attention] Though SPNEGO is intended to negotiate a mechanism, the Oracle JVM currently supports
                 Kerberos 5 only and not NTLM additionally due to its proprietary nature. Anyway, it
@@ -87,10 +87,10 @@ Choosing and Using Authenticators
 </Context>
 +----------------------------
 
-  Provide the login entry name from your <<<login.conf>>> configured for your user account capable of
-  initiating GSS contexts with SPNEGO/Kerberos.
+  Provide the login entry name from your <<<login.conf>>> configured for your user account capable
+  of initiating GSS contexts with SPNEGO/Kerberos.
 
-    [Warning] Do not use this in production. This has been crated for the ease of development and
+    [Warning] Do not use this in production. This has been created for the ease of development and
               testing purposes only.
 
   Now you have successfully configured the <<<CurrentWindowsIdentityAuthenticator>>> in your webapp.

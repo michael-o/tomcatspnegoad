@@ -19,9 +19,9 @@
                             ----------------------
                                    Download
                             ----------------------
-                               Michael Osipov
+                                Michael Osipov
                             ----------------------
-                                 2013-08-03
+                                  2013-08-03
                             ----------------------
 
 #macro(property $property)${project.properties.get($property)}#end

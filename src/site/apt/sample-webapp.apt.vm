@@ -29,12 +29,12 @@
 Sample Webapp
 
   It is quite easy to test your setup now.
-  
+
 * Prerequisites
 
   Create a Servlet 2.5 compatible webapp project with a method of your choice, .e.g., Maven archetype
   or Eclipse project wizard. Configure the resources (authenticator and realm).
-  
+
 * Modifying the Deployment Descriptor (<<<web.xml>>>)
 
   Let's now add some security constraints to your sample webapp. Open the app's <<<web.xml>>> and add:
@@ -60,7 +60,7 @@ Sample Webapp
     </web-resource-collection>
     <auth-constraint>
       <!-- Every user in the $AD_GROUP can view this specific page -->
-      <!-- Replace $AD_GROUP with a CN of a group you are actually a member of -->
+      <!-- Replace $AD_GROUP with a UPN of a group you are actually a member of -->
       <role-name>$AD_GROUP</role-name>
     </auth-constraint>
   </security-constraint>
@@ -109,7 +109,7 @@ Hello ${pageContext.request.remoteUser}, you should not see this!
 * Packaging and Deployment
 
   Now package your webapp and deploy it to your remote Tomcat instance.
-  
+
 * Verification
 
   Open every single URL with a properly configured client like IE, Firefox, Chrome or even
@@ -119,4 +119,3 @@ Hello ${pageContext.request.remoteUser}, you should not see this!
   <<<specific.jsp>>>: HTTP/1.1 403 Forbidden <<or>> HTTP/1.1 200 OK, depending whether a user is
   in the specific group, it should be a response or an error page.\
   <<<bogus.jsp>>>: HTTP/1.1 403 Forbidden, every user should see an error page.
-  
