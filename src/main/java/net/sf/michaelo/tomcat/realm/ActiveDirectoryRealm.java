@@ -45,8 +45,6 @@ import net.sf.michaelo.tomcat.realm.mapper.UsernameSearchMapper;
 import net.sf.michaelo.tomcat.realm.mapper.UsernameSearchMapper.MappedValues;
 import net.sf.michaelo.tomcat.utils.LdapUtils;
 
-import org.apache.catalina.util.HexUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSName;
@@ -200,11 +198,11 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 		}
 
 		LdapName dn = getDistinguishedName(context, searchBase, result);
-		byte[] sid = (byte[]) result.getAttributes().get("objectSid;binary").get();
+		byte[] sidBytes = (byte[]) result.getAttributes().get("objectSid;binary").get();
+		Sid sid = new Sid(sidBytes);
 
 		if (logger.isDebugEnabled())
-			logger.debug(sm.getString("activeDirectoryRealm.userFound", gssName, dn,
-					HexUtils.convert(sid)));
+			logger.debug(sm.getString("activeDirectoryRealm.userFound", gssName, dn, sid));
 
 		Attribute memberOfAttr = result.getAttributes().get("memberOf");
 
@@ -351,13 +349,13 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 
 	protected static class User {
 		private final GSSName gssName;
-		private final byte[] sid;
+		private final Sid sid;
 		private final LdapName dn;
 		private final List<String> roles;
 
-		public User(GSSName gssName, byte[] sid, LdapName dn, List<String> roles) {
+		public User(GSSName gssName, Sid sid, LdapName dn, List<String> roles) {
 			this.gssName = gssName;
-			this.sid = ArrayUtils.clone(sid);
+			this.sid = sid;
 			this.dn = (LdapName) dn.clone();
 
 			if (roles == null || roles.isEmpty())
@@ -370,8 +368,8 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 			return gssName;
 		}
 
-		public byte[] getSid() {
-			return ArrayUtils.clone(sid);
+		public Sid getSid() {
+			return sid;
 		}
 
 		public LdapName getDn() {

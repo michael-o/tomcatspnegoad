@@ -21,7 +21,6 @@ import java.util.List;
 
 import javax.naming.ldap.LdapName;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSName;
 import org.ietf.jgss.Oid;
@@ -47,7 +46,7 @@ public class ActiveDirectoryPrincipal implements Principal {
 
 	private GSSName gssName;
 	private Oid mech;
-	private byte[] sid;
+	private Sid sid;
 	private LdapName dn;
 	private GSSCredential gssCredential;
 	private List<String> roles;
@@ -64,11 +63,11 @@ public class ActiveDirectoryPrincipal implements Principal {
 	 * @param roles
 	 *            the roles retrieved from Active Directory
 	 */
-	public ActiveDirectoryPrincipal(GSSName gssName, Oid mech, byte[] sid, LdapName dn,
+	public ActiveDirectoryPrincipal(GSSName gssName, Oid mech, Sid sid, LdapName dn,
 			GSSCredential gssCredential, List<String> roles) {
 		this.gssName = gssName;
 		this.mech = mech;
-		this.sid = ArrayUtils.clone(sid);
+		this.sid = sid;
 		this.dn = (LdapName) dn.clone();
 		this.gssCredential = gssCredential;
 		this.roles = Collections.unmodifiableList(roles);
@@ -102,8 +101,8 @@ public class ActiveDirectoryPrincipal implements Principal {
 	 *
 	 * @return the
 	 */
-	public byte[] getSid() {
-		return ArrayUtils.clone(sid);
+	public Sid getSid() {
+		return sid;
 	}
 
 	/**
