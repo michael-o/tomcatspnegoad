@@ -239,11 +239,12 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 			List<String> realmComponents = new ArrayList<String>();
 			for (Rdn rdn : roleDn.getRdns()) {
 				if (rdn.getType().equals("DC"))
-					realmComponents.add(0, ((String) rdn.getValue()).toUpperCase(Locale.ROOT));
+					realmComponents.add(((String) rdn.getValue()).toUpperCase(Locale.ROOT));
 				else
 					break;
 			}
 
+			Collections.reverse(realmComponents);
 			String realm = StringUtils.join(realmComponents, '.');
 
 			String principal = String.format("%s@%s", samAccountName, realm);
