@@ -35,7 +35,7 @@ import org.ietf.jgss.Oid;
  * <li>the security identifier (SID),</li>
  * <li>the distinguished name (DN) in the forest,</li>
  * <li>an optional GSS credential for credential delegation (impersonation),</li>
- * <li>and the list of roles ({@code memberOf}) the user has been assigned to, converted to a user
+ * <li>and the list of roles ({@code memberOf}) the user has been assigned to, converted to a
  * principal name.
  * </ul>
  * </p>
