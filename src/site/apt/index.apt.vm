@@ -43,5 +43,5 @@ About ${project.name}
   into Apache Tomcat 7 and onwards. Though, this project covers much more than an authenticator and
   works even with Apache Tomcat 6 too.
 
-  This library have served me very well for many years and still does a great job in a complex
+  This library has served me very well for many years and still does a great job in a complex
   multi-realm environment, hopefully it will do for you too.

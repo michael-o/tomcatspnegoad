@@ -60,7 +60,7 @@ Sample Webapp
     </web-resource-collection>
     <auth-constraint>
       <!-- Every user in the $AD_GROUP can view this specific page -->
-      <!-- Replace $AD_GROUP with a UPN of a group you are actually a member of -->
+      <!-- Replace $AD_GROUP with a principal name of a group you are actually a member of -->
       <role-name>$AD_GROUP</role-name>
     </auth-constraint>
   </security-constraint>
