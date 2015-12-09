@@ -83,7 +83,7 @@ public class ActiveDirectoryPrincipal implements Principal {
 	 *
 	 * @return the underlying GSS name
 	 */
-	public GSSName getGssName() {
+	public GSSName getGSSName() {
 		return gssName;
 	}
 
