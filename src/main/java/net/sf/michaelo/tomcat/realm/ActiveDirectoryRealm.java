@@ -18,11 +18,9 @@ package net.sf.michaelo.tomcat.realm;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.Principal;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Locale;
 
 import javax.naming.CompositeName;
 import javax.naming.InvalidNameException;
@@ -36,7 +34,6 @@ import javax.naming.directory.DirContext;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 import javax.naming.ldap.LdapName;
-import javax.naming.ldap.Rdn;
 
 import net.sf.michaelo.dirctxsrc.DirContextSource;
 import net.sf.michaelo.tomcat.realm.mapper.SamAccountNameRfc2247Mapper;
@@ -228,29 +225,23 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 		for (String role : user.getRoles()) {
 			String roleRdn = getRelativeName(context, role);
 
-			Attributes roleAttributes = context.getAttributes(roleRdn, new String[] { "sAMAccountName" });
-			String samAccountName = (String) roleAttributes.get("sAMAccountName").get();
+			Attributes roleAttributes = context.getAttributes(roleRdn, new String[] { "objectSid;binary", "sIDHistory;binary" });
+			byte[] objectSidBytes = (byte[]) roleAttributes.get("objectSid;binary").get();
 
-			NameParser parser = context.getNameParser(StringUtils.EMPTY);
-			LdapName roleDn = (LdapName) parser.parse(role);
+			roles.add(new Sid(objectSidBytes).toString());
 
-			List<String> realmComponents = new ArrayList<String>();
-			for (Rdn rdn : roleDn.getRdns()) {
-				if (rdn.getType().equals("DC"))
-					realmComponents.add(((String) rdn.getValue()).toUpperCase(Locale.ROOT));
-				else
-					break;
+			Attribute sidHistory = roleAttributes.get("sIDHistory;binary");
+			if(sidHistory != null) {
+				NamingEnumeration<?> sidHistoryEnumeration = sidHistory.getAll();
+				while(sidHistoryEnumeration.hasMore()) {
+					byte[] sidHistoryBytes = (byte[]) sidHistoryEnumeration.next();
+					roles.add(new Sid(sidHistoryBytes).toString());
+				}
 			}
-
-			Collections.reverse(realmComponents);
-			String realm = StringUtils.join(realmComponents, '.');
-
-			String principal = String.format("%s@%s", samAccountName, realm);
-			roles.add(principal);
-
+			/*
 			if (logger.isTraceEnabled())
 				logger.trace(sm.getString("activeDirectoryRealm.foundRoleConverted", roleDn,
-						principal));
+						principal));*/
 		}
 
 		if (logger.isDebugEnabled())
