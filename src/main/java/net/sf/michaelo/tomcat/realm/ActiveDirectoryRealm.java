@@ -225,23 +225,34 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 		for (String role : user.getRoles()) {
 			String roleRdn = getRelativeName(context, role);
 
-			Attributes roleAttributes = context.getAttributes(roleRdn, new String[] { "objectSid;binary", "sIDHistory;binary" });
+			Attributes roleAttributes = context.getAttributes(roleRdn, new String[] {
+					"objectSid;binary", "sIDHistory;binary" });
 			byte[] objectSidBytes = (byte[]) roleAttributes.get("objectSid;binary").get();
 
-			roles.add(new Sid(objectSidBytes).toString());
+			String sidString = new Sid(objectSidBytes).toString();
 
 			Attribute sidHistory = roleAttributes.get("sIDHistory;binary");
-			if(sidHistory != null) {
+			List<String> sidHistoryStrings = new LinkedList<String>();
+			if (sidHistory != null) {
 				NamingEnumeration<?> sidHistoryEnumeration = sidHistory.getAll();
-				while(sidHistoryEnumeration.hasMore()) {
+				while (sidHistoryEnumeration.hasMore()) {
 					byte[] sidHistoryBytes = (byte[]) sidHistoryEnumeration.next();
-					roles.add(new Sid(sidHistoryBytes).toString());
+					sidHistoryStrings.add(new Sid(sidHistoryBytes).toString());
 				}
 			}
-			/*
-			if (logger.isTraceEnabled())
-				logger.trace(sm.getString("activeDirectoryRealm.foundRoleConverted", roleDn,
-						principal));*/
+
+			roles.add(sidString);
+			roles.addAll(sidHistoryStrings);
+
+			if (logger.isTraceEnabled()) {
+				if (sidHistoryStrings.isEmpty())
+					logger.trace(sm.getString("activeDirectoryRealm.foundRoleConverted", role,
+							sidString));
+				else
+					logger.trace(sm.getString(
+							"activeDirectoryRealm.foundRoleConverted.withSidHistory", role,
+							sidString, sidHistoryStrings));
+			}
 		}
 
 		if (logger.isDebugEnabled())
