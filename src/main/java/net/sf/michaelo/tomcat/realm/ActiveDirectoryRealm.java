@@ -60,6 +60,9 @@ import org.ietf.jgss.Oid;
  * </ul>
  * </p>
  * <p>
+ * By default the SIDs ({@code objectSid} and {@code sIDHistory}) of the Active Directory groups
+ * will be retreived.
+ * </p>
  *
  * @see ActiveDirectoryPrincipal
  * @version $Id$
@@ -108,7 +111,7 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 				List<String> roles = getRoles(context, user);
 
 				principal = new ActiveDirectoryPrincipal(gssName, mech, user.getSid(),
-						user.getDn(), delegatedCredential, roles);
+						delegatedCredential, roles);
 			}
 
 		} catch (NamingException e) {
@@ -213,7 +216,7 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 				roles.add((String) memberOfValues.next());
 		}
 
-		return new User(gssName, sid, dn, roles);
+		return new User(gssName, sid, roles);
 	}
 
 	protected List<String> getRoles(DirContext context, User user) throws NamingException {
@@ -353,13 +356,11 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 	protected static class User {
 		private final GSSName gssName;
 		private final Sid sid;
-		private final LdapName dn;
 		private final List<String> roles;
 
-		public User(GSSName gssName, Sid sid, LdapName dn, List<String> roles) {
+		public User(GSSName gssName, Sid sid, List<String> roles) {
 			this.gssName = gssName;
 			this.sid = sid;
-			this.dn = (LdapName) dn.clone();
 
 			if (roles == null || roles.isEmpty())
 				this.roles = Collections.emptyList();
@@ -373,10 +374,6 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 
 		public Sid getSid() {
 			return sid;
-		}
-
-		public LdapName getDn() {
-			return (LdapName) dn.clone();
 		}
 
 		public List<String> getRoles() {
