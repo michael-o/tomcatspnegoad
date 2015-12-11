@@ -21,7 +21,6 @@ import java.util.List;
 
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSName;
-import org.ietf.jgss.Oid;
 
 /**
  * Represents a principal from Active Directory with a list of roles.
@@ -29,7 +28,6 @@ import org.ietf.jgss.Oid;
  * An Active Directory principal is comprised of the following items:
  * <ul>
  * <li>the GSS name,</li>
- * <li>the mechanism OID with which the authentication has been performed,</li>
  * <li>the security identifier (SID),</li>
  * <li>an optional GSS credential for credential delegation (impersonation),</li>
  * <li>and the list of roles the user has been assigned to (derived from {@code memberOf}).
@@ -42,7 +40,6 @@ import org.ietf.jgss.Oid;
 public class ActiveDirectoryPrincipal implements Principal {
 
 	private GSSName gssName;
-	private Oid mech;
 	private Sid sid;
 	private GSSCredential gssCredential;
 	private List<String> roles;
@@ -52,15 +49,11 @@ public class ActiveDirectoryPrincipal implements Principal {
 	 *
 	 * @param gssName
 	 *            the underlying GSS name
-	 * @param mech
-	 *            the underlying (negotiated) mechanism OID of the authentication
 	 * @param roles
 	 *            the roles retrieved from Active Directory
 	 */
-	public ActiveDirectoryPrincipal(GSSName gssName, Oid mech, Sid sid, GSSCredential gssCredential,
-			List<String> roles) {
+	public ActiveDirectoryPrincipal(GSSName gssName, Sid sid, GSSCredential gssCredential, List<String> roles) {
 		this.gssName = gssName;
-		this.mech = mech;
 		this.sid = sid;
 		this.gssCredential = gssCredential;
 		this.roles = Collections.unmodifiableList(roles);
@@ -78,15 +71,6 @@ public class ActiveDirectoryPrincipal implements Principal {
 	 */
 	public GSSName getGSSName() {
 		return gssName;
-	}
-
-	/**
-	 * Returns the underlying (negotiated) mechanism OID of the authentication.
-	 *
-	 * @return the underlying (negotiated) mechanism OID of the authentication
-	 */
-	public Oid getMech() {
-		return mech;
 	}
 
 	/**

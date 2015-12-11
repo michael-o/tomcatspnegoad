@@ -127,7 +127,7 @@ public class CurrentWindowsIdentityAuthenticator extends GssAwareAuthenticatorBa
 				GssAwareRealmBase<?> realm = (GssAwareRealmBase<?>) context.getRealm();
 				GSSName srcName = gssCredential.getName();
 
-				principal = realm.authenticate(srcName, KRB5_MECHANISM, gssCredential);
+				principal = realm.authenticate(srcName, gssCredential);
 
 				if (principal == null) {
 					sendUnauthorized(request, response, SUPPORTED_SCHEMES,

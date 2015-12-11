@@ -38,7 +38,6 @@ import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
 import org.ietf.jgss.GSSManager;
 import org.ietf.jgss.GSSName;
-import org.ietf.jgss.Oid;
 
 /**
  * A SPNEGO Authenticator which utilizes GSS-API to authenticate a client.
@@ -229,7 +228,6 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 
 					GssAwareRealmBase<?> realm = (GssAwareRealmBase<?>) context.getRealm();
 					GSSName srcName = gssContext.getSrcName();
-					Oid negotiatedMech = gssContext.getMech();
 
 					GSSCredential delegatedCredential = null;
 					if (storeDelegatedCredential) {
@@ -240,7 +238,7 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 									srcName));
 					}
 
-					principal = realm.authenticate(srcName, negotiatedMech, delegatedCredential);
+					principal = realm.authenticate(srcName, delegatedCredential);
 
 					if (principal == null) {
 						sendUnauthorized(request, response, SUPPORTED_SCHEMES,

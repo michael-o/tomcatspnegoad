@@ -30,7 +30,6 @@ import org.apache.naming.ContextBindings;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
 import org.ietf.jgss.GSSName;
-import org.ietf.jgss.Oid;
 
 /**
  * Base realm which is able to retrieve principals from {@link GSSName GSS names}.
@@ -69,16 +68,13 @@ public abstract class GssAwareRealmBase<T> extends RealmBase {
 	 *
 	 * @param gssName
 	 *            the GSS name of the context initiator (client)
-	 * @param mech
-	 *            the used (negotiated) GSS mechanism of this context
 	 * @param delegatedCredential
 	 *            an eventually available delegated GSS credential
 	 * @return the retrieved principal
 	 * @throws RuntimeException
 	 *             wraps {@link GSSException} and {@link NamingException}
 	 */
-	abstract public Principal authenticate(GSSName gssName, Oid mech,
-			GSSCredential delegatedCredential);
+	abstract public Principal authenticate(GSSName gssName, GSSCredential delegatedCredential);
 
 	/*
 	 * Must be accessed like this due to

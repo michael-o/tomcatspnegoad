@@ -30,7 +30,6 @@ import org.apache.catalina.realm.GenericPrincipal;
 import org.apache.catalina.realm.UserDatabaseRealm;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSName;
-import org.ietf.jgss.Oid;
 
 /**
  * A GSS-aware {@link UserDatabaseRealm}.
@@ -50,7 +49,7 @@ public class GssAwareUserDatabaseRealm extends GssAwareRealmBase<UserDatabase> {
 	}
 
 	@Override
-	public Principal authenticate(GSSName gssName, Oid mech, GSSCredential delegatedCredential) {
+	public Principal authenticate(GSSName gssName, GSSCredential delegatedCredential) {
 
 		UserDatabase database = null;
 

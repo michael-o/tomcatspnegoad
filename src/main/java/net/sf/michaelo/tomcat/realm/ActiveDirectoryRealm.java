@@ -45,7 +45,6 @@ import net.sf.michaelo.tomcat.utils.LdapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSName;
-import org.ietf.jgss.Oid;
 
 /**
  * A realm which retrieves authenticated users from Active Directory.
@@ -83,7 +82,7 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 	}
 
 	@Override
-	public Principal authenticate(GSSName gssName, Oid mech, GSSCredential delegatedCredential) {
+	public Principal authenticate(GSSName gssName, GSSCredential delegatedCredential) {
 
 		DirContextSource dirContextSource = null;
 		try {
@@ -110,8 +109,8 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 			if (user != null) {
 				List<String> roles = getRoles(context, user);
 
-				principal = new ActiveDirectoryPrincipal(gssName, mech, user.getSid(),
-						delegatedCredential, roles);
+				principal = new ActiveDirectoryPrincipal(gssName, user.getSid(), delegatedCredential,
+						roles);
 			}
 
 		} catch (NamingException e) {
@@ -149,6 +148,7 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 		SearchControls searchCtls = new SearchControls();
 		searchCtls.setSearchScope(SearchControls.SUBTREE_SCOPE);
 		searchCtls.setReturningAttributes(new String[] { "memberOf", "objectSid;binary" });
+
 		// Query for user and machine accounts only
 		String searchFilterPattern = "(&(|(sAMAccountType=805306368)(sAMAccountType=805306369))(%s={0}))";
 
