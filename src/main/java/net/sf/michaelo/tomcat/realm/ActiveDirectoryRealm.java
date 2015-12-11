@@ -146,7 +146,8 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 		SearchControls searchCtls = new SearchControls();
 		searchCtls.setSearchScope(SearchControls.SUBTREE_SCOPE);
 		searchCtls.setReturningAttributes(new String[] { "memberOf", "objectSid;binary" });
-		String searchFilterPattern = "(&(objectClass=user)(%s={0})(!(userAccountControl:1.2.840.113556.1.4.803:=2)))";
+		// Query for user and machine accounts only
+		String searchFilterPattern = "(&(|(sAMAccountType=805306368)(sAMAccountType=805306369))(%s={0}))";
 
 		String searchFilter;
 		String searchBase = null;
