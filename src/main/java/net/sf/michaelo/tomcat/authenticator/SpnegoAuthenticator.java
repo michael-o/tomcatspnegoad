@@ -87,7 +87,7 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 
 	@Override
 	public String getInfo() {
-		return "net.sf.michaelo.tomcat.authenticator.SpnegoAuthenticator/1.1";
+		return "net.sf.michaelo.tomcat.authenticator.SpnegoAuthenticator/2.0";
 	}
 
 	@Override

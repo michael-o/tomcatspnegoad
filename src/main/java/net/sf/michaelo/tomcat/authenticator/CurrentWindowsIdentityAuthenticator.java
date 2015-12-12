@@ -55,7 +55,7 @@ public class CurrentWindowsIdentityAuthenticator extends GssAwareAuthenticatorBa
 
 	@Override
 	public String getInfo() {
-		return "net.sf.michaelo.tomcat.authenticator.CurrentWindowsIdentityAuthenticator/1.1";
+		return "net.sf.michaelo.tomcat.authenticator.CurrentWindowsIdentityAuthenticator/2.0";
 	}
 
 	@Override
