@@ -42,6 +42,7 @@ import net.sf.michaelo.tomcat.realm.mapper.UsernameSearchMapper;
 import net.sf.michaelo.tomcat.realm.mapper.UsernameSearchMapper.MappedValues;
 import net.sf.michaelo.tomcat.utils.LdapUtils;
 
+import org.apache.catalina.Context;
 import org.apache.commons.lang3.StringUtils;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSName;
@@ -131,7 +132,13 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 			return false;
 
 		ActiveDirectoryPrincipal adp = (ActiveDirectoryPrincipal) principal;
-		boolean result = adp.hasRole(role);
+
+		boolean result;
+		if(container instanceof Context) {
+			Context context = (Context) container;
+			result = adp.hasRole(context.findRoleMapping(role));
+		} else
+			result = adp.hasRole(role);
 
 		if (logger.isDebugEnabled()) {
 			if (result)
