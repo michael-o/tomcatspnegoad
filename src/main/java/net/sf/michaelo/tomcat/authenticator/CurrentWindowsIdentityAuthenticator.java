@@ -51,8 +51,6 @@ public class CurrentWindowsIdentityAuthenticator extends GssAwareAuthenticatorBa
 	protected static final String CURRENT_WINDOWS_IDENTITY_METHOD = "CURRENT_WINDOWS_IDENTITY";
 	protected static final String CURRENT_WINDOWS_IDENTITY_AUTH_SCHEME = "CWI";
 
-	protected static final String[] SUPPORTED_SCHEMES = { CURRENT_WINDOWS_IDENTITY_AUTH_SCHEME };
-
 	@Override
 	public String getInfo() {
 		return "net.sf.michaelo.tomcat.authenticator.CurrentWindowsIdentityAuthenticator/2.0";
@@ -97,7 +95,7 @@ public class CurrentWindowsIdentityAuthenticator extends GssAwareAuthenticatorBa
 			} catch (LoginException e) {
 				logger.error(sm.getString("cwiAuthenticator.obtainFailed"), e);
 
-				sendUnauthorized(request, response, SUPPORTED_SCHEMES,
+				sendUnauthorized(request, response, CURRENT_WINDOWS_IDENTITY_AUTH_SCHEME,
 						"cwiAuthenticator.obtainFailed");
 				return false;
 			}
@@ -118,7 +116,7 @@ public class CurrentWindowsIdentityAuthenticator extends GssAwareAuthenticatorBa
 			} catch (PrivilegedActionException e) {
 				logger.error(sm.getString("cwiAuthenticator.obtainFailed"), e.getException());
 
-				sendUnauthorized(request, response, SUPPORTED_SCHEMES,
+				sendUnauthorized(request, response, CURRENT_WINDOWS_IDENTITY_AUTH_SCHEME,
 						"cwiAuthenticator.obtainFailed");
 				return false;
 			}
@@ -130,7 +128,7 @@ public class CurrentWindowsIdentityAuthenticator extends GssAwareAuthenticatorBa
 				principal = realm.authenticate(srcName, gssCredential);
 
 				if (principal == null) {
-					sendUnauthorized(request, response, SUPPORTED_SCHEMES,
+					sendUnauthorized(request, response, CURRENT_WINDOWS_IDENTITY_AUTH_SCHEME,
 							"authenticator.userNotFound", srcName);
 					return false;
 				}

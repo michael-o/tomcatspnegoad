@@ -166,15 +166,14 @@ abstract class GssAwareAuthenticatorBase extends AuthenticatorBase {
 				messageKey, params);
 	}
 
-	protected void sendUnauthorized(Request request, Response response, String[] schemes)
+	protected void sendUnauthorized(Request request, Response response, String scheme)
 			throws IOException {
-		sendUnauthorized(request, response, schemes, null);
+		sendUnauthorized(request, response, scheme, null);
 	}
 
-	protected void sendUnauthorized(Request request, Response response, String[] schemes,
+	protected void sendUnauthorized(Request request, Response response, String scheme,
 			String messageKey, Object... params) throws IOException {
-		for (String scheme : schemes)
-			response.addHeader("WWW-Authenticate", scheme);
+		response.addHeader("WWW-Authenticate", scheme);
 
 		respondErrorMessage(request, response, HttpServletResponse.SC_UNAUTHORIZED, messageKey,
 				params);

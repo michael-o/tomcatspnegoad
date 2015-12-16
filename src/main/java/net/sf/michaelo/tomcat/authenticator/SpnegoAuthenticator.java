@@ -63,8 +63,6 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 	protected static final String SPNEGO_METHOD = "SPNEGO";
 	protected static final String SPNEGO_AUTH_SCHEME = "Negotiate";
 
-	protected static final String[] SUPPORTED_SCHEMES = { SPNEGO_AUTH_SCHEME };
-
 	private static final byte[] NTLM_TYPE1_MESSAGE_START = { (byte) 'N', (byte) 'T', (byte) 'L',
 			(byte) 'M', (byte) 'S', (byte) 'S', (byte) 'P', (byte) '\0', (byte) 0x01, (byte) 0x00,
 			(byte) 0x00, (byte) 0x00 };
@@ -126,7 +124,7 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 		String authorization = request.getHeader("Authorization");
 
 		if (!StringUtils.startsWithIgnoreCase(authorization, SPNEGO_AUTH_SCHEME)) {
-			sendUnauthorized(request, response, SUPPORTED_SCHEMES);
+			sendUnauthorized(request, response, SPNEGO_AUTH_SCHEME);
 			return false;
 		}
 
@@ -134,7 +132,7 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 				SPNEGO_AUTH_SCHEME.length() + 1);
 
 		if (StringUtils.isEmpty(authorizationValue)) {
-			sendUnauthorized(request, response, SUPPORTED_SCHEMES);
+			sendUnauthorized(request, response, SPNEGO_AUTH_SCHEME);
 			return false;
 		}
 
@@ -150,7 +148,7 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 			logger.warn(sm.getString("spnegoAuthenticator.incorrectlyEncodedToken",
 					authorizationValue), e);
 
-			sendUnauthorized(request, response, SUPPORTED_SCHEMES,
+			sendUnauthorized(request, response, SPNEGO_AUTH_SCHEME,
 					"spnegoAuthenticator.incorrectlyEncodedToken.responseMessage");
 			return false;
 		}
@@ -167,7 +165,7 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 			if (ntlmDetected) {
 				logger.warn(sm.getString("spnegoAuthenticator.ntlmNotSupported"));
 
-				sendUnauthorized(request, response, SUPPORTED_SCHEMES,
+				sendUnauthorized(request, response, SPNEGO_AUTH_SCHEME,
 						"spnegoAuthenticator.ntlmNotSupported.responseMessage");
 				return false;
 			}
@@ -216,7 +214,7 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 			} catch (GSSException e) {
 				logger.warn(sm.getString("spnegoAuthenticator.invalidToken", authorizationValue), e);
 
-				sendUnauthorized(request, response, SUPPORTED_SCHEMES,
+				sendUnauthorized(request, response, SPNEGO_AUTH_SCHEME,
 						"spnegoAuthenticator.invalidToken.responseMessage");
 				return false;
 			}
@@ -241,7 +239,7 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 					principal = realm.authenticate(srcName, delegatedCredential);
 
 					if (principal == null) {
-						sendUnauthorized(request, response, SUPPORTED_SCHEMES,
+						sendUnauthorized(request, response, SPNEGO_AUTH_SCHEME,
 								"authenticator.userNotFound", srcName);
 						return false;
 					}
