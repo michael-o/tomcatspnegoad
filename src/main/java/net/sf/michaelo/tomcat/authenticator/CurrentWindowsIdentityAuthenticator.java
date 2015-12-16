@@ -131,7 +131,7 @@ public class CurrentWindowsIdentityAuthenticator extends GssAwareAuthenticatorBa
 
 				if (principal == null) {
 					sendUnauthorized(request, response, SUPPORTED_SCHEMES,
-							"authenticator.userNotFound");
+							"authenticator.userNotFound", srcName);
 					return false;
 				}
 			} catch (GSSException e) {
