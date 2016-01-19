@@ -236,10 +236,20 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 		for (String role : user.getRoles()) {
 			String roleRdn = getRelativeName(context, role);
 
-			Attributes roleAttributes = context.getAttributes(roleRdn, new String[] {
+			Attributes roleAttributes = context.getAttributes(roleRdn, new String[] { "groupType",
 					"objectSid;binary", "sIDHistory;binary" });
-			byte[] objectSidBytes = (byte[]) roleAttributes.get("objectSid;binary").get();
 
+			int groupType = Integer.parseInt((String) roleAttributes.get("groupType").get());
+
+			// Skip distribution groups, i.e., we want security-enabled groups only
+			// (ADS_GROUP_TYPE_SECURITY_ENABLED)
+			if ((groupType & Integer.MIN_VALUE) == 0) {
+				if (logger.isTraceEnabled())
+					logger.trace(sm.getString("activeDirectoryRealm.skippingDistributionRole", role));
+				continue;
+			}
+
+			byte[] objectSidBytes = (byte[]) roleAttributes.get("objectSid;binary").get();
 			String sidString = new Sid(objectSidBytes).toString();
 
 			Attribute sidHistory = roleAttributes.get("sIDHistory;binary");
