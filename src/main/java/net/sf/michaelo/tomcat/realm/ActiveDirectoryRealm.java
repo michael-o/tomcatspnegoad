@@ -18,9 +18,12 @@ package net.sf.michaelo.tomcat.realm;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import javax.naming.CompositeName;
 import javax.naming.InvalidNameException;
@@ -43,6 +46,7 @@ import net.sf.michaelo.tomcat.realm.mapper.UsernameSearchMapper.MappedValues;
 import net.sf.michaelo.tomcat.utils.LdapUtils;
 
 import org.apache.catalina.Context;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSName;
@@ -57,6 +61,10 @@ import org.ietf.jgss.GSSName;
  * will be retrieved.</li>
  * <li>{@code localResource}: Whether this resource is locally configured in the {@code context.xml}
  * or globally configured in the {@code server.xml} (optional). Default value is {@code false}.</li>
+ * <li>{@code additionalAttributes}: Comma-separated list of attributes to be retrieved for the
+ * principal. Binary attributes must succeed with {@code ;binary} and will be stored as
+ * {@code byte[]}, ordinary attributes will be stored as {@code String}. If an attribute is multivalued,
+ * it will be stored as {@code List}.</li>
  * </ul>
  * </p>
  * <p>
@@ -72,6 +80,11 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 	private static final UsernameSearchMapper[] USERNAME_SEARCH_MAPPERS = {
 			new SamAccountNameRfc2247Mapper(), new UserPrincipalNameSearchMapper() };
 
+	private static final String[] DEFAULT_ATTRIBUTES = new String[] { "memberOf",
+			"objectSid;binary" };
+
+	private String[] additionalAttributes;
+
 	@Override
 	public String getInfo() {
 		return "net.sf.michaelo.tomcat.realm.ActiveDirectoryRealm/2.0";
@@ -80,6 +93,10 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 	@Override
 	protected String getName() {
 		return "ActiveDirectoryRealm";
+	}
+
+	public void setAdditionalAttributes(String additionalAttributes) {
+		this.additionalAttributes = additionalAttributes.split(",");
 	}
 
 	@Override
@@ -111,7 +128,7 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 				List<String> roles = getRoles(context, user);
 
 				principal = new ActiveDirectoryPrincipal(gssName, user.getSid(), delegatedCredential,
-						roles);
+						roles, user.getAdditionalAttributes());
 			}
 
 		} catch (NamingException e) {
@@ -152,9 +169,14 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 
 	protected User getUser(DirContext context, GSSName gssName) throws NamingException {
 
+		String[] attributes = DEFAULT_ATTRIBUTES;
+
+		if(ArrayUtils.isNotEmpty(additionalAttributes))
+			attributes = ArrayUtils.addAll(DEFAULT_ATTRIBUTES, additionalAttributes);
+
 		SearchControls searchCtls = new SearchControls();
 		searchCtls.setSearchScope(SearchControls.SUBTREE_SCOPE);
-		searchCtls.setReturningAttributes(new String[] { "memberOf", "objectSid;binary" });
+		searchCtls.setReturningAttributes(attributes);
 
 		// Query for user and machine accounts only
 		String searchFilterPattern = "(&(|(sAMAccountType=805306368)(sAMAccountType=805306369))(%s={0}))";
@@ -223,7 +245,30 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 				roles.add((String) memberOfValues.next());
 		}
 
-		return new User(gssName, sid, roles);
+		Map<String, Object> additionalAttributesMap = Collections.emptyMap();
+
+		if(ArrayUtils.isNotEmpty(additionalAttributes)) {
+			additionalAttributesMap = new HashMap<String, Object>();
+
+			for(String addAttr : additionalAttributes) {
+				Attribute attr = result.getAttributes().get(addAttr);
+
+				if(attr != null && attr.size() > 0) {
+					if(attr.size() > 1) {
+						List<Object> attrList = new ArrayList<Object>(attr.size());
+						NamingEnumeration<?> attrEnum = attr.getAll();
+
+						while(attrEnum.hasMore())
+							attrList.add(attrEnum.next());
+
+						additionalAttributesMap.put(addAttr, Collections.unmodifiableList(attrList));
+					} else
+						additionalAttributesMap.put(addAttr, attr.get());
+				}
+			}
+		}
+
+		return new User(gssName, sid, roles, additionalAttributesMap);
 	}
 
 	protected List<String> getRoles(DirContext context, User user) throws NamingException {
@@ -374,15 +419,13 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 		private final GSSName gssName;
 		private final Sid sid;
 		private final List<String> roles;
+		private final Map<String, Object> additionalAttributes;
 
-		public User(GSSName gssName, Sid sid, List<String> roles) {
+		public User(GSSName gssName, Sid sid, List<String> roles, Map<String, Object> additionalAttributes) {
 			this.gssName = gssName;
 			this.sid = sid;
-
-			if (roles == null || roles.isEmpty())
-				this.roles = Collections.emptyList();
-			else
-				this.roles = Collections.unmodifiableList(roles);
+			this.roles = roles;
+			this.additionalAttributes = additionalAttributes;
 		}
 
 		public GSSName getGssName() {
@@ -395,6 +438,10 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 
 		public List<String> getRoles() {
 			return roles;
+		}
+
+		public Map<String, Object> getAdditionalAttributes() {
+			return additionalAttributes;
 		}
 
 	}

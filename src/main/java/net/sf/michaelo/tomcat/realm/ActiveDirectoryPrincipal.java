@@ -18,6 +18,7 @@ package net.sf.michaelo.tomcat.realm;
 import java.security.Principal;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSName;
@@ -30,7 +31,8 @@ import org.ietf.jgss.GSSName;
  * <li>the GSS name,</li>
  * <li>the security identifier (SID),</li>
  * <li>an optional GSS credential for credential delegation (impersonation),</li>
- * <li>and the list of roles the user has been assigned to (derived from {@code memberOf}).
+ * <li>the list of roles the user has been assigned to (derived from {@code memberOf}),</li>
+ * <li>and a map with additional attributes.</li>
  * </ul>
  *
  * </p>
@@ -39,10 +41,11 @@ import org.ietf.jgss.GSSName;
  */
 public class ActiveDirectoryPrincipal implements Principal {
 
-	private GSSName gssName;
-	private Sid sid;
-	private GSSCredential gssCredential;
-	private List<String> roles;
+	private final GSSName gssName;
+	private final Sid sid;
+	private final GSSCredential gssCredential;
+	private final List<String> roles;
+	private final Map<String, Object> additionalAttributes;
 
 	/**
 	 * Constructs a new principal for the given parameters.
@@ -52,11 +55,13 @@ public class ActiveDirectoryPrincipal implements Principal {
 	 * @param roles
 	 *            the roles retrieved from Active Directory
 	 */
-	public ActiveDirectoryPrincipal(GSSName gssName, Sid sid, GSSCredential gssCredential, List<String> roles) {
+	public ActiveDirectoryPrincipal(GSSName gssName, Sid sid, GSSCredential gssCredential,
+			List<String> roles, Map<String, Object> additionalAttributes) {
 		this.gssName = gssName;
 		this.sid = sid;
 		this.gssCredential = gssCredential;
 		this.roles = Collections.unmodifiableList(roles);
+		this.additionalAttributes = Collections.unmodifiableMap(additionalAttributes);
 	}
 
 	@Override
@@ -106,6 +111,14 @@ public class ActiveDirectoryPrincipal implements Principal {
 		if (role.equals("*"))
 			return true;
 		return roles.contains(role);
+	}
+
+	/**
+	 * TODO Document me!
+	 * @return
+	 */
+	public Map<String, Object> getAdditionalAttributes() {
+		return additionalAttributes;
 	}
 
 	@Override
