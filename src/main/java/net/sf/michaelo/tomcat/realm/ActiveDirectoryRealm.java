@@ -68,8 +68,8 @@ import org.ietf.jgss.GSSName;
  * </ul>
  * </p>
  * <p>
- * By default the SIDs ({@code objectSid} and {@code sIDHistory}) of the Active Directory groups
- * will be retreived.
+ * By default the SIDs ({@code objectSid} and {@code sIDHistory}) of the Active Directory security
+ * groups will be retreived.
  * </p>
  *
  * @see ActiveDirectoryPrincipal
