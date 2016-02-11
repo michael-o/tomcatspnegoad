@@ -31,7 +31,8 @@ import org.ietf.jgss.GSSName;
  * <li>the GSS name,</li>
  * <li>the security identifier (SID),</li>
  * <li>an optional GSS credential for credential delegation (impersonation),</li>
- * <li>the list of roles the user has been assigned to (derived from {@code memberOf}),</li>
+ * <li>the list of security roles the user has been assigned to, stored as SIDs (the actual value(s)
+ * are queried with {@code memberOf} and stored from {@code objectSid} and {@code sIDHistory}),</li>
  * <li>and a map with additional attributes.</li>
  * </ul>
  *
@@ -81,7 +82,7 @@ public class ActiveDirectoryPrincipal implements Principal {
 	/**
 	 * Returns the security identifier (SID) of the principal.
 	 *
-	 * @return the
+	 * @return the security identifier
 	 */
 	public Sid getSid() {
 		return sid;
@@ -114,8 +115,9 @@ public class ActiveDirectoryPrincipal implements Principal {
 	}
 
 	/**
-	 * TODO Document me!
-	 * @return
+	 * Holds additional attributes for a given principal which may be stored in Active Directory.
+	 *
+	 * @return a read-only view of the additional attributes
 	 */
 	public Map<String, Object> getAdditionalAttributes() {
 		return additionalAttributes;

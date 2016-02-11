@@ -24,6 +24,8 @@ import java.util.Arrays;
  * href="https://msdn.microsoft.com/en-us/library/gg465313.aspx">security
  * identifier</a> from Active Directory.
  *
+ * <b>Note</b>: this class ignores possible integer overflows which might happen because the
+ * specification of the SID works with unsigned integers only.
  * @version $Id$
  *
  */
