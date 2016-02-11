@@ -31,8 +31,9 @@ import org.ietf.jgss.GSSName;
  * <li>the GSS name,</li>
  * <li>the security identifier (SID),</li>
  * <li>an optional GSS credential for credential delegation (impersonation),</li>
- * <li>the list of security roles the user has been assigned to, stored as SIDs (the actual value(s)
- * are queried with {@code memberOf} and stored from {@code objectSid} and {@code sIDHistory}),</li>
+ * <li>the list of security groups the user has been assigned to, stored as SID strings (the actual
+ * value(s) are queried with {@code memberOf} and stored from {@code objectSid} and
+ * {@code sIDHistory}),</li>
  * <li>and a map with additional attributes.</li>
  * </ul>
  *

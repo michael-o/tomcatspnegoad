@@ -40,7 +40,7 @@ Choosing and Using Realms
 
   The {{{./apidocs/net/sf/michaelo/tomcat/realm/ActiveDirectoryRealm.html}<<<ActiveDirectoryRealm>>>}}
   will query your Active Directory for a user by his/her {{{http://msdn.microsoft.com/en-us/library/windows/desktop/aa380525%28v=vs.85%29.aspx#user_principal_name}UPN}}
-  and retrieve all the necessary information, e.g., his/her roles.
+  and retrieve all the necessary information, e.g., his/her security groups.
 
   It requires two steps of setup: First, you will need to configure a <<<DirContextSourceFactory>>>
   with the parameters of your Active Direcory. Second, the realm itself pointing to that Active Directory.
@@ -85,8 +85,16 @@ Choosing and Using Realms
 ** Authenticated Principal
 
   After successful authentication and retrieval, this realm will create an <<<ActiveDirectoryPrincipal>>>
-  with several attributes besides the mechanism-specific name. Refer to the {{{./apidocs/net/sf/michaelo/tomcat/realm/ActiveDirectoryPrincipal.html}Javadocs}}
+  with several attributes. Refer to the {{{./apidocs/net/sf/michaelo/tomcat/realm/ActiveDirectoryPrincipal.html}Javadocs}}
   for details.
+
+** Using Security Groups from Active Directory
+
+  By default the <<<ActiveDirectoryRealm>>> will populate all roles as SID strings for the given principal.
+  While it might not look handy in the first place, it adds benefit when security groups are moved
+  from/to other domains, the SID history is completely retained. I.e., your application will continue
+  to work even with the old SID. If you would like to map SIDs to developer-friendly role names,
+  checkout the {{{http://mo-tomcat-ext.sourceforge.net/user-guide.html#PropertiesRoleMappingListener}<<<PropertiesRoleMappingListener>>>}}.
 
 * Using a Realm for Testing Purposes
 
