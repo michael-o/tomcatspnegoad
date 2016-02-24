@@ -53,11 +53,17 @@ public abstract class GssAwareRealmBase<T> extends RealmBase {
 		this.resourceName = resourceName;
 	}
 
+	/**
+	 *@throws UnsupportedOperationException always throws because not implemented
+	 */
 	@Override
 	protected String getPassword(String username) {
 		throw new UnsupportedOperationException("This method is not supported by this realm");
 	}
 
+	/**
+	 *@throws UnsupportedOperationException always throws because not implemented
+	 */
 	@Override
 	protected Principal getPrincipal(String username) {
 		throw new UnsupportedOperationException("This method is not supported by this realm");
