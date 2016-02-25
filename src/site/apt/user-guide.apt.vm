@@ -58,6 +58,10 @@ User Guide
 
   Finally configured all components, now need to verify your setup? Read the {{{./sample-webapp.html}sample webapp setup}}.
 
+* Spring Security
+
+  Integrating this module within Spring Security can easily be done. Read {{{./spring-security.html}here}} how!
+
 * Not using Active Directory but another Kerberos KDC implementation?
 
   If you happen <not> to use Active Directory but MIT Kerberos or Heimdal as your KDC &#x2013; no

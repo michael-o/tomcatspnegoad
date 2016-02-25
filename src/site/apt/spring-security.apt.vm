@@ -1,0 +1,75 @@
+#*
+ * Copyright 2013–2016 Michael Osipov
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *#
+
+## $Id$
+
+                            ----------------------
+                                Spring Security
+                            ----------------------
+                                Michael Osipov
+                            ----------------------
+                                  2016-02-25
+                            ----------------------
+
+#set($ellipsis = $esc.unicode('\u2026'))
+
+Integrating with Spring Security
+
+  Once in a while people ask on Stack Overflow how to use this with Spring Security. I was consoling
+  people for years for a proper implementation. Finally I have decided not to impelement anything
+  for Spring Security at all. You might ask <<why>>? The answer is rather simple, Spring Security's
+  APIs are so complex and different to those in Tomcat that it would mean to provide a complete
+  reimplementation which is a maintenance nightmare. Something I am not willing to do and see real
+  no benefit in.\
+  Fortunately, the Spring guys were smart enough to think about lazy people like me:
+  pre-athentication to the rescue! Spring Security comes with a set of classes completely wrapping
+  authentication already perfomed by the container which is called Java EE Container Authentication.
+
+* Reconciling Spring Security with Container-managed Security (CMS)
+
+  Assuming that your webapp now perfectly works with the given authenticator and realm, you need to
+  tell that Spring Security.
+
+  Add this to your <<<beans.xml>>>, e.g., <<<root-context.xml>>> or <<<security.xml>>>:
+
++----------------------------
+<beans $ellipsis>
+<!-- Don't forget to add the Security namespace! -->
+[$ellipsis]
+  <!-- Add this -->
+  <security:http>
+    <security:intercept-url pattern="/app/**"
+      access="hasAnyRole('User','Editor','Admin')" />
+
+    <security:jee mappable-roles="User,Editor,Admin" />
+
+  </security:http>
+[$ellipsis]
+</beans>
++----------------------------
+
+  Make sure that your webapp path <<</app>>> is intercepted in the <<<web.xml>>> in the first place
+  otherwise it won't secure your sites. Moreover, <<<mappable-roles>>> have to match the security
+  roles defined in your <<<web.xml>>>.
+
+    [Attention] Spring Security suffers from a series of bugs effectively limiting proper usage of
+                pre-authentication scenarios: {{{https://github.com/spring-projects/spring-security/issues/2101}SEC-1869}},
+                {{{https://github.com/spring-projects/spring-security/pull/69}SEC-1869 additions}},
+                {{{https://github.com/spring-projects/spring-security/issues/3357}SEC-3198}},
+                {{{https://github.com/spring-projects/spring-security/issues/3358}SEC-3199}}, and
+                {{{https://github.com/spring-projects/spring-security/issues/3359}SEC-3200}}.
+
+  You have successfully configured the Spring Security integration in your webapp. It is now ready to use.

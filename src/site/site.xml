@@ -27,6 +27,7 @@
 				<item name="Authenticators" href="authenticators.html" />
 				<item name="Realms" href="realms.html" />
 				<item name="Sample Webapp" href="sample-webapp.html" />
+				<item name="Spring Security" href="spring-security.html" />
 			</item>
 		</menu>
 
