@@ -1,0 +1,27 @@
+<document xmlns="http://maven.apache.org/changes/1.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/changes/1.0.0
+						http://maven.apache.org/xsd/changes-1.0.0.xsd">
+
+	<body>
+		<release version="2.0" date="TBD" description="Major documentation and realm overhaul">
+			<action type="remove" dev="michael-o">Authenticators do not analyze X-Requested-With header anymore</action>
+			<action type="fix" dev="michael-o">NTLM type 1 message is properly detected now</action>
+			<action type="update" dev="michael-o">Authenticators will fail with Internal Server Error if security context requires continuation</action>
+			<action type="remove" dev="michael-o">Property strippableRoleNamePrefixes on realms has been removed</action>
+			<action type="update" dev="michael-o">Connections aren't closed on successful authentiction anymore</action>
+			<action type="update" dev="michael-o">Improved logging messages</action>
+			<action type="update" dev="michael-o">Improved overall documentation</action>
+			<action type="add" dev="michael-o">Created VisualBasic scripts to mimic the UsernameSearchMapper implementations</action>
+			<action type="add" dev="michael-o">Added an immutable SID (security identifier) implementation</action>
+			<action type="update" dev="michael-o">Make roles by default stored as SID strings derived from objectSid and sIDHistory</action>
+			<action type="update" dev="michael-o">Retrieve security-enabled roles only</action>
+			<action type="update" dev="michael-o">Search in Active Directory for user and machine accounts only</action>
+			<action type="remove" dev="michael-o">ActiveDirectoryPrincipal does not contain the mech OID and DN anymore</action>
+			<action type="add" dev="michael-o">ActiveDirectoryRealm queries role mappings from Context</action>
+			<action type="add" dev="michael-o">Retrieve additional attributes from AD and store in the ActiveDirectoryPrincipal</action>
+			<action type="add" dev="michael-o">Added documentation for Spring Security</action>
+		</release>
+	</body>
+
+</document>
