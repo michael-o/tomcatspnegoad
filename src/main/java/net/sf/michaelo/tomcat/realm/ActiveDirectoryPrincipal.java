@@ -126,7 +126,15 @@ public class ActiveDirectoryPrincipal implements Principal {
 
 	@Override
 	public boolean equals(Object obj) {
-		return gssName.equals(obj);
+		if(obj == null)
+			return false;
+
+		if(!(obj instanceof ActiveDirectoryPrincipal))
+			return false;
+
+		ActiveDirectoryPrincipal other = (ActiveDirectoryPrincipal) obj;
+
+		return gssName.equals((Object) other.gssName);
 	}
 
 	@Override
