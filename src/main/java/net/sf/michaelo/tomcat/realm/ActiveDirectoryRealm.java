@@ -243,6 +243,8 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 
 			while (memberOfValues.hasMore())
 				roles.add((String) memberOfValues.next());
+
+			LdapUtils.close(memberOfValues);
 		}
 
 		Map<String, Object> additionalAttributesMap = Collections.emptyMap();
@@ -260,6 +262,8 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 
 						while(attrEnum.hasMore())
 							attrList.add(attrEnum.next());
+
+						LdapUtils.close(attrEnum);
 
 						additionalAttributesMap.put(addAttr, Collections.unmodifiableList(attrList));
 					} else
@@ -300,11 +304,13 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 			Attribute sidHistory = roleAttributes.get("sIDHistory;binary");
 			List<String> sidHistoryStrings = new LinkedList<String>();
 			if (sidHistory != null) {
-				NamingEnumeration<?> sidHistoryEnumeration = sidHistory.getAll();
-				while (sidHistoryEnumeration.hasMore()) {
-					byte[] sidHistoryBytes = (byte[]) sidHistoryEnumeration.next();
+				NamingEnumeration<?> sidHistoryEnum = sidHistory.getAll();
+				while (sidHistoryEnum.hasMore()) {
+					byte[] sidHistoryBytes = (byte[]) sidHistoryEnum.next();
 					sidHistoryStrings.add(new Sid(sidHistoryBytes).toString());
 				}
+
+				LdapUtils.close(sidHistoryEnum);
 			}
 
 			roles.add(sidString);
