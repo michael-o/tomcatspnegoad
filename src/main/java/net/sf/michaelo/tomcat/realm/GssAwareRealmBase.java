@@ -28,7 +28,6 @@ import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 import org.apache.naming.ContextBindings;
 import org.ietf.jgss.GSSCredential;
-import org.ietf.jgss.GSSException;
 import org.ietf.jgss.GSSName;
 
 /**
@@ -77,8 +76,6 @@ public abstract class GssAwareRealmBase<T> extends RealmBase {
 	 * @param delegatedCredential
 	 *            an eventually available delegated GSS credential
 	 * @return the retrieved principal
-	 * @throws RuntimeException
-	 *             wraps {@link GSSException} and {@link NamingException}
 	 */
 	abstract public Principal authenticate(GSSName gssName, GSSCredential delegatedCredential);
 
