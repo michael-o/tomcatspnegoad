@@ -48,7 +48,9 @@ import net.sf.michaelo.tomcat.utils.LdapUtils;
 import org.apache.catalina.Context;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.ietf.jgss.GSSContext;
 import org.ietf.jgss.GSSCredential;
+import org.ietf.jgss.GSSException;
 import org.ietf.jgss.GSSName;
 
 /**
@@ -65,6 +67,9 @@ import org.ietf.jgss.GSSName;
  * principal. Binary attributes must succeed with {@code ;binary} and will be stored as
  * {@code byte[]}, ordinary attributes will be stored as {@code String}. If an attribute is multivalued,
  * it will be stored as {@code List}.</li>
+ * <li>{@code storeDelegatedCredential}: Store the client's (initiator's) delegated credential in
+ * the user principal (optional). Valid values are {@code true}, {@code false}. Default value is
+ * {@code false}.</li>
  * </ul>
  * </p>
  * <p>
@@ -84,6 +89,7 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 			"objectSid;binary" };
 
 	private String[] additionalAttributes;
+	protected boolean storeDelegatedCredential;
 
 	@Override
 	public String getInfo() {
@@ -95,12 +101,59 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 		return "ActiveDirectoryRealm";
 	}
 
+	// TODO Document me!
 	public void setAdditionalAttributes(String additionalAttributes) {
 		this.additionalAttributes = additionalAttributes.split(",");
 	}
 
+	/**
+	 * Sets whether client's (initiator's) delegated credential is stored in the user principal.
+	 *
+	 * @param storeDelegatedCredential
+	 *            the store delegated credential indication
+	 */
+	public void setStoreDelegatedCredential(boolean storeDelegatedCredential) {
+		this.storeDelegatedCredential = storeDelegatedCredential;
+	}
+
 	@Override
-	public Principal authenticate(GSSName gssName, GSSCredential delegatedCredential) {
+	public Principal authenticate(GSSName gssName) {
+		return authenticateInternal(gssName, null);
+	}
+
+	@Override
+	public Principal authenticate(GSSContext gssContext) {
+		if(gssContext == null)
+			throw new NullPointerException("gssContext cannot be null");
+
+		if(!gssContext.isEstablished())
+			throw new IllegalStateException("gssContext is not fully established");
+
+		GSSName gssName;
+		GSSCredential delegatedCredential = null;
+
+		try {
+			gssName = gssContext.getSrcName();
+
+			if (storeDelegatedCredential) {
+				if (gssContext.getCredDelegState()) {
+					delegatedCredential = gssContext.getDelegCred();
+				} else if (logger.isDebugEnabled())
+					logger.debug(sm.getString("activeDirectoryRealm.credentialNotDelegable",
+							gssName));
+			}
+		} catch (GSSException e) {
+			logger.error(sm.getString("realm.inquireFailed"), e);
+
+			return null;
+		}
+
+		return authenticateInternal(gssName, delegatedCredential);
+	}
+
+	private Principal authenticateInternal(GSSName gssName, GSSCredential delegatedCredential) {
+		if(gssName == null)
+			throw new NullPointerException("gssName cannot be null");
 
 		DirContextSource dirContextSource = null;
 		try {

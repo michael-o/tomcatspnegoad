@@ -28,7 +28,8 @@ import org.apache.catalina.User;
 import org.apache.catalina.UserDatabase;
 import org.apache.catalina.realm.GenericPrincipal;
 import org.apache.catalina.realm.UserDatabaseRealm;
-import org.ietf.jgss.GSSCredential;
+import org.ietf.jgss.GSSContext;
+import org.ietf.jgss.GSSException;
 import org.ietf.jgss.GSSName;
 
 /**
@@ -49,7 +50,9 @@ public class GssAwareUserDatabaseRealm extends GssAwareRealmBase<UserDatabase> {
 	}
 
 	@Override
-	public Principal authenticate(GSSName gssName, GSSCredential delegatedCredential) {
+	public Principal authenticate(GSSName gssName) {
+		if(gssName == null)
+			throw new NullPointerException("gssName cannot be null");
 
 		UserDatabase database = null;
 
@@ -83,6 +86,24 @@ public class GssAwareUserDatabaseRealm extends GssAwareRealmBase<UserDatabase> {
 			}
 		}
 		return new GenericPrincipal(this, username, null, roles, user);
+	}
+
+	@Override
+	public Principal authenticate(GSSContext gssContext) {
+		if(gssContext == null)
+			throw new NullPointerException("gssContext cannot be null");
+
+		if(!gssContext.isEstablished())
+			throw new IllegalStateException("gssContext is not fully established");
+
+		try {
+			GSSName gssName = gssContext.getSrcName();
+			return authenticate(gssName);
+		} catch (GSSException e) {
+			logger.error(sm.getString("realm.inquireFailed"), e);
+
+			return null;
+		}
 	}
 
 	public boolean hasRole(Principal principal, String role) {

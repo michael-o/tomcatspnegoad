@@ -27,7 +27,7 @@ import org.apache.catalina.util.StringManager;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 import org.apache.naming.ContextBindings;
-import org.ietf.jgss.GSSCredential;
+import org.ietf.jgss.GSSContext;
 import org.ietf.jgss.GSSName;
 
 /**
@@ -69,15 +69,28 @@ public abstract class GssAwareRealmBase<T> extends RealmBase {
 	}
 
 	/**
-	 * Authenticates a user from the given GSS name and eventually store his/her GSS credential.
+	 * Authenticates a user from a given GSS name.
 	 *
 	 * @param gssName
 	 *            the GSS name of the context initiator (client)
-	 * @param delegatedCredential
-	 *            an eventually available delegated GSS credential
 	 * @return the retrieved principal
+	 * @throws NullPointerException
+	 *             if the gssName is null
 	 */
-	abstract public Principal authenticate(GSSName gssName, GSSCredential delegatedCredential);
+	abstract public Principal authenticate(GSSName gssName);
+
+	/**
+	 * Authenticates a user from a fully established GSS context.
+	 *
+	 * @param gssName
+	 *            the GSS context established with the peer
+	 * @return the retrieved principal
+	 * @throws NullPointerException
+	 *             if the gssContext is null
+	 * @throws IllegalStateException
+	 *             if the gssContext is not fully established
+	 */
+	abstract public Principal authenticate(GSSContext gssContext);
 
 	/*
 	 * Must be accessed like this due to

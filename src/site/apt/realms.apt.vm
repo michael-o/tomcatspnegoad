@@ -124,7 +124,7 @@ Choosing and Using Realms
 
   If you are not using the Active Directory as a user repository (e.g. database or another directory
   server) and can still make use of this library. Extend the {{{./apidocs/net/sf/michaelo/tomcat/realm/GssAwareRealmBase.html}<<<GssAwareRealmBase>>>}}
-  class and implement the abstract method <<<authenticate(GSSName, GSSCredential)>>>.
+  class and implement the abstract methods <<<authenticate(GSSName)>>> and <<<authenticate(GSSContext)>>>.
 
 The Next Step
 

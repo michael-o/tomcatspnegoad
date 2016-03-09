@@ -45,9 +45,6 @@ import org.ietf.jgss.GSSName;
  * This authenticator has the following configuration options:
  * <ul>
  * <li>{@code loginEntryName}: Login entry name with a configured {@code Krb5LoginModule}.</li>
- * <li>{@code storeDelegatedCredential}: Store the client's (initiator's) delegated credential in
- * the user principal (optional). Valid values are {@code true}, {@code false}. Default value is
- * {@code false}.</li>
  * </ul>
  * </p>
  *
@@ -66,22 +63,6 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 	private static final byte[] NTLM_TYPE1_MESSAGE_START = { (byte) 'N', (byte) 'T', (byte) 'L',
 			(byte) 'M', (byte) 'S', (byte) 'S', (byte) 'P', (byte) '\0', (byte) 0x01, (byte) 0x00,
 			(byte) 0x00, (byte) 0x00 };
-
-	protected boolean storeDelegatedCredential;
-
-	/**
-	 * Sets whether client's (initiator's) delegated credential is stored in the user principal.
-	 *
-	 * @param storeDelegatedCredential
-	 *            the store delegated credential indication
-	 */
-	public void setStoreDelegatedCredential(boolean storeDelegatedCredential) {
-		this.storeDelegatedCredential = storeDelegatedCredential;
-	}
-
-	public boolean isStoreDelegatedCredential() {
-		return storeDelegatedCredential;
-	}
 
 	@Override
 	public String getInfo() {
@@ -225,20 +206,10 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 						logger.debug(sm.getString("spnegoAuthenticator.contextSuccessfullyEstablished"));
 
 					GssAwareRealmBase<?> realm = (GssAwareRealmBase<?>) context.getRealm();
-					GSSName srcName = gssContext.getSrcName();
-
-					GSSCredential delegatedCredential = null;
-					if (storeDelegatedCredential) {
-						if (gssContext.getCredDelegState()) {
-							delegatedCredential = gssContext.getDelegCred();
-						} else if (logger.isDebugEnabled())
-							logger.debug(sm.getString("spnegoAuthenticator.credentialNotDelegable",
-									srcName));
-					}
-
-					principal = realm.authenticate(srcName, delegatedCredential);
+					principal = realm.authenticate(gssContext);
 
 					if (principal == null) {
+						GSSName srcName = gssContext.getSrcName();
 						sendUnauthorized(request, response, SPNEGO_AUTH_SCHEME,
 								"authenticator.userNotFound", srcName);
 						return false;
