@@ -85,8 +85,8 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 	private static final UsernameSearchMapper[] USERNAME_SEARCH_MAPPERS = {
 			new SamAccountNameRfc2247Mapper(), new UserPrincipalNameSearchMapper() };
 
-	private static final String[] DEFAULT_ATTRIBUTES = new String[] { "memberOf",
-			"objectSid;binary" };
+	private static final String[] DEFAULT_ATTRIBUTES = new String[] { "userAccountControl",
+			"memberOf", "objectSid;binary" };
 
 	private String[] additionalAttributes;
 	protected boolean storeDelegatedCredential;
@@ -277,6 +277,17 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 			logger.error(sm.getString("activeDirectoryRealm.duplicateUser", gssName));
 
 			LdapUtils.close(results);
+			return null;
+		}
+
+		String userAccountControlStr = (String) result.getAttributes().get("userAccountControl").get();
+		int userAccountControl = Integer.valueOf(userAccountControlStr);
+
+		// Do not allow disabled accounts (UF_ACCOUNT_DISABLE)
+		if((userAccountControl & 0x2) == 0x2) {
+			if (logger.isDebugEnabled())
+				logger.warn(sm.getString("activeDirectoryRealm.userFoundButDisabled", gssName));
+
 			return null;
 		}
 
