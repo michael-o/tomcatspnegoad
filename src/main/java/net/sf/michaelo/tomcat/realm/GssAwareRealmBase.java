@@ -82,7 +82,7 @@ public abstract class GssAwareRealmBase<T> extends RealmBase {
 	/**
 	 * Authenticates a user from a fully established GSS context.
 	 *
-	 * @param gssName
+	 * @param gssContext
 	 *            the GSS context established with the peer
 	 * @return the retrieved principal
 	 * @throws NullPointerException
