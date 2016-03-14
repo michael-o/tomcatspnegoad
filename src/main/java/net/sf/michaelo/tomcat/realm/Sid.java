@@ -76,6 +76,27 @@ public class Sid {
 	}
 
 	@Override
+	public boolean equals(Object obj) {
+		if(obj == null)
+			return false;
+
+		if(!(obj instanceof Sid))
+			return false;
+
+		Sid that = (Sid) obj;
+
+		if(this == that)
+			return true;
+
+		return Arrays.equals(this.bytes, that.bytes);
+	}
+
+	@Override
+	public int hashCode() {
+		return Arrays.hashCode(this.bytes);
+	}
+
+	@Override
 	public String toString() {
 		return sidString;
 	}
