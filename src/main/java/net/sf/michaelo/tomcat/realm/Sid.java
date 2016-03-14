@@ -30,6 +30,11 @@ import java.util.Arrays;
  *
  */
 public class Sid {
+
+	public static final Sid NULL_SID = new Sid(new byte[] { (byte) 0x01, (byte) 0x01, (byte) 0x00,
+			(byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
+			(byte) 0x00, (byte) 0x00, (byte) 0x00 });
+
 	private byte[] bytes;
 
 	private byte revision;
