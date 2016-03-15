@@ -59,8 +59,11 @@ Choosing and Using Realms
 [$ellipsis]
 +----------------------------
 
-    [Note] I strongly recommend using the Global Catalog (port 3268) otherwise data might be missing
-           and/or you will end up chasing referrals.
+** Referral Handling
+
+  In general, you should pick LDAP URLs which avoid any referral incursion because it amplifies
+  execution in space and time. You are highly recommended using the Global Catalog (port 3268) only.
+  More details on how this realm deals with referrals can be found in the {{{./apidocs/net/sf/michaelo/tomcat/realm/ActiveDirectoryRealm.html#referral-handling}Javadocs}}.
 
 ** Configuring the Realm
 

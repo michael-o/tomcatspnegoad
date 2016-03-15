@@ -31,12 +31,17 @@ import javax.naming.Name;
 import javax.naming.NameParser;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
+import javax.naming.PartialResultException;
+import javax.naming.ReferralException;
 import javax.naming.directory.Attribute;
 import javax.naming.directory.Attributes;
 import javax.naming.directory.DirContext;
+import javax.naming.directory.InitialDirContext;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 import javax.naming.ldap.LdapName;
+import javax.naming.ldap.ManageReferralControl;
+import javax.security.sasl.SaslClient;
 
 import net.sf.michaelo.dirctxsrc.DirContextSource;
 import net.sf.michaelo.tomcat.realm.mapper.SamAccountNameRfc2247Mapper;
@@ -46,6 +51,7 @@ import net.sf.michaelo.tomcat.realm.mapper.UsernameSearchMapper.MappedValues;
 import net.sf.michaelo.tomcat.utils.LdapUtils;
 
 import org.apache.catalina.Context;
+import org.apache.catalina.realm.CombinedRealm;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.ietf.jgss.GSSContext;
@@ -65,8 +71,8 @@ import org.ietf.jgss.GSSName;
  * or globally configured in the {@code server.xml} (optional). Default value is {@code false}.</li>
  * <li>{@code additionalAttributes}: Comma-separated list of attributes to be retrieved for the
  * principal. Binary attributes must succeed with {@code ;binary} and will be stored as
- * {@code byte[]}, ordinary attributes will be stored as {@code String}. If an attribute is multivalued,
- * it will be stored as {@code List}.</li>
+ * {@code byte[]}, ordinary attributes will be stored as {@code String}. If an attribute is
+ * multivalued, it will be stored as {@code List}.</li>
  * <li>{@code storeDelegatedCredential}: Store the client's (initiator's) delegated credential in
  * the user principal (optional). Valid values are {@code true}, {@code false}. Default value is
  * {@code false}.</li>
@@ -75,6 +81,72 @@ import org.ietf.jgss.GSSName;
  * <p>
  * By default the SIDs ({@code objectSid} and {@code sIDHistory}) of the Active Directory security
  * groups will be retreived.
+ * </p>
+ * <h4 id="referral-handling">Referral Handling</h4> When working with the default LDAP ports (not
+ * GC) or in a multi-forest environment, it is highly likely to receive referrals (either
+ * subordinate or cross) during a search or lookup. JNDI takes several approaches to handle
+ * referrals with the {@code java.naming.referral} property and its values: {@code ignore},
+ * {@code throw}, and {@code follow}. You can ignore referrals altogether, but the Active Directory
+ * will still signal a {@link PartialResultException} when a {@link NamingEnumeration} is iterated.
+ * The reason is because Oracle's LDAP implementation adds a {@link ManageReferralControl} when
+ * {@code ignore} is set but Active Directory does not support it and returns a referral anyway.
+ * This realm will catch this and continue to process the enumeration. If the
+ * {@code DirContextSource} is set to {@code throw}, this realm will catch the
+ * {@link ReferralException} but avoid to follow the referral(s) manually for several reasons and
+ * will continue with the process. Following referrals automatically is a completely opaque
+ * operation to the application, the {@code ReferralException} is handled internally and referral
+ * contexts are queried and closed. Unfortunately, Oracle's LDAP implementation is not able to
+ * handle this properly and only Oracle can fix this shortcoming.
+ * <p>
+ * <em>What is the shortcoming and how can it be solved?</em> Microsoft takes a very sophisticated
+ * approach on not to rely on host names because servers can be provisioned and decommissioned any
+ * time. Instead, they heavily rely on DNS domain names and DNS SRV records at runtime. I.e., the
+ * referral URL does not contain a host name, but only a DNS domain name. While you can connect to
+ * the service with this name, you cannot easily authenticate against it with Kerberos because one
+ * cannot bind the same SPN {@code ldap/<dnsDomainName>@<REALM>}, e.g.,
+ * {@code ldap/example.com@EXAMPLE.COM} to more than one account. If you try authenticate anyway,
+ * you will receive a "Server not found in kerberos database (7)" error. Therefore, one has to
+ * perform a DNS SRV query ({@code _ldap._tcp.<dnsDomainName>}) to test whether this name is a host
+ * name or a DNS domain name served by one or more machines. If it turns out to be a DNS domain
+ * name, you have to select one arbitrary target host from the query response, construct a special
+ * SPN {@code ldap/<targetHost>/<dnsDomainName>@<REALM>} or a regular one
+ * {@code ldap/<targetHost>@<REALM>}, obtain a service ticket for and connect to that target host.
+ * If it is a regular host name, which is not the usual case with Active Directory, Oracle's
+ * internal implementation will behave correctly.<br/>
+ * The {@code follow} implementation cannot be made to work because there is no way to tell the
+ * internal classes to perform this DNS SRV query and pass the appropriate server name(s) for the
+ * SPN to the {@link SaslClient}. It is deemed to fail. Note, that host name canocalization might
+ * sound reasonable within the {@code SaslClient}, but this is deemed to fail too for two reasons.
+ * First, the {@code SaslClient} will receive an arbitrary IP address without knowing whether the
+ * LDAP client socket will use the same one. You will have a service ticket issued for another host
+ * and your authentication will fail. Second, most Kerberos implementations rely on reverse DNS
+ * records, but Microsoft's SSPI Kerberos provider does not care about reverse DNS, it does not
+ * canonicalize host names by default and there is no guarantee, that reverse DNS is set up
+ * properly. Using {@code throw} will not make it any better because the referral URL returned by
+ * {@link ReferralException#getReferralInfo()} cannot be changed with the calculated values from
+ * DNS. {@link ReferralException#getReferralContext()} will unconditionally reuse that value. The
+ * only way (theoretically) to achieve this is to construct an {@link InitialDirContext} with the
+ * new URL manually and work with it appropriately. Though, this approach has not been evaluated and
+ * at this time, it won't be implemented. (Changing the URLs manually in the debugger makes it work
+ * actually)
+ * <p>
+ * <em>How to work around this issue?</em> Use the global catalog (port 3268) as much as you can. If
+ * this won't help and you know your target forests upfront, you can set up a {@link CombinedRealm},
+ * configure nested realms one per each forest with {@code ignore} and let the principal iterate
+ * over all of them until it hits the target forest. You will then have the client properly looked
+ * up in the Active Directory.
+ * </p>
+ * <p>
+ * This issue is also documented on <a href="http://stackoverflow.com/q/25436410/696632">Stack
+ * Overflow</a>. Additionally, <a
+ * href="https://technet.microsoft.com/en-us/library/cc759550%28v=ws.10%29.aspx">How DNS Support for
+ * Active Directory Works</a> is a good read on the DNS topic as well as
+ * <a href="https://technet.microsoft.com/en-us/library/cc978012.aspx">Global Catalog and LDAP Searches</a>
+ * and
+ * <a href="https://technet.microsoft.com/en-us/library/cc978014.aspx">LDAP Referrals</a>.
+ * <p>
+ * <em>Note</em>: always remember, referrals incur an amplification in time and space and make the
+ * entire process slower.
  * </p>
  *
  * @see ActiveDirectoryPrincipal
@@ -114,6 +186,40 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 	 */
 	public void setStoreDelegatedCredential(boolean storeDelegatedCredential) {
 		this.storeDelegatedCredential = storeDelegatedCredential;
+	}
+
+	@Override
+	public void init() {
+		super.init();
+
+		DirContextSource dirContextSource = null;
+		try {
+			dirContextSource = lookupResource();
+		} catch (NamingException e) {
+			logger.error(sm.getString("activeDirectoryealm.lookupFailed", resourceName), e);
+
+			return;
+		}
+		DirContext context = null;
+		try {
+			context = dirContextSource.getDirContext();
+		} catch (NamingException e) {
+			logger.error(sm.getString("activeDirectoryRealm.obtainFailed", resourceName), e);
+			return;
+		}
+
+		try {
+			String referral = (String) context.getEnvironment().get(DirContext.REFERRAL);
+
+			if ("follow".equals(referral))
+				logger.warn(sm.getString("activeDirectoryRealm.referralFollow"));
+			else if ("throw".equals(referral))
+				logger.warn(sm.getString("activeDirectoryRealm.referralThrow"));
+		} catch (NamingException e) {
+			logger.error(sm.getString("activeDirectoryRealm.environmentFailed"), e);
+		} finally {
+			LdapUtils.close(context);
+		}
 	}
 
 	@Override
@@ -242,6 +348,7 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 		MappedValues mappedValues;
 		NamingEnumeration<SearchResult> results = null;
 		for (UsernameSearchMapper mapper : USERNAME_SEARCH_MAPPERS) {
+			String mapperClassName = mapper.getClass().getSimpleName();
 			mappedValues = mapper.map(context, gssName);
 
 			searchBase = getRelativeName(context, mappedValues.getSearchBase());
@@ -249,23 +356,43 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 			searchAttributeValue = mappedValues.getSearchUsername();
 
 			searchFilter = String.format(searchFilterPattern, searchAttributeName);
-			results = context.search(searchBase, searchFilter,
-					new Object[] { searchAttributeValue }, searchCtls);
 
-			if (!results.hasMore()) {
+			if (logger.isDebugEnabled())
+				logger.debug(sm.getString("activeDirectoryRealm.usernameSearch",
+						searchAttributeValue, searchBase, searchAttributeName, mapperClassName));
 
-				if (logger.isDebugEnabled()) {
-					String simpleClassName = mapper.getClass().getSimpleName();
-					logger.debug(sm.getString("activeDirectoryRealm.usernameNotMapped",
-							searchAttributeValue, searchBase, searchAttributeName, simpleClassName));
-				}
+			try {
+				results = context.search(searchBase, searchFilter,
+						new Object[] { searchAttributeValue }, searchCtls);
+			} catch(ReferralException e) {
+				logger.warn(
+						sm.getString("activeDirectoryRealm.user.referralException", mapperClassName,
+								e.getRemainingName(), e.getReferralInfo()));
+
+				continue;
+			}
+
+			try {
+				if (!results.hasMore()) {
+					if (logger.isDebugEnabled())
+						logger.debug(sm.getString("activeDirectoryRealm.userNotMapped", gssName,
+								mapperClassName));
+
+					LdapUtils.close(results);
+					results = null;
+				} else
+					break;
+			} catch(PartialResultException e) {
+				logger.debug(
+						sm.getString("activeDirectoryRealm.user.partialResultException", mapperClassName,
+								e.getRemainingName()));
 
 				LdapUtils.close(results);
-			} else
-				break;
+				results = null;
+			}
 		}
 
-		if (!results.hasMore()) {
+		if (results == null) {
 			logger.info(sm.getString("activeDirectoryRealm.userNotFound", gssName));
 
 			return null;
@@ -280,25 +407,28 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 			return null;
 		}
 
-		String userAccountControlStr = (String) result.getAttributes().get("userAccountControl").get();
-		int userAccountControl = Integer.valueOf(userAccountControlStr);
+		Attributes userAttributes = result.getAttributes();
+
+		int userAccountControl = Integer.parseInt((String) userAttributes.get("userAccountControl")
+				.get());
 
 		// Do not allow disabled accounts (UF_ACCOUNT_DISABLE)
 		if((userAccountControl & 0x2) == 0x2) {
 			if (logger.isDebugEnabled())
 				logger.warn(sm.getString("activeDirectoryRealm.userFoundButDisabled", gssName));
 
+			LdapUtils.close(results);
 			return null;
 		}
 
 		LdapName dn = getDistinguishedName(context, searchBase, result);
-		byte[] sidBytes = (byte[]) result.getAttributes().get("objectSid;binary").get();
+		byte[] sidBytes = (byte[]) userAttributes.get("objectSid;binary").get();
 		Sid sid = new Sid(sidBytes);
 
 		if (logger.isDebugEnabled())
 			logger.debug(sm.getString("activeDirectoryRealm.userFound", gssName, dn, sid));
 
-		Attribute memberOfAttr = result.getAttributes().get("memberOf");
+		Attribute memberOfAttr = userAttributes.get("memberOf");
 
 		List<String> roles = new LinkedList<String>();
 
@@ -317,7 +447,7 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 			additionalAttributesMap = new HashMap<String, Object>();
 
 			for(String addAttr : additionalAttributes) {
-				Attribute attr = result.getAttributes().get(addAttr);
+				Attribute attr = userAttributes.get(addAttr);
 
 				if(attr != null && attr.size() > 0) {
 					if(attr.size() > 1) {
@@ -336,6 +466,7 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 			}
 		}
 
+		LdapUtils.close(results);
 		return new User(gssName, sid, roles, additionalAttributesMap);
 	}
 
@@ -343,14 +474,27 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 
 		List<String> roles = new LinkedList<String>();
 
-		if (logger.isTraceEnabled())
-			logger.trace(sm.getString("activeDirectoryRealm.retrievingRoles", user.getGssName()));
+		if (logger.isDebugEnabled())
+			logger.debug(sm.getString("activeDirectoryRealm.retrievingRoles", user.getGssName()));
 
 		for (String role : user.getRoles()) {
 			String roleRdn = getRelativeName(context, role);
 
-			Attributes roleAttributes = context.getAttributes(roleRdn, new String[] { "groupType",
-					"objectSid;binary", "sIDHistory;binary" });
+			Attributes roleAttributes = null;
+			try {
+				roleAttributes = context.getAttributes(roleRdn, new String[] { "groupType",
+						"objectSid;binary", "sIDHistory;binary" });
+			} catch (ReferralException e) {
+				logger.warn(sm.getString("activeDirectoryRealm.role.referralException", role,
+						e.getRemainingName(), e.getReferralInfo()));
+
+				continue;
+			} catch (PartialResultException e) {
+				logger.debug(sm.getString("activeDirectoryRealm.role.partialResultException", role,
+						e.getRemainingName()));
+
+				continue;
+			}
 
 			int groupType = Integer.parseInt((String) roleAttributes.get("groupType").get());
 
@@ -359,6 +503,7 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 			if ((groupType & Integer.MIN_VALUE) == 0) {
 				if (logger.isTraceEnabled())
 					logger.trace(sm.getString("activeDirectoryRealm.skippingDistributionRole", role));
+
 				continue;
 			}
 
