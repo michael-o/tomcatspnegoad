@@ -287,12 +287,15 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 			User user = getUser(context, gssName);
 
 			if (user != null) {
-				List<String> roles = getRoles(context, user);
+				if(user.getSid().equals(Sid.NULL_SID))
+					principal = new ActiveDirectoryPrincipal(gssName, user.getSid(), delegatedCredential);
+				else {
+					List<String> roles = getRoles(context, user);
 
-				principal = new ActiveDirectoryPrincipal(gssName, user.getSid(), delegatedCredential,
-						roles, user.getAdditionalAttributes());
+					principal = new ActiveDirectoryPrincipal(gssName, user.getSid(), delegatedCredential,
+							roles, user.getAdditionalAttributes());
+				}
 			}
-
 		} catch (NamingException e) {
 			logger.error(sm.getString("activeDirectoryRealm.principalSearchFailed", gssName), e);
 		} finally {
@@ -396,7 +399,7 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 		if (results == null) {
 			logger.info(sm.getString("activeDirectoryRealm.userNotFound", gssName));
 
-			return null;
+			return new User(gssName, Sid.NULL_SID, null, null);
 		}
 
 		SearchResult result = results.next();
@@ -415,8 +418,7 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 
 		// Do not allow disabled accounts (UF_ACCOUNT_DISABLE)
 		if((userAccountControl & 0x2) == 0x2) {
-			if (logger.isDebugEnabled())
-				logger.warn(sm.getString("activeDirectoryRealm.userFoundButDisabled", gssName));
+			logger.warn(sm.getString("activeDirectoryRealm.userFoundButDisabled", gssName));
 
 			LdapUtils.close(results);
 			return null;
