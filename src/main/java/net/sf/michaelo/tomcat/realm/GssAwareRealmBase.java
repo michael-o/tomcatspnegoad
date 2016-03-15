@@ -47,7 +47,6 @@ public abstract class GssAwareRealmBase<T> extends RealmBase {
 		this.localResource = localResource;
 	}
 
-	// TODO Validate in #init
 	public void setResourceName(String resourceName) {
 		this.resourceName = resourceName;
 	}

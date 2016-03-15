@@ -77,11 +77,10 @@ import org.ietf.jgss.GSSName;
  * the user principal (optional). Valid values are {@code true}, {@code false}. Default value is
  * {@code false}.</li>
  * </ul>
- * </p>
  * <p>
  * By default the SIDs ({@code objectSid} and {@code sIDHistory}) of the Active Directory security
  * groups will be retreived.
- * </p>
+ * <h3></h3>
  * <h4 id="referral-handling">Referral Handling</h4> When working with the default LDAP ports (not
  * GC) or in a multi-forest environment, it is highly likely to receive referrals (either
  * subordinate or cross) during a search or lookup. JNDI takes several approaches to handle
@@ -109,10 +108,10 @@ import org.ietf.jgss.GSSName;
  * perform a DNS SRV query ({@code _ldap._tcp.<dnsDomainName>}) to test whether this name is a host
  * name or a DNS domain name served by one or more machines. If it turns out to be a DNS domain
  * name, you have to select one arbitrary target host from the query response, construct a special
- * SPN {@code ldap/<targetHost>/<dnsDomainName>@<REALM>} or a regular one
- * {@code ldap/<targetHost>@<REALM>}, obtain a service ticket for and connect to that target host.
- * If it is a regular host name, which is not the usual case with Active Directory, Oracle's
- * internal implementation will behave correctly.<br/>
+ * SPN {@code ldap/<targetHost>/<dnsDomainName>@<REALM>} or a regular one {@code ldap/<targetHost>@
+ * <REALM>}, obtain a service ticket for and connect to that target host. If it is a regular host
+ * name, which is not the usual case with Active Directory, Oracle's internal implementation will
+ * behave correctly.<br>
  * The {@code follow} implementation cannot be made to work because there is no way to tell the
  * internal classes to perform this DNS SRV query and pass the appropriate server name(s) for the
  * SPN to the {@link SaslClient}. It is deemed to fail. Note, that host name canocalization might
@@ -135,19 +134,17 @@ import org.ietf.jgss.GSSName;
  * configure nested realms one per each forest with {@code ignore} and let the principal iterate
  * over all of them until it hits the target forest. You will then have the client properly looked
  * up in the Active Directory.
- * </p>
  * <p>
  * This issue is also documented on <a href="http://stackoverflow.com/q/25436410/696632">Stack
- * Overflow</a>. Additionally, <a
- * href="https://technet.microsoft.com/en-us/library/cc759550%28v=ws.10%29.aspx">How DNS Support for
- * Active Directory Works</a> is a good read on the DNS topic as well as
- * <a href="https://technet.microsoft.com/en-us/library/cc978012.aspx">Global Catalog and LDAP Searches</a>
- * and
- * <a href="https://technet.microsoft.com/en-us/library/cc978014.aspx">LDAP Referrals</a>.
+ * Overflow</a>. Additionally,
+ * <a href="https://technet.microsoft.com/en-us/library/cc759550%28v=ws.10%29.aspx">How DNS Support
+ * for Active Directory Works</a> is a good read on the DNS topic as well as
+ * <a href="https://technet.microsoft.com/en-us/library/cc978012.aspx">Global Catalog and LDAP
+ * Searches</a> and <a href="https://technet.microsoft.com/en-us/library/cc978014.aspx">LDAP
+ * Referrals</a>.
  * <p>
- * <em>Note</em>: always remember, referrals incur an amplification in time and space and make the
- * entire process slower.
- * </p>
+ * <strong>Note:</strong> always remember, referrals incur an amplification in time and space and
+ * make the entire process slower.
  *
  * @see ActiveDirectoryPrincipal
  * @version $Id$
@@ -558,6 +555,8 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 	 * @param result
 	 *            The search result
 	 * @return String containing the distinguished name
+	 * @throws NamingException
+	 *             if DN cannot be build
 	 */
 	protected LdapName getDistinguishedName(DirContext context, String base, SearchResult result)
 			throws NamingException {

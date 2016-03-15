@@ -42,7 +42,6 @@ import org.ietf.jgss.GSSName;
  * <ul>
  * <li>{@code loginEntryName}: Login entry name with a configured {@code Krb5LoginModule}.</li>
  * </ul>
- * </p>
  *
  * @version $Id$
  */

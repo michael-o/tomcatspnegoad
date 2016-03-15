@@ -115,12 +115,9 @@ abstract class GssAwareAuthenticatorBase extends AuthenticatorBase {
 	 * not analyze it anyway but have to consume the response (wasted time and resources). When a
 	 * client issues a request, the server will write the error messages to either one header:
 	 * {@code Auth-Error} or {@code Server-Error}.
-	 * </p>
-	 *
 	 * <p>
 	 * Technically speaking, {@link HttpServletResponse#setStatus(int)} will be called instead of
 	 * {@link HttpServletResponse#sendError(int, String)}.
-	 * </p>
 	 *
 	 * @param errorMessagesAsHeaders
 	 *            indicates whether error messages will be responded as headers
