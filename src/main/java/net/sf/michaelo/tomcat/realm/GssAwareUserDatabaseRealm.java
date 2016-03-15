@@ -67,7 +67,7 @@ public class GssAwareUserDatabaseRealm extends GssAwareRealmBase<UserDatabase> {
 		String username = gssName.toString();
 		User user = database.findUser(username);
 		if (user == null) {
-			return null;
+			return new GenericPrincipal(this, username, null);
 		}
 
 		List<String> roles = new ArrayList<String>();
@@ -85,6 +85,7 @@ public class GssAwareUserDatabaseRealm extends GssAwareRealmBase<UserDatabase> {
 				roles.add(role.getName());
 			}
 		}
+
 		return new GenericPrincipal(this, username, null, roles, user);
 	}
 
