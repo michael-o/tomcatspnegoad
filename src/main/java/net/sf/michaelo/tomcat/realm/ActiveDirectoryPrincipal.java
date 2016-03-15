@@ -49,13 +49,16 @@ public class ActiveDirectoryPrincipal implements Principal {
 	private final List<String> roles;
 	private final Map<String, Object> additionalAttributes;
 
+	public ActiveDirectoryPrincipal(GSSName gssName, Sid sid, GSSCredential gssCredential) {
+		this.gssName = gssName;
+		this.sid = sid;
+		this.gssCredential = gssCredential;
+		this.roles = Collections.emptyList();
+		this.additionalAttributes = Collections.emptyMap();
+	}
+
 	/**
 	 * Constructs a new principal for the given parameters.
-	 *
-	 * @param gssName
-	 *            the underlying GSS name
-	 * @param roles
-	 *            the roles retrieved from Active Directory
 	 */
 	public ActiveDirectoryPrincipal(GSSName gssName, Sid sid, GSSCredential gssCredential,
 			List<String> roles, Map<String, Object> additionalAttributes) {

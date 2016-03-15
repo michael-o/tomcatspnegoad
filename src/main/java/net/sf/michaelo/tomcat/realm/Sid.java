@@ -35,6 +35,10 @@ public class Sid {
 			(byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
 			(byte) 0x00, (byte) 0x00, (byte) 0x00 });
 
+	public static final Sid ANONYMOUS_SID = new Sid(new byte[] { (byte) 0x01, (byte) 0x01, (byte) 0x00,
+			(byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x05, (byte) 0x07,
+			(byte) 0x00, (byte) 0x00, (byte) 0x00 });
+
 	private byte[] bytes;
 
 	private byte revision;

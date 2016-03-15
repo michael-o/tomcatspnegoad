@@ -279,6 +279,9 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 			return null;
 		}
 
+		if(gssName.isAnonymous())
+			return new ActiveDirectoryPrincipal(gssName, Sid.ANONYMOUS_SID, delegatedCredential);
+
 		Principal principal = null;
 		try {
 			User user = getUser(context, gssName);
@@ -292,8 +295,6 @@ public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
 
 		} catch (NamingException e) {
 			logger.error(sm.getString("activeDirectoryRealm.principalSearchFailed", gssName), e);
-
-			return null;
 		} finally {
 			LdapUtils.close(context);
 		}
