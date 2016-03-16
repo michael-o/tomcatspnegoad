@@ -33,8 +33,7 @@ Integrating with Spring Security
   for Spring Security at all. You might ask <<why>>? The answer is rather simple, Spring Security's
   APIs are so complex and different to those in Tomcat that it would mean to provide a complete
   reimplementation which is a maintenance nightmare. Something I am not willing to do and see real
-  no benefit in.\
-  Fortunately, the Spring guys were smart enough to think about lazy people like me:
+  no benefit in. Fortunately, the Spring guys were smart enough to think about lazy people like me:
   pre-athentication to the rescue! Spring Security comes with a set of classes completely wrapping
   authentication already perfomed by the container which is called Java EE Container Authentication.
 
