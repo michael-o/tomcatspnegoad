@@ -37,16 +37,16 @@ import org.ietf.jgss.GSSName;
  *
  * @version $Id$
  */
-public class GssAwareUserDatabaseRealm extends GssAwareRealmBase<UserDatabase> {
+public class GSSUserDatabaseRealm extends GSSRealmBase<UserDatabase> {
 
 	@Override
 	public String getInfo() {
-		return "net.sf.michaelo.realm.GssAwareUserDatabaseRealm/2.0";
+		return "net.sf.michaelo.realm.GSSUserDatabaseRealm/2.0";
 	}
 
 	@Override
 	protected String getName() {
-		return "GssAwareUserDatabaseRealm";
+		return "GSSUserDatabaseRealm";
 	}
 
 	@Override

@@ -34,7 +34,7 @@ import org.ietf.jgss.Oid;
  *
  * @version $Id$
  */
-abstract class GssAwareAuthenticatorBase extends AuthenticatorBase {
+abstract class GSSAuthenticatorBase extends AuthenticatorBase {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 	protected final StringManager sm = StringManager.getManager(getClass().getPackage().getName());

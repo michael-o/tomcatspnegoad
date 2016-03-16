@@ -24,7 +24,7 @@ import javax.security.auth.Subject;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 
-import net.sf.michaelo.tomcat.realm.GssAwareRealmBase;
+import net.sf.michaelo.tomcat.realm.GSSRealmBase;
 import net.sf.michaelo.tomcat.utils.Base64;
 
 import org.apache.catalina.authenticator.Constants;
@@ -54,7 +54,7 @@ import org.ietf.jgss.GSSName;
  * http://www.mail-archive.com/users@tomcat.apache.org/msg98308.html Solution:
  * net.sf.michaelo.tomcat.extras.valves.EnhancedErrorReportValve
  */
-public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
+public class SpnegoAuthenticator extends GSSAuthenticatorBase {
 
 	protected static final String SPNEGO_METHOD = "SPNEGO";
 	protected static final String SPNEGO_AUTH_SCHEME = "Negotiate";
@@ -204,7 +204,7 @@ public class SpnegoAuthenticator extends GssAwareAuthenticatorBase {
 					if (logger.isDebugEnabled())
 						logger.debug(sm.getString("spnegoAuthenticator.contextSuccessfullyEstablished"));
 
-					GssAwareRealmBase<?> realm = (GssAwareRealmBase<?>) context.getRealm();
+					GSSRealmBase<?> realm = (GSSRealmBase<?>) context.getRealm();
 					principal = realm.authenticate(gssContext);
 
 					if (principal == null) {

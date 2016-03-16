@@ -31,11 +31,12 @@ import org.ietf.jgss.GSSContext;
 import org.ietf.jgss.GSSName;
 
 /**
- * Base realm which is able to retrieve principals from {@link GSSName GSS names}.
+ * Base realm which is able to retrieve principals from {@link GSSName GSSNames} or fully
+ * established {@link GSSContext GSSContexts}.
  *
  * @version $Id$
  */
-public abstract class GssAwareRealmBase<T> extends RealmBase {
+public abstract class GSSRealmBase<T> extends RealmBase {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 	protected final StringManager sm = StringManager.getManager(getClass().getPackage().getName());

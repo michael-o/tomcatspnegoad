@@ -24,7 +24,7 @@ import javax.security.auth.Subject;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 
-import net.sf.michaelo.tomcat.realm.GssAwareRealmBase;
+import net.sf.michaelo.tomcat.realm.GSSRealmBase;
 
 import org.apache.catalina.authenticator.Constants;
 import org.apache.catalina.connector.Request;
@@ -45,7 +45,7 @@ import org.ietf.jgss.GSSName;
  *
  * @version $Id$
  */
-public class CurrentWindowsIdentityAuthenticator extends GssAwareAuthenticatorBase {
+public class CurrentWindowsIdentityAuthenticator extends GSSAuthenticatorBase {
 
 	protected static final String CURRENT_WINDOWS_IDENTITY_METHOD = "CURRENT_WINDOWS_IDENTITY";
 	protected static final String CURRENT_WINDOWS_IDENTITY_AUTH_SCHEME = "CWI";
@@ -121,7 +121,7 @@ public class CurrentWindowsIdentityAuthenticator extends GssAwareAuthenticatorBa
 			}
 
 			try {
-				GssAwareRealmBase<?> realm = (GssAwareRealmBase<?>) context.getRealm();
+				GSSRealmBase<?> realm = (GSSRealmBase<?>) context.getRealm();
 				GSSName srcName = gssCredential.getName();
 
 				principal = realm.authenticate(srcName);

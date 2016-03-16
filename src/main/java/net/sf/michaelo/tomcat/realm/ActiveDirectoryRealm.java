@@ -149,7 +149,7 @@ import org.ietf.jgss.GSSName;
  * @see ActiveDirectoryPrincipal
  * @version $Id$
  */
-public class ActiveDirectoryRealm extends GssAwareRealmBase<DirContextSource> {
+public class ActiveDirectoryRealm extends GSSRealmBase<DirContextSource> {
 
 	private static final UsernameSearchMapper[] USERNAME_SEARCH_MAPPERS = {
 			new SamAccountNameRfc2247Mapper(), new UserPrincipalNameSearchMapper() };
