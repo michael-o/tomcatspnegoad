@@ -4,7 +4,7 @@
 						http://maven.apache.org/xsd/changes-1.0.0.xsd">
 
 	<body>
-		<release version="2.0" date="TBD" description="Major documentation and realm overhaul">
+		<release version="2.0" date="2016-03-16" description="Major documentation and realm overhaul">
 			<action type="add" dev="michael-o">ActiveDirectoryRealm will properly inform about referral handling and log when not possible/failed</action>
 			<action type="add" dev="michael-o">Return anonymous principal (ANONYMOUS_SID) is GSS context is anonymous</action>
 			<action type="update" dev="michael-o">Realms return now principals with NULL_SID if not found instead of null because users are fully authenticated anyway</action>
