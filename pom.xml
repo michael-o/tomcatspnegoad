@@ -216,6 +216,7 @@
 			<plugin>
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<configuration>
+					<locale>en</locale>
 					<links>
 						<link>https://tomcat.apache.org/tomcat-6.0-doc/api</link>
 						<link>http://dirctxsrc.sourceforge.net/apidocs</link>
