@@ -31,7 +31,7 @@ About ${project.name}
 * Getting Started
 
   {{{./download.html}Download}} the artifact and read the {{{./user-guide.html}user guide}}
-  to get started.
+  to get started. Make sure to read the {{{./changes-report.html}changes}} also.
 
 * Origin of this Project
 
