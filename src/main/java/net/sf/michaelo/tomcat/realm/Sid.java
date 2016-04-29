@@ -35,27 +35,42 @@ public class Sid {
 			(byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
 			(byte) 0x00, (byte) 0x00, (byte) 0x00 });
 
-	public static final Sid ANONYMOUS_SID = new Sid(new byte[] { (byte) 0x01, (byte) 0x01, (byte) 0x00,
-			(byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x05, (byte) 0x07,
-			(byte) 0x00, (byte) 0x00, (byte) 0x00 });
+	public static final Sid ANONYMOUS_SID = new Sid(new byte[] { (byte) 0x01, (byte) 0x01,
+			(byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x05,
+			(byte) 0x07, (byte) 0x00, (byte) 0x00, (byte) 0x00 });
 
 	private byte[] bytes;
 
-	private byte revision;
-	private byte subAuthorityCount;
+	private int revision;
+	private int subAuthorityCount;
 	private byte[] identifierAuthority;
-	private int[] subAuthorities;
+	private long[] subAuthorities;
 
 	private String sidString;
 
 	public Sid(byte[] sid) {
+		if (sid == null)
+			throw new NullPointerException("sid cannot be null");
+
+		if (sid.length < 12)
+			throw new IllegalArgumentException(
+					"sid must be at least 12 bytes long but is " + sid.length);
+
 		this.bytes = Arrays.copyOf(sid, sid.length);
 
 		ByteBuffer bb = ByteBuffer.wrap(this.bytes);
 		bb.order(ByteOrder.LITTLE_ENDIAN);
 
-		this.revision = bb.get();
-		this.subAuthorityCount = bb.get();
+		// Always 0x01
+		this.revision = bb.get() & 0xFF;
+		if(this.revision != 0x01)
+			throw new IllegalArgumentException("sid revision must be 1 but is " + (this.revision & 0xFF));
+
+		// At most 15 subauthorities
+		this.subAuthorityCount = bb.get() & 0xFF;
+		if (this.subAuthorityCount > 15)
+			throw new IllegalArgumentException("sid sub authority count must be at most 15 but is " + this.subAuthorityCount);
+
 		this.identifierAuthority = new byte[6];
 		bb.get(this.identifierAuthority);
 
@@ -70,9 +85,9 @@ public class Sid {
 
 		sidStringBuilder.append('-').append(iaBb.getLong());
 
-		this.subAuthorities = new int[this.subAuthorityCount];
+		this.subAuthorities = new long[this.subAuthorityCount];
 		for (byte b = 0; b < this.subAuthorityCount; b++) {
-			this.subAuthorities[b] = bb.getInt();
+			this.subAuthorities[b] = bb.getInt() & 0xffffffffL;
 
 			sidStringBuilder.append('-').append(this.subAuthorities[b]);
 		}
@@ -86,15 +101,15 @@ public class Sid {
 
 	@Override
 	public boolean equals(Object obj) {
-		if(obj == null)
+		if (obj == null)
 			return false;
 
-		if(!(obj instanceof Sid))
+		if (!(obj instanceof Sid))
 			return false;
 
 		Sid that = (Sid) obj;
 
-		if(this == that)
+		if (this == that)
 			return true;
 
 		return Arrays.equals(this.bytes, that.bytes);
