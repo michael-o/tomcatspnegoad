@@ -24,8 +24,6 @@ import java.util.Arrays;
  * <a href="https://msdn.microsoft.com/en-us/library/gg465313.aspx">security identifier</a> from
  * Active Directory.
  * <p>
- * <strong>Note:</strong>: this class ignores possible integer overflows which might happen because
- * the specification of the SID works with unsigned integers only.
  *
  * @version $Id$
  */
@@ -50,11 +48,11 @@ public class Sid {
 
 	public Sid(byte[] sid) {
 		if (sid == null)
-			throw new NullPointerException("sid cannot be null");
+			throw new NullPointerException("SID cannot be null");
 
 		if (sid.length < 12)
 			throw new IllegalArgumentException(
-					"sid must be at least 12 bytes long but is " + sid.length);
+					"SID must be at least 12 bytes long but is " + sid.length);
 
 		this.bytes = Arrays.copyOf(sid, sid.length);
 
@@ -64,12 +62,12 @@ public class Sid {
 		// Always 0x01
 		this.revision = bb.get() & 0xFF;
 		if(this.revision != 0x01)
-			throw new IllegalArgumentException("sid revision must be 1 but is " + (this.revision & 0xFF));
+			throw new IllegalArgumentException("SID revision must be 1 but is " + (this.revision & 0xFF));
 
 		// At most 15 subauthorities
 		this.subAuthorityCount = bb.get() & 0xFF;
 		if (this.subAuthorityCount > 15)
-			throw new IllegalArgumentException("sid sub authority count must be at most 15 but is " + this.subAuthorityCount);
+			throw new IllegalArgumentException("SID sub authority count must be at most 15 but is " + this.subAuthorityCount);
 
 		this.identifierAuthority = new byte[6];
 		bb.get(this.identifierAuthority);
