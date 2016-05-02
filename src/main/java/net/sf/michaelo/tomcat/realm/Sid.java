@@ -61,13 +61,15 @@ public class Sid {
 
 		// Always 0x01
 		this.revision = bb.get() & 0xFF;
-		if(this.revision != 0x01)
-			throw new IllegalArgumentException("SID revision must be 1 but is " + (this.revision & 0xFF));
+		if (this.revision != 0x01)
+			throw new IllegalArgumentException(
+					"SID revision must be 1 but is " + (this.revision & 0xFF));
 
 		// At most 15 subauthorities
 		this.subAuthorityCount = bb.get() & 0xFF;
 		if (this.subAuthorityCount > 15)
-			throw new IllegalArgumentException("SID sub authority count must be at most 15 but is " + this.subAuthorityCount);
+			throw new IllegalArgumentException(
+					"SID sub authority count must be at most 15 but is " + this.subAuthorityCount);
 
 		this.identifierAuthority = new byte[6];
 		bb.get(this.identifierAuthority);
