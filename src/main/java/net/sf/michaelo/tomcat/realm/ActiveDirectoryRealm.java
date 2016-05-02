@@ -41,6 +41,7 @@ import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 import javax.naming.ldap.LdapName;
 import javax.naming.ldap.ManageReferralControl;
+import javax.naming.ldap.Rdn;
 import javax.security.sasl.SaslClient;
 
 import net.sf.michaelo.dirctxsrc.DirContextSource;
@@ -600,15 +601,15 @@ public class ActiveDirectoryRealm extends GSSRealmBase<DirContextSource> {
 			throws NamingException {
 
 		NameParser parser = context.getNameParser(StringUtils.EMPTY);
-		Name nameInNamespace = parser.parse(context.getNameInNamespace());
-		Name name = parser.parse(distinguishedName);
+		LdapName nameInNamespace = (LdapName) parser.parse(context.getNameInNamespace());
+		LdapName name = (LdapName) parser.parse(distinguishedName);
 
-		String nameRdn;
-		String nameInNamespaceRdn;
+		Rdn nameRdn;
+		Rdn nameInNamespaceRdn;
 
 		while (Math.min(name.size(), nameInNamespace.size()) != 0) {
-			nameRdn = name.get(0);
-			nameInNamespaceRdn = nameInNamespace.get(0);
+			nameRdn = name.getRdn(0);
+			nameInNamespaceRdn = nameInNamespace.getRdn(0);
 			if (nameRdn.equals(nameInNamespaceRdn)) {
 				name.remove(0);
 				nameInNamespace.remove(0);
@@ -619,8 +620,8 @@ public class ActiveDirectoryRealm extends GSSRealmBase<DirContextSource> {
 		int innerPosn;
 		while (Math.min(name.size(), nameInNamespace.size()) != 0) {
 			innerPosn = nameInNamespace.size() - 1;
-			nameRdn = name.get(0);
-			nameInNamespaceRdn = nameInNamespace.get(innerPosn);
+			nameRdn = name.getRdn(0);
+			nameInNamespaceRdn = nameInNamespace.getRdn(innerPosn);
 			if (nameRdn.equals(nameInNamespaceRdn)) {
 				name.remove(0);
 				nameInNamespace.remove(innerPosn);
