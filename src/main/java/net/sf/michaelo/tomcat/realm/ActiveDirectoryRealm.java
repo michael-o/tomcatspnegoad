@@ -211,8 +211,6 @@ public class ActiveDirectoryRealm extends GSSRealmBase<DirContextSource> {
 
 			if ("follow".equals(referral))
 				logger.warn(sm.getString("activeDirectoryRealm.referralFollow"));
-			else if ("throw".equals(referral))
-				logger.warn(sm.getString("activeDirectoryRealm.referralThrow"));
 		} catch (NamingException e) {
 			logger.error(sm.getString("activeDirectoryRealm.environmentFailed"), e);
 		} finally {
