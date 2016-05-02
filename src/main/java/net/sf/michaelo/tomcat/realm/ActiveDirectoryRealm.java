@@ -80,7 +80,7 @@ import org.ietf.jgss.GSSName;
  * </ul>
  * <p>
  * By default the SIDs ({@code objectSid} and {@code sIDHistory}) of the Active Directory security
- * groups will be retreived.
+ * groups will be retrieved.
  * <h3></h3>
  * <h4 id="referral-handling">Referral Handling</h4> When working with the default LDAP ports (not
  * GC) or in a multi-forest environment, it is highly likely to receive referrals (either
@@ -92,7 +92,7 @@ import org.ietf.jgss.GSSName;
  * {@code ignore} is set but Active Directory does not support it and returns a referral anyway.
  * This realm will catch this and continue to process the enumeration. If the
  * {@code DirContextSource} is set to {@code throw}, this realm will catch the
- * {@link ReferralException} but avoid to follow the referral(s) manually for several reasons and
+ * {@link ReferralException} but avoid to follow the referral(s) manually (for several reasons) and
  * will continue with the process. Following referrals automatically is a completely opaque
  * operation to the application, the {@code ReferralException} is handled internally and referral
  * contexts are queried and closed. Unfortunately, Oracle's LDAP implementation is not able to
