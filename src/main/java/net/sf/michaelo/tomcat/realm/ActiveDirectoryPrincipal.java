@@ -111,12 +111,20 @@ public class ActiveDirectoryPrincipal implements Principal {
 	 * @return true if principal is associated with the role, else false
 	 */
 	public boolean hasRole(String role) {
-
 		if (role == null)
 			return false;
 		if (role.equals("*"))
 			return true;
 		return roles.contains(role);
+	}
+
+	/**
+	 * Returns the role SID strings of the given principal.
+	 *
+	 * @return a read-only view of the roles
+	 */
+	public List<String> getRoles() {
+		return roles;
 	}
 
 	/**
