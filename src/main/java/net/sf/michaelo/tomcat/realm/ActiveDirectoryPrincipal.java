@@ -34,7 +34,8 @@ import org.ietf.jgss.GSSName;
  * <li>the list of security groups the user has been assigned to, stored as SID strings (the actual
  * values are queried with {@code memberOf} and retrieved from {@code objectSid} and
  * {@code sIDHistory}),</li>
- * <li>and a map with additional attributes.</li>
+ * <li>and a map with additional attributes which are either a {@code String}, {@code byte[]} or a
+ * {@code List} of either one.</li>
  * </ul>
  *
  * @version $Id$

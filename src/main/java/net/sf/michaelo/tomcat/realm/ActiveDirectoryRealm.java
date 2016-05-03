@@ -171,7 +171,13 @@ public class ActiveDirectoryRealm extends GSSRealmBase<DirContextSource> {
 		return "ActiveDirectoryRealm";
 	}
 
-	// TODO Document me!
+	/**
+	 * Sets a comma-separated list of Active Directory attributes retreived and stored for the user
+	 * principal.
+	 *
+	 * @param additionalAttributes
+	 *            the additional attributes.
+	 */
 	public void setAdditionalAttributes(String additionalAttributes) {
 		this.additionalAttributes = additionalAttributes.split(",");
 	}
