@@ -4,6 +4,13 @@
 						http://maven.apache.org/xsd/changes-1.0.0.xsd">
 
 	<body>
+		<release version="2.0.1" date="TBD" description="Minor improvements">
+			<action type="add" dev="michael-o">Have ActiveDirectoryPrincipal expose roles as SID strings via #getRoles()</action>
+			<action type="update" dev="michael-o">Upgrade to DirContextSource 1.3</action>
+			<action type="remove" dev="michael-o">Don't log that referral throw is not handled</action>
+			<action type="fix" dev="michael-o">Make #getRelativeName() comparison case-insensitive as per RFC 2253</action>
+			<action type="fix" dev="michael-o">Avoid number overflows while parsing a SID from bytes</action>
+		</release>
 		<release version="2.0" date="2016-03-16" description="Major documentation and realm overhaul">
 			<action type="add" dev="michael-o">ActiveDirectoryRealm will properly inform about referral handling and log when not possible/failed</action>
 			<action type="add" dev="michael-o">Return anonymous principal (ANONYMOUS_SID) is GSS context is anonymous</action>
