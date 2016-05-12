@@ -51,7 +51,7 @@ Choosing and Using Authenticators
 [$ellipsis]
   <!-- Add this -->
   <Valve className="net.sf.michaelo.tomcat.authenticator.SpnegoAuthenticator"
-    loginEntryName="a-login-entry" storeDelegatedCredential="true|false" />
+    loginEntryName="a-login-entry" />
 [$ellipsis]
 </Context>
 +----------------------------
@@ -59,17 +59,12 @@ Choosing and Using Authenticators
   Provide the login entry name from your <<<login.conf>>> configured for the machine account
   capable of accepting GSS contexts with SPNEGO/Kerberos.
 
-  Additionally, you may instruct the authenticator to store the delegated credential of a user if
-  you need to perform further operations on the user's behalf (impersonation). Default value is
-  <<<false>>>. Keep in mind that Active Directory accounts have to be explicitly enabled for this.
-
   You have successfully configured the <<<SpnegoAuthenticator>>> in your webapp. It is now ready to use.
 
 * Using an Authenticator During Development
 
   After examining the authenticator above and probably ask yourself: How do I use that on my local
-  development machine? Generally, you can't in Windows due to {{{http://stackoverflow.com/q/17705727/696632}this}}
-  stupidity. {{{./apidocs/net/sf/michaelo/tomcat/authenticator/CurrentWindowsIdentityAuthenticator.html}<<<CurrentWindowsIdentityAuthenticator>>>}}
+  development machine? {{{./apidocs/net/sf/michaelo/tomcat/authenticator/CurrentWindowsIdentityAuthenticator.html}<<<CurrentWindowsIdentityAuthenticator>>>}}
   to the rescue. It will automatically obtain the GSS credential of the currently logged in domain
   user and auto-login you in the application. This is very handy when you are running your Tomcat
   instance inside Eclipse.
