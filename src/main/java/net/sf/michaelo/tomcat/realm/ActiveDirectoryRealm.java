@@ -202,7 +202,7 @@ public class ActiveDirectoryRealm extends GSSRealmBase<DirContextSource> {
 		try {
 			dirContextSource = lookupResource();
 		} catch (NamingException e) {
-			logger.error(sm.getString("activeDirectoryealm.lookupFailed", resourceName), e);
+			logger.error(sm.getString("activeDirectoryRealm.lookupFailed", resourceName), e);
 
 			return;
 		}
