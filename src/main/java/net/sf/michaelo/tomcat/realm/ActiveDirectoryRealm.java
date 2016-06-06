@@ -398,7 +398,7 @@ public class ActiveDirectoryRealm extends GSSRealmBase<DirContextSource> {
 		}
 
 		if (results == null) {
-			logger.info(sm.getString("activeDirectoryRealm.userNotFound", gssName));
+			logger.debug(sm.getString("activeDirectoryRealm.userNotFound", gssName));
 
 			return null;
 		}
