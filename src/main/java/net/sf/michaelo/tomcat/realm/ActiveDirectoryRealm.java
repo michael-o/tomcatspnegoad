@@ -291,15 +291,13 @@ public class ActiveDirectoryRealm extends GSSRealmBase<DirContextSource> {
 			User user = getUser(context, gssName);
 
 			if (user != null) {
-				if (user.getSid().equals(Sid.NULL_SID))
-					principal = new ActiveDirectoryPrincipal(gssName, user.getSid(),
-							delegatedCredential);
-				else {
-					List<String> roles = getRoles(context, user);
+				List<String> roles = getRoles(context, user);
 
-					principal = new ActiveDirectoryPrincipal(gssName, user.getSid(),
-							delegatedCredential, roles, user.getAdditionalAttributes());
-				}
+				principal = new ActiveDirectoryPrincipal(gssName, user.getSid(),
+						delegatedCredential, roles, user.getAdditionalAttributes());
+			} else {
+				principal = new ActiveDirectoryPrincipal(gssName, Sid.NULL_SID,
+						delegatedCredential);
 			}
 		} catch (NamingException e) {
 			logger.error(sm.getString("activeDirectoryRealm.principalSearchFailed", gssName), e);
@@ -402,7 +400,7 @@ public class ActiveDirectoryRealm extends GSSRealmBase<DirContextSource> {
 		if (results == null) {
 			logger.info(sm.getString("activeDirectoryRealm.userNotFound", gssName));
 
-			return new User(gssName, Sid.NULL_SID, null, null);
+			return null;
 		}
 
 		SearchResult result = results.next();
