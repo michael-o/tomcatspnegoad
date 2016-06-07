@@ -4,7 +4,7 @@
 						http://maven.apache.org/xsd/changes-1.0.0.xsd">
 
 	<body>
-		<release version="2.0.1" date="TBD" description="Minor improvements">
+		<release version="2.1" date="TBD" description="Minor improvements and new features">
 			<action type="add" dev="michael-o">Have ActiveDirectoryPrincipal expose roles as SID strings via #getRoles()</action>
 			<action type="update" dev="michael-o">Upgrade to DirContextSource 1.3</action>
 			<action type="remove" dev="michael-o">Don't log that referral throw is not handled</action>
