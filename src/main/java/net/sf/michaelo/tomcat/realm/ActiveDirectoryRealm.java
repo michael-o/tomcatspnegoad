@@ -295,9 +295,6 @@ public class ActiveDirectoryRealm extends GSSRealmBase<DirContextSource> {
 
 				principal = new ActiveDirectoryPrincipal(gssName, user.getSid(),
 						delegatedCredential, roles, user.getAdditionalAttributes());
-			} else {
-				principal = new ActiveDirectoryPrincipal(gssName, Sid.NULL_SID,
-						delegatedCredential);
 			}
 		} catch (NamingException e) {
 			logger.error(sm.getString("activeDirectoryRealm.principalSearchFailed", gssName), e);
