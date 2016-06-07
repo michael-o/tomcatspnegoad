@@ -84,7 +84,7 @@ import org.ietf.jgss.GSSName;
  * <h3></h3>
  * <h4 id="referral-handling">Referral Handling</h4> When working with the default LDAP ports (not
  * GC) or in a multi-forest environment, it is highly likely to receive referrals (either
- * subordinate or cross-forest) during a search or lookup. JNDI takes several approaches to handle
+ * subordinate or cross) during a search or lookup. JNDI takes several approaches to handle
  * referrals with the {@code java.naming.referral} property and its values: {@code ignore},
  * {@code throw}, and {@code follow}. You can ignore referrals altogether, but the Active Directory
  * will still signal a {@link PartialResultException} when a {@link NamingEnumeration} is iterated.
@@ -96,12 +96,13 @@ import org.ietf.jgss.GSSName;
  * will continue with the process. Following referrals automatically is a completely opaque
  * operation to the application, the {@code ReferralException} is handled internally and referral
  * contexts are queried and closed. Unfortunately, Oracle's LDAP implementation is not able to
- * handle this properly and only Oracle can fix this shortcoming. Issues have already been reported!
+ * handle this properly and only Oracle can fix this shortcoming. Issues have already been reported
+ * (Review IDs 9089870 and 9089874)!
  * <p>
  * <em>What is the shortcoming and how can it be solved?</em> Microsoft takes a very sophisticated
  * approach on not to rely on host names because servers can be provisioned and decommissioned any
  * time. Instead, they heavily rely on DNS domain names and DNS SRV records at runtime. I.e., an
- * initial or a referral URL do not contain a host name, but only a DNS domain name. While you can
+ * initial or a referral URL does not contain a host name, but only a DNS domain name. While you can
  * connect to the service with this name, you cannot easily authenticate against it with Kerberos
  * because one cannot bind the same SPN {@code ldap/<dnsDomainName>@<REALM>}, e.g.,
  * {@code ldap/example.com@EXAMPLE.COM} to more than one account. If you try authenticate anyway,
@@ -110,10 +111,9 @@ import org.ietf.jgss.GSSName;
  * name or a DNS domain name served by one or more machines. If it turns out to be a DNS domain
  * name, you have to select one target host from the query response (according to RFC 2782),
  * construct a domain-based SPN {@code ldap/<targetHost>/<dnsDomainName>@<REALM>} or a host-based
- * one {@code ldap/<targetHost>@
- * <REALM>}, obtain a service ticket for and connect to that target host. If it is a regular host
- * name, which is not the usual case with Active Directory, Oracle's internal implementation will
- * behave correctly.<br>
+ * one {@code ldap/<targetHost>@<REALM>}, obtain a service ticket for and connect to that target
+ * host. If it is a regular host name, which is not the usual case with Active Directory, Oracle's
+ * internal implementation will behave correctly.<br>
  * The {@code follow} implementation cannot be made to work because there is no way to tell the
  * internal classes to perform this DNS SRV query and pass the appropriate server name(s) for the
  * SPN to the {@link SaslClient}. It is deemed to fail. Note, that host name canocalization might
@@ -132,11 +132,22 @@ import org.ietf.jgss.GSSName;
  * at this time and won't be implemented. (Changing the URLs manually in the debugger makes it work
  * actually)
  * <p>
- * <em>How to work around this issue?</em> Use the global catalog (port 3268) as much as you can. If
- * this won't help and you know your target forests upfront, you can set up a {@link CombinedRealm},
- * configure nested realms one per each forest with {@code ignore} and let the principal iterate
- * over all of them until it hits the target forest. You will then have the client properly looked
- * up in the Active Directory.
+ * <em>How to work around this issue?</em> There are several ways depending on your setup: Use the
+ * Global Catalog (port 3268) with
+ * <ul>
+ * <li>a single forest and set referrals to {@code ignore}, or</li>
+ * <li>multiple forests and set referrals to either
+ * <ul>
+ * <li>{@code follow} with a {@link DirContextSource} in your home forest, patch
+ * {@code com.sun.jndi.ldap.LdapCtx} to properly resolve DNS names to host names and prepend it to
+ * the boot classpath and all referrals will be cleanly resolved, or</li>
+ * <li>{@code ignore} with multiple {@code DirContextSources}, and create a
+ * {@link CombinedActiveDirectoryRealm} with one {@code ActiveDirectoryRealm} per forest.</li>
+ * </ul>
+ * </li>
+ * </ul>
+ *
+ * You will then have the principal properly looked up in the Active Directory.
  * <p>
  * This issue is also documented on <a href="http://stackoverflow.com/q/25436410/696632">Stack
  * Overflow</a>. Additionally,
