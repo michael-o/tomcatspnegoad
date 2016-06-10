@@ -52,7 +52,6 @@ import net.sf.michaelo.tomcat.realm.mapper.UsernameSearchMapper.MappedValues;
 import net.sf.michaelo.tomcat.utils.LdapUtils;
 
 import org.apache.catalina.Context;
-import org.apache.catalina.realm.CombinedRealm;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.ietf.jgss.GSSContext;
