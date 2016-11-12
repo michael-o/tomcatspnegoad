@@ -78,7 +78,7 @@
 	</distributionManagement>
 
 	<properties>
-		<tomcat.version>6.0.45</tomcat.version>
+		<tomcat.version>8.5.8</tomcat.version>
 	</properties>
 
 	<dependencies>
@@ -89,19 +89,19 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.tomcat</groupId>
-			<artifactId>catalina</artifactId>
+			<artifactId>tomcat-catalina</artifactId>
 			<version>${tomcat.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.tomcat</groupId>
-			<artifactId>juli</artifactId>
+			<artifactId>tomcat-juli</artifactId>
 			<version>${tomcat.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.tomcat</groupId>
-			<artifactId>servlet-api</artifactId>
+			<artifactId>tomcat-servlet-api</artifactId>
 			<version>${tomcat.version}</version>
 			<scope>provided</scope>
 		</dependency>
