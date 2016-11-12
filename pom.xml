@@ -202,11 +202,6 @@
 					</links>
 				</configuration>
 			</plugin>
-			<!-- Remove when Parent 10 is released -->
-			<plugin>
-				<artifactId>maven-site-plugin</artifactId>
-				<version>3.5.1</version>
-			</plugin>
 		</plugins>
 	</build>
 
