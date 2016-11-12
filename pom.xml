@@ -55,10 +55,6 @@
 		</mailingList>
 	</mailingLists>
 
-	<prerequisites>
-		<maven>${maven.version}</maven>
-	</prerequisites>
-
 	<scm>
 		<connection>scm:svn:http://svn.code.sf.net/p/tomcatspnegoad/code/trunk</connection>
 		<developerConnection>scm:svn:https://svn.code.sf.net/p/tomcatspnegoad/code/trunk</developerConnection>
