@@ -197,7 +197,7 @@
 				<configuration>
 					<locale>en</locale>
 					<links>
-						<link>https://tomcat.apache.org/tomcat-6.0-doc/api</link>
+						<link>https://tomcat.apache.org/tomcat-8.5-doc/api</link>
 						<link>http://dirctxsrc.sourceforge.net/apidocs</link>
 					</links>
 				</configuration>
@@ -212,7 +212,7 @@
 				<configuration>
 					<locale>en</locale>
 					<links>
-						<link>https://tomcat.apache.org/tomcat-6.0-doc/api</link>
+						<link>https://tomcat.apache.org/tomcat-8.5-doc/api</link>
 						<link>http://dirctxsrc.sourceforge.net/apidocs</link>
 					</links>
 				</configuration>
