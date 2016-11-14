@@ -29,7 +29,7 @@
 User Guide
 
   To make use of this library you must run at least Java #property("maven.compiler.target") and
-  Apache Tomcat <<6.0 only>> due to ABI changes in version 7.0.
+  Apache Tomcat 8.5 or newer.
 
     [Prerequisites] Make sure that the machine running the Tomcat instance (a) has joined a domain,
                     (b) has an appropriate {{{http://msdn.microsoft.com/en-us/library/windows/desktop/ms677949%28v=vs.85%29.aspx}SPN}}
