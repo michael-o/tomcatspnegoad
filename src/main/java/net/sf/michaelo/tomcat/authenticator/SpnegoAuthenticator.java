@@ -23,16 +23,14 @@ import java.security.PrivilegedExceptionAction;
 import javax.security.auth.Subject;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
+import javax.servlet.http.HttpServletResponse;
 
 import net.sf.michaelo.tomcat.realm.GSSRealmBase;
-import net.sf.michaelo.tomcat.utils.Base64;
 
-import org.apache.catalina.authenticator.Constants;
 import org.apache.catalina.connector.Request;
-import org.apache.catalina.connector.Response;
-import org.apache.catalina.deploy.LoginConfig;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.tomcat.util.codec.binary.Base64;
 import org.ietf.jgss.GSSContext;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
@@ -41,11 +39,6 @@ import org.ietf.jgss.GSSName;
 
 /**
  * A SPNEGO Authenticator which utilizes GSS-API to authenticate a client.
- * <p>
- * This authenticator has the following configuration options:
- * <ul>
- * <li>{@code loginEntryName}: Login entry name with a configured {@code Krb5LoginModule}.</li>
- * </ul>
  *
  * @version $Id$
  */
@@ -64,42 +57,12 @@ public class SpnegoAuthenticator extends GSSAuthenticatorBase {
 			(byte) 0x00, (byte) 0x00 };
 
 	@Override
-	public String getInfo() {
-		return "net.sf.michaelo.tomcat.authenticator.SpnegoAuthenticator/2.0";
-	}
-
-	@Override
-	protected boolean authenticate(Request request, Response response, LoginConfig config)
+	protected boolean doAuthenticate(Request request, HttpServletResponse response)
 			throws IOException {
 
-		// HttpServletRequest request = req.getRequest();
-		// HttpServletResponse response = resp.getResponse();
-
-		Principal principal = request.getUserPrincipal();
-		// String ssoId = (String) request.getNote(Constants.REQ_SSOID_NOTE);
-		if (principal != null) {
-			if (logger.isDebugEnabled())
-				logger.debug(sm.getString("authenticator.alreadyAuthenticated", principal));
-			String ssoId = (String) request.getNote(Constants.REQ_SSOID_NOTE);
-			if (ssoId != null)
-				associate(ssoId, request.getSessionInternal(true));
+		if (checkForCachedAuthentication(request, response, true)) {
 			return true;
 		}
-
-		// NOTE: We don't try to reauthenticate using any existing SSO session,
-		// because that will only work if the original authentication was
-		// BASIC or FORM, which are less secure than the SPNEGO auth-type
-		// specified for this webapp
-
-		/*
-		if (ssoId != null) {
-			if (logger.isDebugEnabled())
-				logger.debug(String.format("SSO Id %s set; attempting reauthentication", ssoId));
-
-			if (reauthenticateFromSSO(ssoId, request))
-				return true;
-		}
-		*/
 
 		String authorization = request.getHeader("Authorization");
 
@@ -123,7 +86,7 @@ public class SpnegoAuthenticator extends GSSAuthenticatorBase {
 			logger.debug(sm.getString("spnegoAuthenticator.processingToken", authorizationValue));
 
 		try {
-			inToken = Base64.decode(authorizationValue);
+			inToken = Base64.decodeBase64(authorizationValue);
 		} catch (Exception e) {
 			logger.warn(sm.getString("spnegoAuthenticator.incorrectlyEncodedToken",
 					authorizationValue), e);
@@ -153,6 +116,7 @@ public class SpnegoAuthenticator extends GSSAuthenticatorBase {
 
 		LoginContext lc = null;
 		GSSContext gssContext = null;
+		Principal principal = null;
 
 		try {
 			try {
@@ -205,7 +169,7 @@ public class SpnegoAuthenticator extends GSSAuthenticatorBase {
 						logger.debug(sm.getString("spnegoAuthenticator.contextSuccessfullyEstablished"));
 
 					GSSRealmBase<?> realm = (GSSRealmBase<?>) context.getRealm();
-					principal = realm.authenticate(gssContext);
+					principal = realm.authenticate(gssContext, isStoreDelegatedCredential());
 
 					if (principal == null) {
 						GSSName srcName = gssContext.getSrcName();
@@ -248,16 +212,19 @@ public class SpnegoAuthenticator extends GSSAuthenticatorBase {
 		register(request, response, principal, SPNEGO_METHOD, principal.getName(), null);
 
 		if (ArrayUtils.isNotEmpty(outToken)) {
-			String authenticationValue = Base64.encode(outToken);
-
+			String authenticationValue = Base64.encodeBase64String(outToken);
 			if (logger.isDebugEnabled())
 				logger.debug(sm.getString("spnegoAuthenticator.respondingWithToken", authenticationValue));
 
-			response.setHeader("WWW-Authenticate",
-					SPNEGO_AUTH_SCHEME + " " + authenticationValue);
+			response.setHeader(AUTH_HEADER_NAME, SPNEGO_AUTH_SCHEME + " " + authenticationValue);
 		}
 
 		return true;
+	}
+
+	@Override
+	protected String getAuthMethod() {
+		return SPNEGO_METHOD;
 	}
 
 }
