@@ -16,19 +16,11 @@
 package net.sf.michaelo.tomcat.realm;
 
 import java.security.Principal;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
-import javax.naming.NamingException;
-
-import org.apache.catalina.Group;
-import org.apache.catalina.Role;
-import org.apache.catalina.User;
 import org.apache.catalina.UserDatabase;
-import org.apache.catalina.realm.GenericPrincipal;
 import org.apache.catalina.realm.UserDatabaseRealm;
 import org.ietf.jgss.GSSContext;
+import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
 import org.ietf.jgss.GSSName;
 
@@ -39,116 +31,49 @@ import org.ietf.jgss.GSSName;
  */
 public class GSSUserDatabaseRealm extends GSSRealmBase<UserDatabase> {
 
-	@Override
-	public String getInfo() {
-		return "net.sf.michaelo.realm.GSSUserDatabaseRealm/2.0";
-	}
+	/**
+	 * Descriptive information about this Realm implementation.
+	 */
+	protected static final String name = "GSSUserDatabaseRealm";
 
 	@Override
 	protected String getName() {
-		return "GSSUserDatabaseRealm";
+		return name;
 	}
 
 	@Override
-	public Principal authenticate(GSSName gssName) {
-		if(gssName == null)
-			throw new NullPointerException("gssName cannot be null");
-
-		UserDatabase database = null;
-
-		try {
-			database = lookupResource();
-		} catch (NamingException e) {
-			logger.error(sm.getString("userDatabaseRealm.lookupFailed", resourceName), e);
-
-			return null;
-		}
-
-		String username = gssName.toString();
-		User user = database.findUser(username);
-		if (user == null) {
-			return new GenericPrincipal(this, username, null);
-		}
-
-		List<String> roles = new ArrayList<String>();
-		Iterator<?> uroles = user.getRoles();
-		while (uroles.hasNext()) {
-			Role role = (Role) uroles.next();
-			roles.add(role.getName());
-		}
-		Iterator<?> groups = user.getGroups();
-		while (groups.hasNext()) {
-			Group group = (Group) groups.next();
-			uroles = group.getRoles();
-			while (uroles.hasNext()) {
-				Role role = (Role) uroles.next();
-				roles.add(role.getName());
-			}
-		}
-
-		return new GenericPrincipal(this, username, null, roles, user);
+	public Principal authenticate(GSSName gssName, GSSCredential gssCredential) {
+		return getPrincipal(String.valueOf(gssName), gssCredential);
 	}
 
 	@Override
-	public Principal authenticate(GSSContext gssContext) {
-		if(gssContext == null)
+	public Principal authenticate(GSSContext gssContext, boolean storeCreds) {
+		if (gssContext == null)
 			throw new NullPointerException("gssContext cannot be null");
 
-		if(!gssContext.isEstablished())
+		if (!gssContext.isEstablished())
 			throw new IllegalStateException("gssContext is not fully established");
 
+		GSSName gssName;
+		GSSCredential delegatedCredential = null;
+
 		try {
-			GSSName gssName = gssContext.getSrcName();
-			return authenticate(gssName);
+			gssName = gssContext.getSrcName();
+
+			if (storeCreds) {
+				if (gssContext.getCredDelegState()) {
+					delegatedCredential = gssContext.getDelegCred();
+				} else if (logger.isDebugEnabled())
+					logger.debug(
+							sm.getString("activeDirectoryRealm.credentialNotDelegable", gssName));
+			}
 		} catch (GSSException e) {
 			logger.error(sm.getString("realm.inquireFailed"), e);
 
 			return null;
 		}
-	}
 
-	public boolean hasRole(Principal principal, String role) {
-		if (principal instanceof GenericPrincipal) {
-			GenericPrincipal gp = (GenericPrincipal) principal;
-			if (gp.getUserPrincipal() instanceof User) {
-				principal = gp.getUserPrincipal();
-			}
-		}
-		if (!(principal instanceof User)) {
-			// Play nice with SSO and mixed Realms
-			return super.hasRole(principal, role);
-		}
-		if ("*".equals(role)) {
-			return true;
-		} else if (role == null) {
-			return false;
-		}
-		User user = (User) principal;
-
-		UserDatabase database;
-		try {
-			database = lookupResource();
-		} catch (NamingException e) {
-			logger.error(sm.getString("userDatabaseRealm.lookupFailed", resourceName), e);
-
-			return false;
-		}
-
-		Role dbrole = database.findRole(role);
-		if (dbrole == null) {
-			return false;
-		}
-		if (user.isInRole(dbrole)) {
-			return true;
-		}
-		Iterator<?> groups = user.getGroups();
-		while (groups.hasNext()) {
-			Group group = (Group) groups.next();
-			if (group.isInRole(dbrole)) {
-				return true;
-			}
-		}
-		return false;
+		return getPrincipal(String.valueOf(gssName), delegatedCredential);
 	}
 
 }
