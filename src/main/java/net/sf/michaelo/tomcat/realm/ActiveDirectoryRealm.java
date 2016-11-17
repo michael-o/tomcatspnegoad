@@ -52,6 +52,8 @@ import net.sf.michaelo.tomcat.realm.mapper.UsernameSearchMapper.MappedValues;
 import net.sf.michaelo.tomcat.utils.LdapUtils;
 
 import org.apache.catalina.Context;
+import org.apache.catalina.LifecycleException;
+import org.apache.catalina.Wrapper;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.ietf.jgss.GSSContext;
@@ -73,9 +75,6 @@ import org.ietf.jgss.GSSName;
  * principal. Binary attributes must succeed with {@code ;binary} and will be stored as
  * {@code byte[]}, ordinary attributes will be stored as {@code String}. If an attribute is
  * multivalued, it will be stored as {@code List}.</li>
- * <li>{@code storeDelegatedCredential}: Store the client's (initiator's) delegated credential in
- * the user principal (optional). Valid values are {@code true}, {@code false}. Default value is
- * {@code false}.</li>
  * </ul>
  * <p>
  * By default the SIDs ({@code objectSid} and {@code sIDHistory}) of the Active Directory security
@@ -171,16 +170,15 @@ public class ActiveDirectoryRealm extends GSSRealmBase<DirContextSource> {
 			"memberOf", "objectSid;binary" };
 
 	private String[] additionalAttributes;
-	protected boolean storeDelegatedCredential;
 
-	@Override
-	public String getInfo() {
-		return "net.sf.michaelo.tomcat.realm.ActiveDirectoryRealm/2.0";
-	}
+	/**
+	 * Descriptive information about this Realm implementation.
+	 */
+	protected static final String name = "ActiveDirectoryRealm";
 
 	@Override
 	protected String getName() {
-		return "ActiveDirectoryRealm";
+		return name;
 	}
 
 	/**
@@ -194,26 +192,15 @@ public class ActiveDirectoryRealm extends GSSRealmBase<DirContextSource> {
 		this.additionalAttributes = additionalAttributes.split(",");
 	}
 
-	/**
-	 * Sets whether client's (initiator's) delegated credential is stored in the user principal.
-	 *
-	 * @param storeDelegatedCredential
-	 *            the store delegated credential indication
-	 */
-	public void setStoreDelegatedCredential(boolean storeDelegatedCredential) {
-		this.storeDelegatedCredential = storeDelegatedCredential;
-	}
-
 	@Override
-	public void init() {
-		super.init();
+	protected void initInternal() throws LifecycleException {
+		super.initInternal();
 
 		DirContextSource dirContextSource = null;
 		try {
 			dirContextSource = lookupResource();
 		} catch (NamingException e) {
 			logger.error(sm.getString("activeDirectoryRealm.lookupFailed", resourceName), e);
-
 			return;
 		}
 		DirContext context = null;
@@ -237,12 +224,12 @@ public class ActiveDirectoryRealm extends GSSRealmBase<DirContextSource> {
 	}
 
 	@Override
-	public Principal authenticate(GSSName gssName) {
-		return authenticateInternal(gssName, null);
+	public Principal authenticate(GSSName gssName, GSSCredential gssCredential) {
+		return getPrincipal(gssName, null);
 	}
 
 	@Override
-	public Principal authenticate(GSSContext gssContext) {
+	public Principal authenticate(GSSContext gssContext, boolean storeCreds) {
 		if (gssContext == null)
 			throw new NullPointerException("gssContext cannot be null");
 
@@ -255,7 +242,7 @@ public class ActiveDirectoryRealm extends GSSRealmBase<DirContextSource> {
 		try {
 			gssName = gssContext.getSrcName();
 
-			if (storeDelegatedCredential) {
+			if (storeCreds) {
 				if (gssContext.getCredDelegState()) {
 					delegatedCredential = gssContext.getDelegCred();
 				} else if (logger.isDebugEnabled())
@@ -268,10 +255,10 @@ public class ActiveDirectoryRealm extends GSSRealmBase<DirContextSource> {
 			return null;
 		}
 
-		return authenticateInternal(gssName, delegatedCredential);
+		return getPrincipal(gssName, delegatedCredential);
 	}
 
-	private Principal authenticateInternal(GSSName gssName, GSSCredential delegatedCredential) {
+	private Principal getPrincipal(GSSName gssName, GSSCredential delegatedCredential) {
 		if (gssName == null)
 			throw new NullPointerException("gssName cannot be null");
 
@@ -296,15 +283,14 @@ public class ActiveDirectoryRealm extends GSSRealmBase<DirContextSource> {
 		if (gssName.isAnonymous())
 			return new ActiveDirectoryPrincipal(gssName, Sid.ANONYMOUS_SID, delegatedCredential);
 
-		Principal principal = null;
 		try {
 			User user = getUser(context, gssName);
 
 			if (user != null) {
 				List<String> roles = getRoles(context, user);
 
-				principal = new ActiveDirectoryPrincipal(gssName, user.getSid(),
-						delegatedCredential, roles, user.getAdditionalAttributes());
+				return new ActiveDirectoryPrincipal(gssName, user.getSid(), roles,
+						delegatedCredential, user.getAdditionalAttributes());
 			}
 		} catch (NamingException e) {
 			logger.error(sm.getString("activeDirectoryRealm.principalSearchFailed", gssName), e);
@@ -312,11 +298,17 @@ public class ActiveDirectoryRealm extends GSSRealmBase<DirContextSource> {
 			LdapUtils.close(context);
 		}
 
-		return principal;
+		return null;
 	}
 
 	@Override
-	public boolean hasRole(Principal principal, String role) {
+	public boolean hasRole(Wrapper wrapper, Principal principal, String role) {
+		// Check for a role alias defined in a <security-role-ref> element
+		if (wrapper != null) {
+			String realRole = wrapper.findSecurityReference(role);
+			if (realRole != null)
+				role = realRole;
+		}
 
 		if (principal == null || role == null || !(principal instanceof ActiveDirectoryPrincipal))
 			return false;
@@ -576,13 +568,14 @@ public class ActiveDirectoryRealm extends GSSRealmBase<DirContextSource> {
 		// Get the entry's distinguished name. For relative results, this means
 		// we need to composite a name with the base name, the context name, and
 		// the result name. For non-relative names, use the returned name.
+		String resultName = result.getName();
 		if (result.isRelative()) {
 			NameParser parser = context.getNameParser(StringUtils.EMPTY);
 			Name contextName = parser.parse(context.getNameInNamespace());
 			Name baseName = parser.parse(base);
 
 			// Bugzilla 32269
-			Name entryName = parser.parse(new CompositeName(result.getName()).get(0));
+			Name entryName = parser.parse(new CompositeName(resultName).get(0));
 
 			Name name = contextName.addAll(baseName);
 			name = name.addAll(entryName);
@@ -592,10 +585,9 @@ public class ActiveDirectoryRealm extends GSSRealmBase<DirContextSource> {
 			try {
 				// Normalize the name by running it through the name parser.
 				NameParser parser = context.getNameParser(StringUtils.EMPTY);
-				URI userNameUri = new URI(absoluteName);
+				URI userNameUri = new URI(resultName);
 				String pathComponent = userNameUri.getPath();
-				// Should not ever have an empty path component, since that is
-				// /{DN}
+				// Should not ever have an empty path component, since that is /{DN}
 				if (pathComponent.length() < 1) {
 					throw new InvalidNameException(
 							sm.getString("activeDirectoryRealm.unparseableName", absoluteName));
