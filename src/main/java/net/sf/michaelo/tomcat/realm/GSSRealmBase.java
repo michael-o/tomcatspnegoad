@@ -20,14 +20,14 @@ import java.security.Principal;
 import javax.naming.Context;
 import javax.naming.NamingException;
 
-import org.apache.catalina.ServerFactory;
-import org.apache.catalina.core.StandardServer;
+import org.apache.catalina.Server;
 import org.apache.catalina.realm.RealmBase;
-import org.apache.catalina.util.StringManager;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 import org.apache.naming.ContextBindings;
+import org.apache.tomcat.util.res.StringManager;
 import org.ietf.jgss.GSSContext;
+import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSName;
 
 /**
@@ -53,7 +53,8 @@ public abstract class GSSRealmBase<T> extends RealmBase {
 	}
 
 	/**
-	 *@throws UnsupportedOperationException always throws because not implemented
+	 * @throws UnsupportedOperationException
+	 *             always throws because not implemented
 	 */
 	@Override
 	protected String getPassword(String username) {
@@ -61,7 +62,8 @@ public abstract class GSSRealmBase<T> extends RealmBase {
 	}
 
 	/**
-	 *@throws UnsupportedOperationException always throws because not implemented
+	 * @throws UnsupportedOperationException
+	 *             always throws because not implemented
 	 */
 	@Override
 	protected Principal getPrincipal(String username) {
@@ -73,24 +75,29 @@ public abstract class GSSRealmBase<T> extends RealmBase {
 	 *
 	 * @param gssName
 	 *            the GSS name of the context initiator (client)
+	 * @param gssCredential
+	 *            the GSS credential of the context initiator (client)
 	 * @return the retrieved principal
 	 * @throws NullPointerException
 	 *             if the gssName is null
 	 */
-	abstract public Principal authenticate(GSSName gssName);
+	abstract public Principal authenticate(GSSName gssName, GSSCredential gssCredential);
 
 	/**
 	 * Authenticates a user from a fully established GSS context.
 	 *
 	 * @param gssContext
 	 *            the GSS context established with the peer
+	 * @param storeCreds
+	 *            the store delegated credential indication
 	 * @return the retrieved principal
 	 * @throws NullPointerException
 	 *             if the gssContext is null
 	 * @throws IllegalStateException
 	 *             if the gssContext is not fully established
 	 */
-	abstract public Principal authenticate(GSSContext gssContext);
+	// TODO Remove this method in the next iteration. It is already in RealmBase
+	abstract public Principal authenticate(GSSContext gssContext, boolean storeCreds);
 
 	/*
 	 * Must be accessed like this due to
@@ -104,7 +111,7 @@ public abstract class GSSRealmBase<T> extends RealmBase {
 			context = ContextBindings.getClassLoader();
 			context = (Context) context.lookup("comp/env");
 		} else {
-			StandardServer server = (StandardServer) ServerFactory.getServer();
+			Server server = getServer();
 			context = server.getGlobalNamingContext();
 		}
 
