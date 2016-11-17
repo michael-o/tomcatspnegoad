@@ -95,7 +95,20 @@
 			<version>${tomcat.version}</version>
 			<scope>provided</scope>
 		</dependency>
+		<!-- https://bz.apache.org/bugzilla/show_bug.cgi?id=60383 -->
 		<dependency>
+			<groupId>org.apache.tomcat</groupId>
+			<artifactId>tomcat-jaspic-api</artifactId>
+			<version>${tomcat.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.tomcat</groupId>
+			<artifactId>tomcat-util</artifactId>
+			<version>${tomcat.version}</version>
+			<scope>provided</scope>
+		</dependency>
+ 		<dependency>
 			<groupId>org.apache.tomcat</groupId>
 			<artifactId>tomcat-servlet-api</artifactId>
 			<version>${tomcat.version}</version>
@@ -163,6 +176,8 @@
 									<shadedPattern>internal.org.apache.commons.lang3</shadedPattern>
 								</relocation>
 							</relocations>
+							<!-- This is necessary due to a bug in maven-shade-plugin -->
+							<promoteTransitiveDependencies>true</promoteTransitiveDependencies>
 						</configuration>
 					</execution>
 				</executions>
