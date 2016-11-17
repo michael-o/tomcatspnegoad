@@ -5,7 +5,7 @@
 
 	<body>
 		<release version="2.1" date="2016-06-09" description="Minor improvements and new features">
-			<action type="add" dev="michael-o">A Combined ActiveDirectoryRealm which iterates over multiple ActiveDirectoryRealms</action>
+			<action type="add" dev="michael-o">A CombinedActiveDirectoryRealm which iterates over multiple ActiveDirectoryRealms</action>
 			<action type="remove" dev="michael-o">Don't return principal with NULL_SID if not found in Active Directory</action>
 			<action type="add" dev="michael-o">Have ActiveDirectoryPrincipal expose roles as SID strings via #getRoles()</action>
 			<action type="update" dev="michael-o">Upgrade to DirContextSource 1.3</action>
@@ -15,7 +15,7 @@
 		</release>
 		<release version="2.0" date="2016-03-16" description="Major documentation and realm overhaul">
 			<action type="add" dev="michael-o">ActiveDirectoryRealm will properly inform about referral handling and log when not possible/failed</action>
-			<action type="add" dev="michael-o">Return anonymous principal (ANONYMOUS_SID) is GSS context is anonymous</action>
+			<action type="add" dev="michael-o">Return anonymous principal (ANONYMOUS_SID) if GSS context is anonymous</action>
 			<action type="update" dev="michael-o">Realms return now principals with NULL_SID if not found instead of null because users are fully authenticated anyway</action>
 			<action type="add" dev="michael-o">Add equals and hashCode to Sid</action>
 			<action type="update" dev="michael-o">User search in ActiveDirectoryRealm will ignore users which are disabled</action>
