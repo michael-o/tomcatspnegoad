@@ -49,13 +49,14 @@ import net.sf.michaelo.tomcat.realm.mapper.SamAccountNameRfc2247Mapper;
 import net.sf.michaelo.tomcat.realm.mapper.UserPrincipalNameSearchMapper;
 import net.sf.michaelo.tomcat.realm.mapper.UsernameSearchMapper;
 import net.sf.michaelo.tomcat.realm.mapper.UsernameSearchMapper.MappedValues;
-import net.sf.michaelo.tomcat.utils.LdapUtils;
 
 import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleException;
+import org.apache.catalina.Server;
 import org.apache.catalina.Wrapper;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.naming.ContextBindings;
 import org.ietf.jgss.GSSContext;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
@@ -67,10 +68,11 @@ import org.ietf.jgss.GSSName;
  * <p>
  * Following options can be configured:
  * <ul>
- * <li>{@code resourceName}: The name of the {@link DirContextSource} in JNDI with which principals
- * will be retrieved.</li>
- * <li>{@code localResource}: Whether this resource is locally configured in the {@code context.xml}
- * or globally configured in the {@code server.xml} (optional). Default value is {@code false}.</li>
+ * <li>{@code dirContextSourceName}: The name of the {@link DirContextSource} in JNDI with which
+ * principals will be retrieved.</li>
+ * <li>{@code localDirContextSource}: Whether this {@code DirContextSource} is locally configured in
+ * the {@code context.xml} or globally configured in the {@code server.xml} (optional). Default
+ * value is {@code false}.</li>
  * <li>{@code additionalAttributes}: Comma-separated list of attributes to be retrieved for the
  * principal. Binary attributes must succeed with {@code ;binary} and will be stored as
  * {@code byte[]}, ordinary attributes will be stored as {@code String}. If an attribute is
@@ -161,7 +163,7 @@ import org.ietf.jgss.GSSName;
  * @see ActiveDirectoryPrincipal
  * @version $Id$
  */
-public class ActiveDirectoryRealm extends GSSRealmBase<DirContextSource> {
+public class ActiveDirectoryRealm extends GSSRealmBase {
 
 	private static final UsernameSearchMapper[] USERNAME_SEARCH_MAPPERS = {
 			new SamAccountNameRfc2247Mapper(), new UserPrincipalNameSearchMapper() };
@@ -169,16 +171,27 @@ public class ActiveDirectoryRealm extends GSSRealmBase<DirContextSource> {
 	private static final String[] DEFAULT_ATTRIBUTES = new String[] { "userAccountControl",
 			"memberOf", "objectSid;binary" };
 
-	private String[] additionalAttributes;
+	protected boolean localDirContextSource;
+	protected String dirContextSourceName;
+	protected String[] additionalAttributes;
 
 	/**
 	 * Descriptive information about this Realm implementation.
 	 */
 	protected static final String name = "ActiveDirectoryRealm";
 
-	@Override
-	protected String getName() {
-		return name;
+	/**
+	 * TODO Document me!
+	 */
+	public void setLocalDirContextSource(boolean localDirContextSource) {
+		this.localDirContextSource = localDirContextSource;
+	}
+
+	/**
+	 * TODO Document me!
+	 */
+	public void setDirContextSourceName(String dirContextSourceName) {
+		this.dirContextSourceName = dirContextSourceName;
 	}
 
 	/**
@@ -193,34 +206,8 @@ public class ActiveDirectoryRealm extends GSSRealmBase<DirContextSource> {
 	}
 
 	@Override
-	protected void initInternal() throws LifecycleException {
-		super.initInternal();
-
-		DirContextSource dirContextSource = null;
-		try {
-			dirContextSource = lookupResource();
-		} catch (NamingException e) {
-			logger.error(sm.getString("activeDirectoryRealm.lookupFailed", resourceName), e);
-			return;
-		}
-		DirContext context = null;
-		try {
-			context = dirContextSource.getDirContext();
-		} catch (NamingException e) {
-			logger.error(sm.getString("activeDirectoryRealm.obtainFailed", resourceName), e);
-			return;
-		}
-
-		try {
-			String referral = (String) context.getEnvironment().get(DirContext.REFERRAL);
-
-			if ("follow".equals(referral))
-				logger.warn(sm.getString("activeDirectoryRealm.referralFollow"));
-		} catch (NamingException e) {
-			logger.error(sm.getString("activeDirectoryRealm.environmentFailed"), e);
-		} finally {
-			LdapUtils.close(context);
-		}
+	protected String getName() {
+		return name;
 	}
 
 	@Override
@@ -229,59 +216,47 @@ public class ActiveDirectoryRealm extends GSSRealmBase<DirContextSource> {
 	}
 
 	@Override
-	public Principal authenticate(GSSContext gssContext, boolean storeCreds) {
-		if (gssContext == null)
-			throw new NullPointerException("gssContext cannot be null");
-
-		if (!gssContext.isEstablished())
-			throw new IllegalStateException("gssContext is not fully established");
-
-		GSSName gssName;
-		GSSCredential delegatedCredential = null;
-
-		try {
-			gssName = gssContext.getSrcName();
-
-			if (storeCreds) {
-				if (gssContext.getCredDelegState()) {
-					delegatedCredential = gssContext.getDelegCred();
-				} else if (logger.isDebugEnabled())
-					logger.debug(
-							sm.getString("activeDirectoryRealm.credentialNotDelegable", gssName));
+	public Principal authenticate(GSSContext gssContext, boolean storeCred) {
+		if (gssContext.isEstablished()) {
+			GSSName gssName = null;
+			try {
+				gssName = gssContext.getSrcName();
+			} catch (GSSException e) {
+				logger.error(sm.getString("activeDirectoryRealm.gssNameFailed"), e);
 			}
-		} catch (GSSException e) {
-			logger.error(sm.getString("realm.inquireFailed"), e);
 
-			return null;
-		}
+			if (gssName != null) {
+				GSSCredential gssCredential = null;
+				if (storeCred) {
+					if (gssContext.getCredDelegState()) {
+						try {
+							gssCredential = gssContext.getDelegCred();
+						} catch (GSSException e) {
+							logger.warn(sm.getString(
+									"activeDirectoryRealm.delegatedCredentialFailed", gssName), e);
+						}
+					} else {
+						if (logger.isDebugEnabled())
+							logger.debug(sm.getString(
+									"activeDirectoryRealm.credentialNotDelegable", gssName));
+					}
+				}
 
-		return getPrincipal(gssName, delegatedCredential);
+				return getPrincipal(gssName, gssCredential);
+			}
+		} else
+			logger.error(sm.getString("activeDirectoryRealm.securityContextNotEstablished"));
+
+		return null;
 	}
 
-	private Principal getPrincipal(GSSName gssName, GSSCredential delegatedCredential) {
-		if (gssName == null)
-			throw new NullPointerException("gssName cannot be null");
-
-		DirContextSource dirContextSource = null;
-		try {
-			dirContextSource = lookupResource();
-		} catch (NamingException e) {
-			logger.error(sm.getString("activeDirectoryealm.lookupFailed", resourceName), e);
-
-			return null;
-		}
-
-		DirContext context = null;
-		try {
-			context = dirContextSource.getDirContext();
-		} catch (NamingException e) {
-			logger.error(sm.getString("activeDirectoryRealm.obtainFailed", resourceName), e);
-
-			return null;
-		}
-
+	protected Principal getPrincipal(GSSName gssName, GSSCredential delegatedCredential) {
 		if (gssName.isAnonymous())
 			return new ActiveDirectoryPrincipal(gssName, Sid.ANONYMOUS_SID, delegatedCredential);
+
+		DirContext context = open();
+		if (context == null)
+			return null;
 
 		try {
 			User user = getUser(context, gssName);
@@ -295,7 +270,7 @@ public class ActiveDirectoryRealm extends GSSRealmBase<DirContextSource> {
 		} catch (NamingException e) {
 			logger.error(sm.getString("activeDirectoryRealm.principalSearchFailed", gssName), e);
 		} finally {
-			LdapUtils.close(context);
+			close(context);
 		}
 
 		return null;
@@ -332,6 +307,81 @@ public class ActiveDirectoryRealm extends GSSRealmBase<DirContextSource> {
 		return result;
 	}
 
+	protected DirContext open() {
+		try {
+			javax.naming.Context context = null;
+
+			if (localDirContextSource) {
+				context = ContextBindings.getClassLoader();
+				context = (javax.naming.Context) context.lookup("comp/env");
+			} else {
+				Server server = getServer();
+				context = server.getGlobalNamingContext();
+			}
+
+			DirContextSource contextSource = (DirContextSource) context
+					.lookup(dirContextSourceName);
+			return contextSource.getDirContext();
+		} catch (NamingException e) {
+			logger.error(sm.getString("activeDirectoryRealm.open"), e);
+		}
+
+		return null;
+	}
+
+	protected void close(DirContext context) {
+		if (context == null)
+			return;
+
+		try {
+			context.close();
+		} catch (NamingException e) {
+			logger.error(sm.getString("activeDirectoryRealm.close"), e);
+		}
+	}
+
+	protected void close(NamingEnumeration<?> results) {
+		if (results == null)
+			return;
+
+		try {
+			results.close();
+		} catch (NamingException e) {
+			; // swallow
+		}
+	}
+
+	@Override
+	protected void initInternal() throws LifecycleException {
+		super.initInternal();
+
+		DirContext context = open();
+		if (context == null)
+			return;
+
+		try {
+			String referral = (String) context.getEnvironment().get(DirContext.REFERRAL);
+
+			if ("follow".equals(referral))
+				logger.warn(sm.getString("activeDirectoryRealm.referralFollow"));
+		} catch (NamingException e) {
+			logger.error(sm.getString("activeDirectoryRealm.environmentFailed"), e);
+		} finally {
+			close(context);
+		}
+	}
+
+	@Override
+	public String[] getRoles(Principal principal) {
+		if (principal instanceof ActiveDirectoryPrincipal) {
+			return ((ActiveDirectoryPrincipal) principal).getRoles();
+		}
+
+		String className = principal.getClass().getName();
+		throw new IllegalStateException(sm.getString("activeDirectoryRealm.cannotGetRoles",
+				principal.getName(), className));
+	}
+
 	protected User getUser(DirContext context, GSSName gssName) throws NamingException {
 
 		String[] attributes = DEFAULT_ATTRIBUTES;
@@ -347,7 +397,7 @@ public class ActiveDirectoryRealm extends GSSRealmBase<DirContextSource> {
 		String searchFilterPattern = "(&(|(sAMAccountType=805306368)(sAMAccountType=805306369))(%s={0}))";
 
 		String searchFilter;
-		String searchBase = null;
+		Name searchBase = null;
 		String searchAttributeName;
 		String searchAttributeValue;
 
@@ -383,7 +433,7 @@ public class ActiveDirectoryRealm extends GSSRealmBase<DirContextSource> {
 						logger.debug(sm.getString("activeDirectoryRealm.userNotMapped", gssName,
 								mapperClassName));
 
-					LdapUtils.close(results);
+					close(results);
 					results = null;
 				} else
 					break;
@@ -391,7 +441,7 @@ public class ActiveDirectoryRealm extends GSSRealmBase<DirContextSource> {
 				logger.debug(sm.getString("activeDirectoryRealm.user.partialResultException",
 						mapperClassName, e.getRemainingName()));
 
-				LdapUtils.close(results);
+				close(results);
 				results = null;
 			}
 		}
@@ -407,7 +457,7 @@ public class ActiveDirectoryRealm extends GSSRealmBase<DirContextSource> {
 		if (results.hasMore()) {
 			logger.error(sm.getString("activeDirectoryRealm.duplicateUser", gssName));
 
-			LdapUtils.close(results);
+			close(results);
 			return null;
 		}
 
@@ -420,11 +470,11 @@ public class ActiveDirectoryRealm extends GSSRealmBase<DirContextSource> {
 		if ((userAccountControl & 0x2) == 0x2) {
 			logger.warn(sm.getString("activeDirectoryRealm.userFoundButDisabled", gssName));
 
-			LdapUtils.close(results);
+			close(results);
 			return null;
 		}
 
-		LdapName dn = getDistinguishedName(context, searchBase, result);
+		Name dn = getDistinguishedName(context, searchBase, result);
 		byte[] sidBytes = (byte[]) userAttributes.get("objectSid;binary").get();
 		Sid sid = new Sid(sidBytes);
 
@@ -441,7 +491,7 @@ public class ActiveDirectoryRealm extends GSSRealmBase<DirContextSource> {
 			while (memberOfValues.hasMore())
 				roles.add((String) memberOfValues.next());
 
-			LdapUtils.close(memberOfValues);
+			close(memberOfValues);
 		}
 
 		Map<String, Object> additionalAttributesMap = Collections.emptyMap();
@@ -460,7 +510,7 @@ public class ActiveDirectoryRealm extends GSSRealmBase<DirContextSource> {
 						while (attrEnum.hasMore())
 							attrList.add(attrEnum.next());
 
-						LdapUtils.close(attrEnum);
+						close(attrEnum);
 
 						additionalAttributesMap.put(addAttr,
 								Collections.unmodifiableList(attrList));
@@ -470,7 +520,7 @@ public class ActiveDirectoryRealm extends GSSRealmBase<DirContextSource> {
 			}
 		}
 
-		LdapUtils.close(results);
+		close(results);
 		return new User(gssName, sid, roles, additionalAttributesMap);
 	}
 
@@ -482,7 +532,7 @@ public class ActiveDirectoryRealm extends GSSRealmBase<DirContextSource> {
 			logger.debug(sm.getString("activeDirectoryRealm.retrievingRoles", user.getGssName()));
 
 		for (String role : user.getRoles()) {
-			String roleRdn = getRelativeName(context, role);
+			Name roleRdn = getRelativeName(context, role);
 
 			Attributes roleAttributes = null;
 			try {
@@ -524,7 +574,7 @@ public class ActiveDirectoryRealm extends GSSRealmBase<DirContextSource> {
 					sidHistoryStrings.add(new Sid(sidHistoryBytes).toString());
 				}
 
-				LdapUtils.close(sidHistoryEnum);
+				close(sidHistoryEnum);
 			}
 
 			roles.add(sidString);
@@ -555,7 +605,7 @@ public class ActiveDirectoryRealm extends GSSRealmBase<DirContextSource> {
 	 *
 	 * @param context
 	 *            Our DirContext
-	 * @param base
+	 * @param baseName
 	 *            The base DN
 	 * @param result
 	 *            The search result
@@ -563,7 +613,7 @@ public class ActiveDirectoryRealm extends GSSRealmBase<DirContextSource> {
 	 * @throws NamingException
 	 *             if DN cannot be build
 	 */
-	protected LdapName getDistinguishedName(DirContext context, String base, SearchResult result)
+	protected Name getDistinguishedName(DirContext context, Name baseName, SearchResult result)
 			throws NamingException {
 		// Get the entry's distinguished name. For relative results, this means
 		// we need to composite a name with the base name, the context name, and
@@ -572,14 +622,12 @@ public class ActiveDirectoryRealm extends GSSRealmBase<DirContextSource> {
 		if (result.isRelative()) {
 			NameParser parser = context.getNameParser(StringUtils.EMPTY);
 			Name contextName = parser.parse(context.getNameInNamespace());
-			Name baseName = parser.parse(base);
 
 			// Bugzilla 32269
 			Name entryName = parser.parse(new CompositeName(resultName).get(0));
 
 			Name name = contextName.addAll(baseName);
-			name = name.addAll(entryName);
-			return (LdapName) name;
+			return name.addAll(entryName);
 		} else {
 			String absoluteName = result.getName();
 			try {
@@ -592,8 +640,7 @@ public class ActiveDirectoryRealm extends GSSRealmBase<DirContextSource> {
 					throw new InvalidNameException(
 							sm.getString("activeDirectoryRealm.unparseableName", absoluteName));
 				}
-				Name name = parser.parse(pathComponent.substring(1));
-				return (LdapName) name;
+				return parser.parse(pathComponent.substring(1));
 			} catch (URISyntaxException e) {
 				throw new InvalidNameException(
 						sm.getString("activeDirectoryRealm.unparseableName", absoluteName));
@@ -601,7 +648,7 @@ public class ActiveDirectoryRealm extends GSSRealmBase<DirContextSource> {
 		}
 	}
 
-	protected String getRelativeName(DirContext context, String distinguishedName)
+	protected Name getRelativeName(DirContext context, String distinguishedName)
 			throws NamingException {
 
 		NameParser parser = context.getNameParser(StringUtils.EMPTY);
@@ -633,8 +680,7 @@ public class ActiveDirectoryRealm extends GSSRealmBase<DirContextSource> {
 				break;
 		}
 
-		return name.toString();
-
+		return name;
 	}
 
 	protected static class User {
