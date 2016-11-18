@@ -17,8 +17,10 @@ package net.sf.michaelo.tomcat.realm;
 
 import java.security.Principal;
 
-import org.apache.catalina.UserDatabase;
 import org.apache.catalina.realm.UserDatabaseRealm;
+import org.apache.juli.logging.Log;
+import org.apache.juli.logging.LogFactory;
+import org.apache.tomcat.util.res.StringManager;
 import org.ietf.jgss.GSSContext;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
@@ -29,7 +31,10 @@ import org.ietf.jgss.GSSName;
  *
  * @version $Id$
  */
-public class GSSUserDatabaseRealm extends GSSRealmBase<UserDatabase> {
+public class GSSUserDatabaseRealm extends UserDatabaseRealm implements GSSRealm {
+
+	protected final Log logger = LogFactory.getLog(getClass());
+	protected final StringManager sm = StringManager.getManager(getClass().getPackage().getName());
 
 	/**
 	 * Descriptive information about this Realm implementation.
@@ -41,7 +46,6 @@ public class GSSUserDatabaseRealm extends GSSRealmBase<UserDatabase> {
 		return name;
 	}
 
-	@Override
 	public Principal authenticate(GSSName gssName, GSSCredential gssCredential) {
 		return getPrincipal(String.valueOf(gssName), gssCredential);
 	}
