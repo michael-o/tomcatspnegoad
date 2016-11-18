@@ -17,17 +17,11 @@ package net.sf.michaelo.tomcat.realm;
 
 import java.security.Principal;
 
-import javax.naming.Context;
-import javax.naming.NamingException;
-
-import org.apache.catalina.Server;
 import org.apache.catalina.realm.RealmBase;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
-import org.apache.naming.ContextBindings;
 import org.apache.tomcat.util.res.StringManager;
 import org.ietf.jgss.GSSContext;
-import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSName;
 
 /**
@@ -36,21 +30,10 @@ import org.ietf.jgss.GSSName;
  *
  * @version $Id$
  */
-public abstract class GSSRealmBase<T> extends RealmBase {
+public abstract class GSSRealmBase extends RealmBase implements GSSRealm {
 
 	protected final Log logger = LogFactory.getLog(getClass());
-	protected final StringManager sm = StringManager.getManager(getClass().getPackage().getName());
-
-	protected boolean localResource;
-	protected String resourceName;
-
-	public void setLocalResource(boolean localResource) {
-		this.localResource = localResource;
-	}
-
-	public void setResourceName(String resourceName) {
-		this.resourceName = resourceName;
-	}
+	protected final StringManager sm = StringManager.getManager(getClass());
 
 	/**
 	 * @throws UnsupportedOperationException
@@ -58,7 +41,8 @@ public abstract class GSSRealmBase<T> extends RealmBase {
 	 */
 	@Override
 	protected String getPassword(String username) {
-		throw new UnsupportedOperationException("This method is not supported by this realm");
+		throw new UnsupportedOperationException(
+				"getPassword(String) is not supported by this realm");
 	}
 
 	/**
@@ -67,55 +51,7 @@ public abstract class GSSRealmBase<T> extends RealmBase {
 	 */
 	@Override
 	protected Principal getPrincipal(String username) {
-		throw new UnsupportedOperationException("This method is not supported by this realm");
+		throw new UnsupportedOperationException(
+				"getPrincipal(String) is not supported by this realm");
 	}
-
-	/**
-	 * Authenticates a user from a given GSS name.
-	 *
-	 * @param gssName
-	 *            the GSS name of the context initiator (client)
-	 * @param gssCredential
-	 *            the GSS credential of the context initiator (client)
-	 * @return the retrieved principal
-	 * @throws NullPointerException
-	 *             if the gssName is null
-	 */
-	abstract public Principal authenticate(GSSName gssName, GSSCredential gssCredential);
-
-	/**
-	 * Authenticates a user from a fully established GSS context.
-	 *
-	 * @param gssContext
-	 *            the GSS context established with the peer
-	 * @param storeCreds
-	 *            the store delegated credential indication
-	 * @return the retrieved principal
-	 * @throws NullPointerException
-	 *             if the gssContext is null
-	 * @throws IllegalStateException
-	 *             if the gssContext is not fully established
-	 */
-	// TODO Remove this method in the next iteration. It is already in RealmBase
-	abstract public Principal authenticate(GSSContext gssContext, boolean storeCreds);
-
-	/*
-	 * Must be accessed like this due to
-	 * http://www.mail-archive.com/users@tomcat.apache.org/msg98380.html
-	 */
-	@SuppressWarnings("unchecked")
-	protected T lookupResource() throws NamingException {
-		Context context = null;
-
-		if (localResource) {
-			context = ContextBindings.getClassLoader();
-			context = (Context) context.lookup("comp/env");
-		} else {
-			Server server = getServer();
-			context = server.getGlobalNamingContext();
-		}
-
-		return (T) context.lookup(resourceName);
-	}
-
 }
