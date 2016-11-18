@@ -352,8 +352,8 @@ public class ActiveDirectoryRealm extends GSSRealmBase {
 	}
 
 	@Override
-	protected void initInternal() throws LifecycleException {
-		super.initInternal();
+	protected void startInternal() throws LifecycleException {
+		super.startInternal();
 
 		DirContext context = open();
 		if (context == null)
