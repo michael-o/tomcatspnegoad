@@ -29,8 +29,6 @@ import org.apache.catalina.LifecycleException;
 import org.apache.catalina.Realm;
 import org.apache.catalina.Wrapper;
 import org.apache.catalina.realm.CombinedRealm;
-import org.apache.juli.logging.Log;
-import org.apache.juli.logging.LogFactory;
 import org.ietf.jgss.GSSContext;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSName;
@@ -58,9 +56,7 @@ import org.ietf.jgss.GSSName;
  * @see ActiveDirectoryRealm
  * @version $Id$
  */
-public class CombinedActiveDirectoryRealm extends GSSRealmBase<Object> {
-
-	private static Log log = LogFactory.getLog(CombinedActiveDirectoryRealm.class);
+public class CombinedActiveDirectoryRealm extends GSSRealmBase {
 
 	/**
 	 * The list of Realms contained by this Realm.
@@ -127,7 +123,7 @@ public class CombinedActiveDirectoryRealm extends GSSRealmBase<Object> {
 			} catch (LifecycleException e) {
 				// If realm doesn't start can't authenticate against it
 				iter.remove();
-				log.error(sm.getString("combinedActiveDirectoryRealm.realmStartFailed",
+				logger.error(sm.getString("combinedActiveDirectoryRealm.realmStartFailed",
 						realm.getClass().getName()), e);
 			}
 		}
