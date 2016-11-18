@@ -99,7 +99,7 @@ public class CurrentWindowsIdentityAuthenticator extends GSSAuthenticatorBase {
 					return true;
 				} else {
 					sendUnauthorized(request, response, CURRENT_WINDOWS_IDENTITY_AUTH_SCHEME,
-							"authenticator.userNotFound", gssName);
+							"gssAuthenticatorBase.userNotFound", gssName);
 					return false;
 				}
 			} catch (GSSException e) {
@@ -108,7 +108,6 @@ public class CurrentWindowsIdentityAuthenticator extends GSSAuthenticatorBase {
 				sendInternalServerError(request, response, "gssAuthenticatorBase.inquireNameFailed");
 				return false;
 			}
-
 		} finally {
 			if (lc != null) {
 				try {
