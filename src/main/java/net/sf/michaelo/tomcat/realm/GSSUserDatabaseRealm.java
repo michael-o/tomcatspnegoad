@@ -52,32 +52,37 @@ public class GSSUserDatabaseRealm extends UserDatabaseRealm implements GSSRealm 
 
 	@Override
 	public Principal authenticate(GSSContext gssContext, boolean storeCred) {
-		if (gssContext == null)
-			throw new NullPointerException("gssContext cannot be null");
-
-		if (!gssContext.isEstablished())
-			throw new IllegalStateException("gssContext is not fully established");
-
-		GSSName gssName;
-		GSSCredential delegatedCredential = null;
-
-		try {
-			gssName = gssContext.getSrcName();
-
-			if (storeCred) {
-				if (gssContext.getCredDelegState()) {
-					delegatedCredential = gssContext.getDelegCred();
-				} else if (logger.isDebugEnabled())
-					logger.debug(
-							sm.getString("activeDirectoryRealm.credentialNotDelegable", gssName));
+		if (gssContext.isEstablished()) {
+			GSSName gssName = null;
+			try {
+				gssName = gssContext.getSrcName();
+			} catch (GSSException e) {
+				logger.error(sm.getString("activeDirectoryRealm.gssNameFailed"), e);
 			}
-		} catch (GSSException e) {
-			logger.error(sm.getString("realm.inquireFailed"), e);
 
-			return null;
-		}
+			if (gssName != null) {
+				GSSCredential gssCredential = null;
+				if (storeCred) {
+					if (gssContext.getCredDelegState()) {
+						try {
+							gssCredential = gssContext.getDelegCred();
+						} catch (GSSException e) {
+							logger.warn(sm.getString(
+									"activeDirectoryRealm.delegatedCredentialFailed", gssName), e);
+						}
+					} else {
+						if (logger.isDebugEnabled())
+							logger.debug(sm.getString(
+									"activeDirectoryRealm.credentialNotDelegable", gssName));
+					}
+				}
 
-		return getPrincipal(String.valueOf(gssName), delegatedCredential);
+				return getPrincipal(String.valueOf(gssName), gssCredential);
+			}
+		} else
+			logger.error(sm.getString("activeDirectoryRealm.securityContextNotEstablished"));
+
+		return null;
 	}
 
 }
