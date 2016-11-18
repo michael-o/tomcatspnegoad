@@ -51,7 +51,7 @@ public class GSSUserDatabaseRealm extends UserDatabaseRealm implements GSSRealm 
 	}
 
 	@Override
-	public Principal authenticate(GSSContext gssContext, boolean storeCreds) {
+	public Principal authenticate(GSSContext gssContext, boolean storeCred) {
 		if (gssContext == null)
 			throw new NullPointerException("gssContext cannot be null");
 
@@ -64,7 +64,7 @@ public class GSSUserDatabaseRealm extends UserDatabaseRealm implements GSSRealm 
 		try {
 			gssName = gssContext.getSrcName();
 
-			if (storeCreds) {
+			if (storeCred) {
 				if (gssContext.getCredDelegState()) {
 					delegatedCredential = gssContext.getDelegCred();
 				} else if (logger.isDebugEnabled())

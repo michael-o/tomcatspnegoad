@@ -33,7 +33,7 @@ public interface GSSRealm {
 	 *
 	 * @param gssContext
 	 *            the GSS context established with the peer
-	 * @param storeCreds
+	 * @param storeCred
 	 *            the store delegated credential indication
 	 * @return the retrieved principal
 	 * @throws NullPointerException
@@ -42,6 +42,6 @@ public interface GSSRealm {
 	 *             if the gssContext is not fully established
 	 */
 	// TODO Remove this method in the next iteration. It is already in RealmBase
-	Principal authenticate(GSSContext gssContext, boolean storeCreds);
+	Principal authenticate(GSSContext gssContext, boolean storeCred);
 
 }
