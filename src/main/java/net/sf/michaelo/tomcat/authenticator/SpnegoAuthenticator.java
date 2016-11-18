@@ -174,7 +174,7 @@ public class SpnegoAuthenticator extends GSSAuthenticatorBase {
 					if (principal == null) {
 						GSSName srcName = gssContext.getSrcName();
 						sendUnauthorized(request, response, SPNEGO_AUTH_SCHEME,
-								"authenticator.userNotFound", srcName);
+								"gssAuthenticatorBase.userNotFound", srcName);
 						return false;
 					}
 				} else {
@@ -186,9 +186,9 @@ public class SpnegoAuthenticator extends GSSAuthenticatorBase {
 				}
 
 			} catch (GSSException e) {
-				logger.error(sm.getString("spnegoAuthenticator.inquireFailed"), e);
+				logger.error(sm.getString("gssAuthenticatorBase.inquireNameFailed"), e);
 
-				sendInternalServerError(request, response, "spnegoAuthenticator.inquireFailed");
+				sendInternalServerError(request, response, "gssAuthenticatorBase.inquireNameFailed");
 				return false;
 			}
 

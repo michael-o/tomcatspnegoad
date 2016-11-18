@@ -37,7 +37,7 @@ import org.ietf.jgss.Oid;
 abstract class GSSAuthenticatorBase extends AuthenticatorBase {
 
 	protected final Log logger = LogFactory.getLog(getClass());
-	protected final StringManager sm = StringManager.getManager(getClass().getPackage().getName());
+	protected final StringManager sm = StringManager.getManager(getClass());
 
 	protected final static Oid KRB5_MECHANISM;
 	protected final static Oid SPNEGO_MECHANISM;

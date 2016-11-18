@@ -25,7 +25,7 @@ import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 import javax.servlet.http.HttpServletResponse;
 
-import net.sf.michaelo.tomcat.realm.GSSRealmBase;
+import net.sf.michaelo.tomcat.realm.GSSRealm;
 
 import org.apache.catalina.connector.Request;
 import org.ietf.jgss.GSSCredential;
@@ -87,10 +87,10 @@ public class CurrentWindowsIdentityAuthenticator extends GSSAuthenticatorBase {
 			}
 
 			try {
-				GSSRealmBase<?> realm = (GSSRealmBase<?>) context.getRealm();
-				GSSName srcName = gssCredential.getName();
+				GSSRealm realm = (GSSRealm) context.getRealm();
+				GSSName gssName = gssCredential.getName();
 
-				Principal principal = realm.authenticate(srcName,
+				Principal principal = realm.authenticate(gssName,
 						isStoreDelegatedCredential() ? gssCredential : null);
 
 				if (principal != null) {
@@ -99,13 +99,13 @@ public class CurrentWindowsIdentityAuthenticator extends GSSAuthenticatorBase {
 					return true;
 				} else {
 					sendUnauthorized(request, response, CURRENT_WINDOWS_IDENTITY_AUTH_SCHEME,
-							"authenticator.userNotFound", srcName);
+							"authenticator.userNotFound", gssName);
 					return false;
 				}
 			} catch (GSSException e) {
-				logger.error(sm.getString("cwiAuthenticator.inquireFailed"), e);
+				logger.error(sm.getString("gssAuthenticatorBase.inquireNameFailed"), e);
 
-				sendInternalServerError(request, response, "cwiAuthenticator.inquireFailed");
+				sendInternalServerError(request, response, "gssAuthenticatorBase.inquireNameFailed");
 				return false;
 			}
 
