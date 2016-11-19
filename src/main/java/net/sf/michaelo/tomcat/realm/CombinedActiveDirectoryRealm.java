@@ -231,4 +231,14 @@ public class CombinedActiveDirectoryRealm extends GSSRealmBase {
 		return result;
 	}
 
+	/**
+	 * @throws UnsupportedOperationException
+	 *             always throws because not implemented
+	 */
+	@Override
+	protected Principal getPrincipal(GSSName gssName, GSSCredential gssCredential) {
+		throw new UnsupportedOperationException(
+				"getPrincipal(GSSName, GSSCredential) is not supported by this realm");
+	}
+
 }
