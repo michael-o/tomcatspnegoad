@@ -2,6 +2,7 @@ package net.sf.michaelo.tomcat.realm;
 
 import java.security.Principal;
 
+import org.apache.catalina.Realm;
 import org.ietf.jgss.GSSContext;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSName;
@@ -12,7 +13,7 @@ import org.ietf.jgss.GSSName;
  *
  * @version $Id$
  */
-public interface GSSRealm {
+public interface GSSRealm extends Realm {
 
 	/**
 	 * Authenticates a user from a given GSS name.
