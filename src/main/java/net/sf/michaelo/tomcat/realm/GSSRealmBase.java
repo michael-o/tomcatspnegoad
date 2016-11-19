@@ -22,6 +22,7 @@ import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 import org.apache.tomcat.util.res.StringManager;
 import org.ietf.jgss.GSSContext;
+import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSName;
 
 /**
@@ -54,4 +55,16 @@ public abstract class GSSRealmBase extends RealmBase implements GSSRealm {
 		throw new UnsupportedOperationException(
 				"getPrincipal(String) is not supported by this realm");
 	}
+
+	/**
+	 * TODO Document me!
+	 */
+	protected Principal getPrincipal(GSSName gssName) {
+		return getPrincipal(gssName, null);
+	}
+
+	/**
+	 * TODO Document me!
+	 */
+	protected abstract Principal getPrincipal(GSSName gssName, GSSCredential gssCredential);
 }
