@@ -250,9 +250,10 @@ public class ActiveDirectoryRealm extends GSSRealmBase {
 		return null;
 	}
 
-	protected Principal getPrincipal(GSSName gssName, GSSCredential delegatedCredential) {
+	@Override
+	protected Principal getPrincipal(GSSName gssName, GSSCredential gssCredential) {
 		if (gssName.isAnonymous())
-			return new ActiveDirectoryPrincipal(gssName, Sid.ANONYMOUS_SID, delegatedCredential);
+			return new ActiveDirectoryPrincipal(gssName, Sid.ANONYMOUS_SID, gssCredential);
 
 		DirContext context = open();
 		if (context == null)
@@ -265,7 +266,7 @@ public class ActiveDirectoryRealm extends GSSRealmBase {
 				List<String> roles = getRoles(context, user);
 
 				return new ActiveDirectoryPrincipal(gssName, user.getSid(), roles,
-						delegatedCredential, user.getAdditionalAttributes());
+						gssCredential, user.getAdditionalAttributes());
 			}
 		} catch (NamingException e) {
 			logger.error(sm.getString("activeDirectoryRealm.principalSearchFailed", gssName), e);
