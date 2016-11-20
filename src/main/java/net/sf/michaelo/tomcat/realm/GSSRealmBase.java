@@ -57,14 +57,24 @@ public abstract class GSSRealmBase extends RealmBase implements GSSRealm {
 	}
 
 	/**
-	 * TODO Document me!
+	 * Get the principal associated with the specified GSS name.
+	 *
+	 * @param gssName
+	 *            The GSS name
+	 * @return the principal associated with the given GSS name
 	 */
 	protected Principal getPrincipal(GSSName gssName) {
 		return getPrincipal(gssName, null);
 	}
 
 	/**
-	 * TODO Document me!
+	 * Get the principal associated with the specified GSS name.
+	 *
+	 * @param gssName
+	 *            The GSS name
+	 * @param gssCredential
+	 *            the GSS credential corresponding to the GSS name
+	 * @return the principal associated with the given GSS name
 	 */
 	protected abstract Principal getPrincipal(GSSName gssName, GSSCredential gssCredential);
 }
