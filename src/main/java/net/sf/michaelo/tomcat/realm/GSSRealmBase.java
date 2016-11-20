@@ -26,8 +26,8 @@ import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSName;
 
 /**
- * Base realm which is able to retrieve principals from {@link GSSName GSSNames} or fully
- * established {@link GSSContext GSSContexts}.
+ * Base realm which is able to retrieve principals from {@link GSSName GSS names} or fully
+ * established {@link GSSContext GSS contexts}.
  *
  * @version $Id$
  */

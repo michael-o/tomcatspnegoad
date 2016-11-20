@@ -181,14 +181,21 @@ public class ActiveDirectoryRealm extends GSSRealmBase {
 	protected static final String name = "ActiveDirectoryRealm";
 
 	/**
-	 * TODO Document me!
+	 * Sets whether the {@code DirContextSource} is locally ({@code context.xml} defined or globally
+	 * {@code server.xml}.
+	 *
+	 * @param localDirContextSource
+	 *            the local directory context source indication
 	 */
 	public void setLocalDirContextSource(boolean localDirContextSource) {
 		this.localDirContextSource = localDirContextSource;
 	}
 
 	/**
-	 * TODO Document me!
+	 * Sets the name of the {@code DirContextSource}
+	 *
+	 * @param dirContextSourceName
+	 *            the directory context source name
 	 */
 	public void setDirContextSourceName(String dirContextSourceName) {
 		this.dirContextSourceName = dirContextSourceName;
@@ -237,8 +244,8 @@ public class ActiveDirectoryRealm extends GSSRealmBase {
 						}
 					} else {
 						if (logger.isDebugEnabled())
-							logger.debug(sm.getString(
-									"activeDirectoryRealm.credentialNotDelegable", gssName));
+							logger.debug(sm.getString("activeDirectoryRealm.credentialNotDelegable",
+									gssName));
 					}
 				}
 
@@ -265,8 +272,8 @@ public class ActiveDirectoryRealm extends GSSRealmBase {
 			if (user != null) {
 				List<String> roles = getRoles(context, user);
 
-				return new ActiveDirectoryPrincipal(gssName, user.getSid(), roles,
-						gssCredential, user.getAdditionalAttributes());
+				return new ActiveDirectoryPrincipal(gssName, user.getSid(), roles, gssCredential,
+						user.getAdditionalAttributes());
 			}
 		} catch (NamingException e) {
 			logger.error(sm.getString("activeDirectoryRealm.principalSearchFailed", gssName), e);

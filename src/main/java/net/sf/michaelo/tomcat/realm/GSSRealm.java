@@ -23,7 +23,7 @@ import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSName;
 
 /**
- * Realm definition which is able to retrieve principals from {@link GSSName GSS names} or fully
+ * Realm interface which is able to retrieve principals from {@link GSSName GSS names} or fully
  * established {@link GSSContext GSS contexts}.
  *
  * @version $Id$
@@ -38,8 +38,6 @@ public interface GSSRealm extends Realm {
 	 * @param gssCredential
 	 *            the GSS credential of the context initiator (client)
 	 * @return the retrieved principal
-	 * @throws NullPointerException
-	 *             if the gssName is null
 	 */
 	// TODO Create issue for this to be added into Tomcat's Realm
 	Principal authenticate(GSSName gssName, GSSCredential gssCredential);
@@ -52,10 +50,6 @@ public interface GSSRealm extends Realm {
 	 * @param storeCred
 	 *            the store delegated credential indication
 	 * @return the retrieved principal
-	 * @throws NullPointerException
-	 *             if the gssContext is null
-	 * @throws IllegalStateException
-	 *             if the gssContext is not fully established
 	 */
 	// TODO Remove this method in the next iteration. It is already in RealmBase
 	Principal authenticate(GSSContext gssContext, boolean storeCred);
