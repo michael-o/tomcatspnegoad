@@ -71,7 +71,7 @@ public class ActiveDirectoryPrincipal implements TomcatPrincipal {
 			Arrays.sort(this.roles);
 		}
 		this.gssCredential = gssCredential;
-		if (additionalAttributes == null)
+		if (additionalAttributes == null || additionalAttributes.isEmpty())
 			this.additionalAttributes = Collections.emptyMap();
 		else
 			this.additionalAttributes = Collections.unmodifiableMap(additionalAttributes);
