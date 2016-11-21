@@ -54,7 +54,6 @@ import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.Server;
 import org.apache.catalina.Wrapper;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.naming.ContextBindings;
 import org.ietf.jgss.GSSContext;
@@ -168,8 +167,11 @@ public class ActiveDirectoryRealm extends GSSRealmBase {
 	private static final UsernameSearchMapper[] USERNAME_SEARCH_MAPPERS = {
 			new SamAccountNameRfc2247Mapper(), new UserPrincipalNameSearchMapper() };
 
-	private static final String[] DEFAULT_ATTRIBUTES = new String[] { "userAccountControl",
+	private static final String[] DEFAULT_USER_ATTRIBUTES = new String[] { "userAccountControl",
 			"memberOf", "objectSid;binary" };
+
+	private static final String[] DEFAULT_ROLE_ATTRIBUTES = new String[] { "groupType",
+			"objectSid;binary", "sIDHistory;binary" };
 
 	protected boolean localDirContextSource;
 	protected String dirContextSourceName;
@@ -392,10 +394,15 @@ public class ActiveDirectoryRealm extends GSSRealmBase {
 
 	protected User getUser(DirContext context, GSSName gssName) throws NamingException {
 
-		String[] attributes = DEFAULT_ATTRIBUTES;
+		String[] attributes = DEFAULT_USER_ATTRIBUTES;
 
-		if (ArrayUtils.isNotEmpty(additionalAttributes))
-			attributes = ArrayUtils.addAll(DEFAULT_ATTRIBUTES, additionalAttributes);
+		if (additionalAttributes != null && additionalAttributes.length > 0) {
+			attributes = new String[DEFAULT_USER_ATTRIBUTES.length + additionalAttributes.length];
+			System.arraycopy(DEFAULT_USER_ATTRIBUTES, 0, attributes, 0,
+					DEFAULT_USER_ATTRIBUTES.length);
+			System.arraycopy(additionalAttributes, 0, attributes, DEFAULT_USER_ATTRIBUTES.length,
+					additionalAttributes.length);
+		}
 
 		SearchControls searchCtls = new SearchControls();
 		searchCtls.setSearchScope(SearchControls.SUBTREE_SCOPE);
@@ -504,7 +511,7 @@ public class ActiveDirectoryRealm extends GSSRealmBase {
 
 		Map<String, Object> additionalAttributesMap = Collections.emptyMap();
 
-		if (ArrayUtils.isNotEmpty(additionalAttributes)) {
+		if (additionalAttributes != null && additionalAttributes.length > 0) {
 			additionalAttributesMap = new HashMap<String, Object>();
 
 			for (String addAttr : additionalAttributes) {
@@ -544,8 +551,7 @@ public class ActiveDirectoryRealm extends GSSRealmBase {
 
 			Attributes roleAttributes = null;
 			try {
-				roleAttributes = context.getAttributes(roleRdn,
-						new String[] { "groupType", "objectSid;binary", "sIDHistory;binary" });
+				roleAttributes = context.getAttributes(roleRdn, DEFAULT_ROLE_ATTRIBUTES);
 			} catch (ReferralException e) {
 				logger.warn(sm.getString("activeDirectoryRealm.role.referralException", role,
 						e.getRemainingName(), e.getReferralInfo()));

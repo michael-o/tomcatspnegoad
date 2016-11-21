@@ -28,7 +28,6 @@ import javax.servlet.http.HttpServletResponse;
 import net.sf.michaelo.tomcat.realm.GSSRealm;
 
 import org.apache.catalina.connector.Request;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.ietf.jgss.GSSContext;
@@ -211,7 +210,7 @@ public class SpnegoAuthenticator extends GSSAuthenticatorBase {
 
 		register(request, response, principal, SPNEGO_METHOD, principal.getName(), null);
 
-		if (ArrayUtils.isNotEmpty(outToken)) {
+		if (outToken != null) {
 			String authenticationValue = Base64.encodeBase64String(outToken);
 			if (logger.isDebugEnabled())
 				logger.debug(sm.getString("spnegoAuthenticator.respondingWithToken", authenticationValue));

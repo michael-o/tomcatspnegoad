@@ -166,7 +166,6 @@
 									<includes>
 										<include>org/apache/commons/lang3/StringUtils.class</include>
 										<include>org/apache/commons/lang3/CharSequenceUtils.class</include>
-										<include>org/apache/commons/lang3/ArrayUtils.class</include>
 									</includes>
 								</filter>
 							</filters>

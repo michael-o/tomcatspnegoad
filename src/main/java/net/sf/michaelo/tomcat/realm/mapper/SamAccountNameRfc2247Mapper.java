@@ -22,7 +22,6 @@ import javax.naming.NameParser;
 import javax.naming.NamingException;
 import javax.naming.directory.DirContext;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.ietf.jgss.GSSName;
 
@@ -55,14 +54,11 @@ public class SamAccountNameRfc2247Mapper extends SamAccountNameMapper {
 		String searchBase = StringUtils.EMPTY;
 
 		String[] realmComponents = StringUtils.split(realm, '.');
-		ArrayUtils.reverse(realmComponents);
 		NameParser parser = context.getNameParser(StringUtils.EMPTY);
 		Name searchBaseName = parser.parse(StringUtils.EMPTY);
 
-		Name realmComponentName;
-		for (String realmComponent : realmComponents) {
-			realmComponentName = parser.parse("DC=" + realmComponent.toLowerCase(Locale.ROOT));
-			searchBaseName.addAll(realmComponentName);
+		for (int i = realmComponents.length - 1; i >= 0; i--) {
+			searchBaseName.add("DC=" + realmComponents[i].toLowerCase(Locale.ROOT));
 		}
 
 		searchBase = searchBaseName.toString();
