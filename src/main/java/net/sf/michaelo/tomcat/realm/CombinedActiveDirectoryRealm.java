@@ -127,7 +127,7 @@ public class CombinedActiveDirectoryRealm extends GSSRealmBase {
 						realm.getClass().getName()), e);
 			}
 		}
-		super.start();
+		super.startInternal();
 	}
 
 	/**
