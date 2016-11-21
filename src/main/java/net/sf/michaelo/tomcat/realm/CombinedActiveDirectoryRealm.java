@@ -215,8 +215,8 @@ public class CombinedActiveDirectoryRealm extends GSSRealmBase {
 		ActiveDirectoryPrincipal adp = (ActiveDirectoryPrincipal) principal;
 
 		boolean result;
-		if (container instanceof Context) {
-			Context context = (Context) container;
+		if (getContainer() instanceof Context) {
+			Context context = (Context) getContainer();
 			result = adp.hasRole(context.findRoleMapping(role));
 		} else
 			result = adp.hasRole(role);
