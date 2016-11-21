@@ -225,7 +225,7 @@ public class ActiveDirectoryRealm extends GSSRealmBase {
 	}
 
 	@Override
-	public Principal authenticate(GSSContext gssContext, boolean storeCred) {
+	public Principal authenticate(GSSContext gssContext, boolean storeCreds) {
 		if (gssContext.isEstablished()) {
 			GSSName gssName = null;
 			try {
@@ -236,7 +236,7 @@ public class ActiveDirectoryRealm extends GSSRealmBase {
 
 			if (gssName != null) {
 				GSSCredential gssCredential = null;
-				if (storeCred) {
+				if (storeCreds) {
 					if (gssContext.getCredDelegState()) {
 						try {
 							gssCredential = gssContext.getDelegCred();

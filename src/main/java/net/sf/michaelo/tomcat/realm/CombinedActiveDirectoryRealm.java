@@ -186,7 +186,7 @@ public class CombinedActiveDirectoryRealm extends GSSRealmBase {
 		ActiveDirectoryPrincipal principal = null;
 
 		for (ActiveDirectoryRealm realm : realms) {
-			principal = (ActiveDirectoryPrincipal) realm.authenticate(gssContext, false);
+			principal = (ActiveDirectoryPrincipal) realm.authenticate(gssContext, storeCreds);
 
 			if (principal != null)
 				break;
