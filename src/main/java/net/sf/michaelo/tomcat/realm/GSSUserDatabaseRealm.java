@@ -34,7 +34,7 @@ import org.ietf.jgss.GSSName;
 public class GSSUserDatabaseRealm extends UserDatabaseRealm implements GSSRealm {
 
 	protected final Log logger = LogFactory.getLog(getClass());
-	protected final StringManager sm = StringManager.getManager(getClass().getPackage().getName());
+	protected final StringManager sm = StringManager.getManager(getClass());
 
 	/**
 	 * Descriptive information about this Realm implementation.
