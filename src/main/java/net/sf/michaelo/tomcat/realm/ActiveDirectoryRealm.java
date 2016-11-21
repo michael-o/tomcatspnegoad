@@ -219,7 +219,7 @@ public class ActiveDirectoryRealm extends GSSRealmBase {
 
 	@Override
 	public Principal authenticate(GSSName gssName, GSSCredential gssCredential) {
-		return getPrincipal(gssName, null);
+		return getPrincipal(gssName, gssCredential);
 	}
 
 	@Override
