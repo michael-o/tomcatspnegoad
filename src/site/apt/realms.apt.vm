@@ -74,13 +74,14 @@ Choosing and Using Realms
 [$ellipsis]
   <!-- Add this -->
   <Realm className="net.sf.michaelo.tomcat.realm.ActiveDirectoryRealm"
-    resourceName="my-active-directory" localResource="true|false" />
+    dircontextSourcName="my-active-directory" localDircontextSourc="true|false" />
 [$ellipsis]
 </Context>
 +----------------------------
 
-  Provide the <<<resourceName>>> you have configured for the <<<DirContextSource>>> above and hint
-  whether this resource has been configured {{{http://dirctxsrc.sourceforge.net/dircontextsourcefactory.html#Resource_Declaration_Examples}locally or globally}}.
+  Provide the <<<dircontextSourcName>>> you have configured for the <<<DirContextSource>>> above and
+  hint whether this directory context source has been configured
+  {{{http://dirctxsrc.sourceforge.net/dircontextsourcefactory.html#Resource_Declaration_Examples}locally or globally}}.
   Default value is <<<false>>>.
 
   You have successfully configured the <<<ActiveDirectoryRealm>>> in your webapp. It is now ready to use.
@@ -115,8 +116,7 @@ Choosing and Using Realms
 <Context>
 [$ellipsis]
   <!-- Add this -->
-  <Realm className="net.sf.michaelo.tomcat.realm.GSSUserDatabaseRealm"
-    resourceName="my-users-xml" />
+  <Realm className="net.sf.michaelo.tomcat.realm.GSSUserDatabaseRealm" />
 [$ellipsis]
 </Context>
 +----------------------------
@@ -127,7 +127,7 @@ Choosing and Using Realms
 
   If you are not using the Active Directory as a user repository (e.g. database or another directory
   server) and can still make use of this library. Extend the {{{./apidocs/net/sf/michaelo/tomcat/realm/GSSRealmBase.html}<<<GSSRealmBase>>>}}
-  class and implement the abstract methods <<<authenticate(GSSName)>>> and <<<authenticate(GSSContext)>>>.
+  class and implement the abstract method <<<getPrincipal(GSSName, GSSCredential)>>>.
 
 The Next Step
 

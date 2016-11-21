@@ -32,7 +32,7 @@ Sample Webapp
 
 * Prerequisites
 
-  Create a Servlet 2.5 compatible webapp project with a method of your choice, .e.g., Maven archetype
+  Create a Servlet 3.1 compatible webapp project with a method of your choice, .e.g., Maven archetype
   or Eclipse project wizard. Configure the resources (authenticator and realm).
 
 * Modifying the Deployment Descriptor (<<<web.xml>>>)

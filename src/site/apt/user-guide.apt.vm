@@ -27,7 +27,7 @@
 User Guide
 
   To make use of this library you must run at least Java $context.get("maven.compiler.target") and
-  Apache Tomcat 8.5 or newer.
+  Apache Tomcat $context.get("tomcat.version") or newer.
 
     [Prerequisites] Make sure that the machine running the Tomcat instance (a) has joined a domain,
                     (b) has an appropriate {{{http://msdn.microsoft.com/en-us/library/windows/desktop/ms677949%28v=vs.85%29.aspx}SPN}}
