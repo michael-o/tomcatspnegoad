@@ -118,11 +118,6 @@ public class ActiveDirectoryPrincipal implements TomcatPrincipal {
 	 * @return true if principal is associated with the role, else false
 	 */
 	public boolean hasRole(String role) {
-		// Special 2.4 role meaning everyone
-		if ("*".equals(role))
-			return true;
-		if (role == null)
-			return false;
 		return Arrays.binarySearch(roles, role) >= 0;
 	}
 
