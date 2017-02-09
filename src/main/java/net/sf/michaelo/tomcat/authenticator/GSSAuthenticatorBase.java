@@ -46,13 +46,13 @@ abstract class GSSAuthenticatorBase extends AuthenticatorBase {
 		try {
 			KRB5_MECHANISM = new Oid("1.2.840.113554.1.2.2");
 		} catch (GSSException e) {
-			throw new IllegalStateException("Failed to create OID for Kerberos 5 mechanism");
+			throw new IllegalStateException("failed to create OID for Kerberos 5 mechanism");
 		}
 
 		try {
 			SPNEGO_MECHANISM = new Oid("1.3.6.1.5.5.2");
 		} catch (GSSException e) {
-			throw new IllegalStateException("Failed to create OID for SPNEGO mechanism");
+			throw new IllegalStateException("failed to create OID for SPNEGO mechanism");
 		}
 	}
 
@@ -167,7 +167,7 @@ abstract class GSSAuthenticatorBase extends AuthenticatorBase {
 					break;
 				default:
 					throw new IllegalArgumentException(
-							String.format("Status code %s not supported", statusCode));
+							String.format("status code %s not supported", statusCode));
 				}
 
 				response.setHeader(headerName, message);
