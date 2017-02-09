@@ -44,9 +44,9 @@ import org.ietf.jgss.GSSName;
  * <pre>
  *  &lt;Realm className="net.sf.michaelo.tomcat.realm.CombinedActiveDirectoryRealm"&gt;
  *    &lt;Realm className="net.sf.michaelo.tomcat.realm.ActiveDirectoryRealm"
- *      resourceName="my-active-directory1" /&gt;
+ *      dirContextSourceName="my-active-directory-forest1" /&gt;
  *    &lt;Realm className="net.sf.michaelo.tomcat.realm.ActiveDirectoryRealm"
- *      resourceName="my-active-directory2" /&gt;
+ *      dirContextSourceName="my-active-directory-forest2" /&gt;
  *  &lt;/Realm&gt;
  * </pre>
  * <p>

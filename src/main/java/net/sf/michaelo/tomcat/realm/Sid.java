@@ -63,7 +63,7 @@ public class Sid {
 		this.revision = bb.get() & 0xFF;
 		if (this.revision != 0x01)
 			throw new IllegalArgumentException(
-					"SID revision must be 1 but is " + (this.revision & 0xFF));
+					"SID revision must be 1 but is " + this.revision);
 
 		// At most 15 subauthorities
 		this.subAuthorityCount = bb.get() & 0xFF;

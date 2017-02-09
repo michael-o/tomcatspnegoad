@@ -167,7 +167,7 @@ abstract class GSSAuthenticatorBase extends AuthenticatorBase {
 					break;
 				default:
 					throw new IllegalArgumentException(
-							String.format("Status code %d not supported", statusCode));
+							String.format("Status code %s not supported", statusCode));
 				}
 
 				response.setHeader(headerName, message);

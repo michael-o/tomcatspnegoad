@@ -67,15 +67,15 @@ import org.ietf.jgss.GSSName;
  * <p>
  * Following options can be configured:
  * <ul>
- * <li>{@code dirContextSourceName}: The name of the {@link DirContextSource} in JNDI with which
+ * <li>{@code dirContextSourceName}: the name of the {@link DirContextSource} in JNDI with which
  * principals will be retrieved.</li>
- * <li>{@code localDirContextSource}: Whether this {@code DirContextSource} is locally configured in
+ * <li>{@code localDirContextSource}: whether this {@code DirContextSource} is locally configured in
  * the {@code context.xml} or globally configured in the {@code server.xml} (optional). Default
  * value is {@code false}.</li>
- * <li>{@code additionalAttributes}: Comma-separated list of attributes to be retrieved for the
- * principal. Binary attributes must succeed with {@code ;binary} and will be stored as
- * {@code byte[]}, ordinary attributes will be stored as {@code String}. If an attribute is
- * multivalued, it will be stored as {@code List}.</li>
+ * <li>{@code additionalAttributes}: comma-separated list of attributes to be retrieved for the
+ * principal. Binary attributes must end with {@code ;binary} and will be stored as {@code byte[]},
+ * ordinary attributes will be stored as {@code String}. If an attribute is multivalued, it will be
+ * stored as {@code List}.</li>
  * </ul>
  * <p>
  * By default the SIDs ({@code objectSid} and {@code sIDHistory}) of the Active Directory security
@@ -96,7 +96,9 @@ import org.ietf.jgss.GSSName;
  * operation to the application, the {@code ReferralException} is handled internally and referral
  * contexts are queried and closed. Unfortunately, Oracle's LDAP implementation is not able to
  * handle this properly and only Oracle can fix this shortcoming. Issues have already been reported
- * (Review IDs 9089870 and 9089874)!
+ * (Review IDs 9089870 and 9089874, public issues
+ * <a href="http://bugs.java.com/bugdatabase/view_bug.do?bug_id=JDK-8161361">JDK-8161361</a> and
+ * <a href="http://bugs.java.com/bugdatabase/view_bug.do?bug_id=JDK-8160768">JDK-8161361</a>)!
  * <p>
  * <em>What is the shortcoming and how can it be solved?</em> Microsoft takes a very sophisticated
  * approach on not to rely on host names because servers can be provisioned and decommissioned any
@@ -120,10 +122,10 @@ import org.ietf.jgss.GSSName;
  * First, the {@code SaslClient} will receive an arbitrary IP address without knowing whether the
  * LDAP client socket will use the same one. You will have a service ticket issued for another host
  * and your authentication will fail. Second, most Kerberos implementations rely on reverse DNS
- * records, but Microsoft's SSPI Kerberos provider does not care about reverse DNS, it does not
+ * records, but Microsoft's Active Directory concept does not care about reverse DNS, it does not
  * canonicalize host names by default and there is no guarantee, that reverse DNS is set up
- * properly. Some environments do not even have control over the reverse DNS zone. Using
- * {@code throw} will not make it any better because the referral URL returned by
+ * properly. Some environments do not even have control over the reverse DNS zone ({@code PTR}
+ * records). Using {@code throw} will not make it any better because the referral URL returned by
  * {@link ReferralException#getReferralInfo()} cannot be changed with the calculated value(s) from
  * DNS. {@link ReferralException#getReferralContext()} will unconditionally reuse that value. The
  * only way (theoretically) to achieve this is to construct an {@link InitialDirContext} with the
@@ -137,9 +139,9 @@ import org.ietf.jgss.GSSName;
  * <li>a single forest and set referrals to {@code ignore}, or</li>
  * <li>multiple forests and set referrals to either
  * <ul>
- * <li>{@code follow} with a {@link DirContextSource} in your home forest, patch
- * {@code com.sun.jndi.ldap.LdapCtx} to properly resolve DNS names to host names and prepend it to
- * the boot classpath and all referrals will be cleanly resolved, or</li>
+ * <li>{@code follow} or {@code throw} with a {@link DirContextSource} in your home forest, patch
+ * {@code com.sun.jndi.ldap.LdapCtxFactory} to properly resolve DNS domain names to host names and
+ * prepend it to the boot classpath and all referrals will be cleanly resolved, or</li>
  * <li>{@code ignore} with multiple {@code DirContextSources}, and create a
  * {@link CombinedActiveDirectoryRealm} with one {@code ActiveDirectoryRealm} per forest.</li>
  * </ul>
@@ -482,7 +484,7 @@ public class ActiveDirectoryRealm extends GSSRealmBase {
 				.parseInt((String) userAttributes.get("userAccountControl").get());
 
 		// Do not allow disabled accounts (UF_ACCOUNT_DISABLE)
-		if ((userAccountControl & 0x2) == 0x2) {
+		if ((userAccountControl & 0x02) == 0x02) {
 			logger.warn(sm.getString("activeDirectoryRealm.userFoundButDisabled", gssName));
 
 			close(results);

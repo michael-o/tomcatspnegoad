@@ -36,10 +36,6 @@ User Guide
 
     []
 
-    [Tip] The default <<<ErrorReportValve>>> in Tomcat is not properly capable to display messages
-          returned by the components in this module, therefore, you are advised to use the
-          {{{http://mo-tomcat-ext.sourceforge.net/user-guide.html#EnhancedErrorReportValve}<<<net.sf.michaelo.tomcat.extras.valves.EnhancedErrorReportValve>>>}}.
-
   This site will guide you through the components of this library:
 
   [[1]] {{{./authenticators.html}Authenticators}}: an authenticator challenges a client to present
@@ -65,6 +61,6 @@ User Guide
 
 * Not using Active Directory but another Kerberos KDC implementation?
 
-  If you happen <not> to use Active Directory but MIT Kerberos or Heimdal as your KDC &#x2013; no
-  problem, the authenticators are not tied to the Active Directory but simply require a working Kerberos
+  If you happen <not> to use Active Directory, but MIT Kerberos or Heimdal as your KDC &#x2013; no
+  problem, the authenticators are not tied to the Active Directory, but simply require a working Kerberos
   setup. As for the realm, read the chapter on {{{./realms.html#Alternative_Realm_Implementations}alternative realm implementations}}.

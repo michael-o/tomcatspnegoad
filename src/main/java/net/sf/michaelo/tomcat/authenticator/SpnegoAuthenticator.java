@@ -41,11 +41,6 @@ import org.ietf.jgss.GSSName;
  *
  * @version $Id$
  */
-/*
- * Error messages aren't reported correctly by the ErrorReportValve, see
- * http://www.mail-archive.com/users@tomcat.apache.org/msg98308.html Solution:
- * net.sf.michaelo.tomcat.extras.valves.EnhancedErrorReportValve
- */
 public class SpnegoAuthenticator extends GSSAuthenticatorBase {
 
 	protected static final String SPNEGO_METHOD = "SPNEGO";
