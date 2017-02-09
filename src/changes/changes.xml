@@ -4,6 +4,16 @@
 						http://maven.apache.org/xsd/changes-1.0.0.xsd">
 
 	<body>
+		<release version="3.0-SNAPSHOT" date="TBD" description="Overhaul for Tomcat 8.5">
+			<action type="add" dev="michael-o">Introduce GSSRealm interface for third-party implementations</action>
+			<action type="update" dev="michael-o">ActiveDirectoryPrincipal now implements TomcatPrincipal</action>
+			<action type="add" dev="michael-o">Add proper warning if referrals are expected to handle, but Oracle JDNI provider not able to do so</action>
+			<action type="update" dev="michael-o">Renamed attribute resourceName to dirContextSourceName in ActiveDirectoryRealm</action>
+			<action type="remove" dev="michael-o">Remove code portions already implemented in Tomcat 8.5</action>
+			<action type="update" dev="michael-o">Attribute storeDelegatedCredential has been moved to GSSAuthenticatorBase</action>
+			<action type="remove" dev="michael-o">Remove custom classes already present in Tomcat 8.5</action>
+			<action type="update" dev="michael-o">Full code update to Tomcat 8.5</action>
+		</release>
 		<release version="2.1" date="2016-06-09" description="Minor improvements and new features">
 			<action type="add" dev="michael-o">A CombinedActiveDirectoryRealm which iterates over multiple ActiveDirectoryRealms</action>
 			<action type="remove" dev="michael-o">Don't return principal with NULL_SID if not found in Active Directory</action>
