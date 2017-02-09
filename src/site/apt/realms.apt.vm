@@ -64,7 +64,7 @@ Choosing and Using Realms
 
   In general, you should pick LDAP URLs which avoid any referral incursion because it amplifies
   execution in space and time. You are highly recommended using the Global Catalog (port 3268) only.
-  More details on how this realm deals with referrals can be found in the {{{./apidocs/net/sf/michaelo/tomcat/realm/ActiveDirectoryRealm.html#referral-handling}Javadocs}}.
+  More details on how this realm deals with referrals can be found in the {{{./apidocs/net/sf/michaelo/tomcat/realm/ActiveDirectoryRealm.html#referral-handling}Javadoc}}.
 
 ** Configuring the Realm
 
@@ -90,7 +90,7 @@ Choosing and Using Realms
 ** Authenticated Principal
 
   After successful authentication and retrieval, this realm will create an <<<ActiveDirectoryPrincipal>>>
-  with several attributes. Refer to the {{{./apidocs/net/sf/michaelo/tomcat/realm/ActiveDirectoryPrincipal.html}Javadocs}}
+  with several attributes. Refer to the {{{./apidocs/net/sf/michaelo/tomcat/realm/ActiveDirectoryPrincipal.html}Javadoc}}
   for details.
 
 ** Using Security Groups from Active Directory
