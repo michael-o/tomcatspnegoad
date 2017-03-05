@@ -1,5 +1,5 @@
 #*
- * Copyright 2013–2016 Michael Osipov
+ * Copyright 2013–2017 Michael Osipov
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,6 @@
                             ----------------------
                                   2013-08-03
                             ----------------------
-
-#macro(property $property)${project.properties.get($property)}#end
 
 Download ${project.name}
 
@@ -51,5 +49,5 @@ Download ${project.name}
 
   After you have obtained the source code, navigate to the source code directory
   and type <<<mvn install>>>. Prior to that, make sure that you have at least Maven
-  #property("maven.version") and Java #property("maven.compiler.target") installed.
+  $context.get("maven.version") and Java $context.get("maven.compiler.target") installed.
   After successful execution the artifact will be installed to your local repository.

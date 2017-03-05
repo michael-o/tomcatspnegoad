@@ -1,5 +1,5 @@
 #*
- * Copyright 2013–2016 Michael Osipov
+ * Copyright 2013–2017 Michael Osipov
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,8 +40,7 @@ About ${project.name}
   the Apache Tomcat did not have anything like this out of the box for years.\
   After a deep dive into Kerberos, GSS-API, Active Directory and LDAP in Java, I made a custom component
   to fill that gap. Portions of this project have been {{{https://issues.apache.org/bugzilla/show_bug.cgi?id=48685}integrated}}
-  into Apache Tomcat 7 and onwards. Though, this project covers much more than an authenticator and
-  works even with Apache Tomcat 6 too.
+  into Apache Tomcat 7 and onwards. Though, this project covers much more than an authenticator.
 
   This library has served me very well for many years and still does a great job in a complex
   multi-realm environment, hopefully it will do for you too.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013–2016 Michael Osipov
+ * Copyright 2013–2017 Michael Osipov
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,12 @@
 package net.sf.michaelo.tomcat.realm;
 
 import java.security.Principal;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.catalina.TomcatPrincipal;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSName;
 
@@ -31,7 +33,7 @@ import org.ietf.jgss.GSSName;
  * <li>the GSS name,</li>
  * <li>the security identifier (SID),</li>
  * <li>an optional GSS credential for credential delegation (impersonation),</li>
- * <li>the list of security groups the user has been assigned to, stored as SID strings (the actual
+ * <li>the array of security groups the user has been assigned to, stored as SID strings (the actual
  * values are queried with {@code memberOf} and retrieved from {@code objectSid} and
  * {@code sIDHistory}),</li>
  * <li>and a map with additional attributes which are either a {@code String}, {@code byte[]} or a
@@ -40,35 +42,44 @@ import org.ietf.jgss.GSSName;
  *
  * @version $Id$
  */
-public class ActiveDirectoryPrincipal implements Principal {
+public class ActiveDirectoryPrincipal implements TomcatPrincipal {
 
 	private final GSSName gssName;
 	private final Sid sid;
-	private final GSSCredential gssCredential;
-	private final List<String> roles;
+	private final transient GSSCredential gssCredential;
+	private final String[] roles;
 	private final Map<String, Object> additionalAttributes;
 
 	/**
 	 * Constructs a new principal for the given parameters.
 	 */
 	public ActiveDirectoryPrincipal(GSSName gssName, Sid sid, GSSCredential gssCredential) {
-		this.gssName = gssName;
-		this.sid = sid;
-		this.gssCredential = gssCredential;
-		this.roles = Collections.emptyList();
-		this.additionalAttributes = Collections.emptyMap();
+		this(gssName, sid, null, gssCredential, null);
 	}
 
 	/**
 	 * Constructs a new principal for the given parameters.
 	 */
-	public ActiveDirectoryPrincipal(GSSName gssName, Sid sid, GSSCredential gssCredential,
-			List<String> roles, Map<String, Object> additionalAttributes) {
+	public ActiveDirectoryPrincipal(GSSName gssName, Sid sid, List<String> roles,
+			GSSCredential gssCredential, Map<String, Object> additionalAttributes) {
 		this.gssName = gssName;
 		this.sid = sid;
+		if (roles == null || roles.isEmpty())
+			this.roles = new String[0];
+		else {
+			this.roles = roles.toArray(new String[roles.size()]);
+			Arrays.sort(this.roles);
+		}
 		this.gssCredential = gssCredential;
-		this.roles = Collections.unmodifiableList(roles);
-		this.additionalAttributes = Collections.unmodifiableMap(additionalAttributes);
+		if (additionalAttributes == null || additionalAttributes.isEmpty())
+			this.additionalAttributes = Collections.emptyMap();
+		else
+			this.additionalAttributes = Collections.unmodifiableMap(additionalAttributes);
+	}
+
+	@Override
+	public Principal getUserPrincipal() {
+		return this;
 	}
 
 	@Override
@@ -81,7 +92,7 @@ public class ActiveDirectoryPrincipal implements Principal {
 	 *
 	 * @return the underlying GSS name
 	 */
-	public GSSName getGSSName() {
+	public GSSName getGssName() {
 		return gssName;
 	}
 
@@ -94,13 +105,8 @@ public class ActiveDirectoryPrincipal implements Principal {
 		return sid;
 	}
 
-	/**
-	 * Returns the delegated credential if the server is trusted for delegation and the credential
-	 * was intended to be stored.
-	 *
-	 * @return the delegated credential
-	 */
-	public GSSCredential getDelegatedCredential() {
+	@Override
+	public GSSCredential getGssCredential() {
 		return gssCredential;
 	}
 
@@ -112,11 +118,7 @@ public class ActiveDirectoryPrincipal implements Principal {
 	 * @return true if principal is associated with the role, else false
 	 */
 	public boolean hasRole(String role) {
-		if (role == null)
-			return false;
-		if (role.equals("*"))
-			return true;
-		return roles.contains(role);
+		return Arrays.binarySearch(roles, role) >= 0;
 	}
 
 	/**
@@ -124,8 +126,8 @@ public class ActiveDirectoryPrincipal implements Principal {
 	 *
 	 * @return a read-only view of the roles
 	 */
-	public List<String> getRoles() {
-		return roles;
+	public String[] getRoles() {
+		return Arrays.copyOf(roles, roles.length);
 	}
 
 	/**
@@ -139,10 +141,10 @@ public class ActiveDirectoryPrincipal implements Principal {
 
 	@Override
 	public boolean equals(Object obj) {
-		if(obj == null)
+		if (obj == null)
 			return false;
 
-		if(!(obj instanceof ActiveDirectoryPrincipal))
+		if (!(obj instanceof ActiveDirectoryPrincipal))
 			return false;
 
 		ActiveDirectoryPrincipal other = (ActiveDirectoryPrincipal) obj;
@@ -158,6 +160,13 @@ public class ActiveDirectoryPrincipal implements Principal {
 	@Override
 	public String toString() {
 		return gssName.toString();
+	}
+
+	@Override
+	public void logout() throws Exception {
+		if (gssCredential != null) {
+			gssCredential.dispose();
+		}
 	}
 
 }

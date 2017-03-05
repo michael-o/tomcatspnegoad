@@ -1,5 +1,5 @@
 /*
- * Copyright 2013–2016 Michael Osipov
+ * Copyright 2013–2017 Michael Osipov
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,19 +16,13 @@
 package net.sf.michaelo.tomcat.realm;
 
 import java.security.Principal;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
-import javax.naming.NamingException;
-
-import org.apache.catalina.Group;
-import org.apache.catalina.Role;
-import org.apache.catalina.User;
-import org.apache.catalina.UserDatabase;
-import org.apache.catalina.realm.GenericPrincipal;
 import org.apache.catalina.realm.UserDatabaseRealm;
+import org.apache.juli.logging.Log;
+import org.apache.juli.logging.LogFactory;
+import org.apache.tomcat.util.res.StringManager;
 import org.ietf.jgss.GSSContext;
+import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
 import org.ietf.jgss.GSSName;
 
@@ -37,118 +31,58 @@ import org.ietf.jgss.GSSName;
  *
  * @version $Id$
  */
-public class GSSUserDatabaseRealm extends GSSRealmBase<UserDatabase> {
+public class GSSUserDatabaseRealm extends UserDatabaseRealm implements GSSRealm {
 
-	@Override
-	public String getInfo() {
-		return "net.sf.michaelo.realm.GSSUserDatabaseRealm/2.0";
-	}
+	protected final Log logger = LogFactory.getLog(getClass());
+	protected final StringManager sm = StringManager.getManager(getClass());
+
+	/**
+	 * Descriptive information about this Realm implementation.
+	 */
+	protected static final String name = "GSSUserDatabaseRealm";
 
 	@Override
 	protected String getName() {
-		return "GSSUserDatabaseRealm";
+		return name;
+	}
+
+	public Principal authenticate(GSSName gssName, GSSCredential gssCredential) {
+		return getPrincipal(String.valueOf(gssName), gssCredential);
 	}
 
 	@Override
-	public Principal authenticate(GSSName gssName) {
-		if(gssName == null)
-			throw new NullPointerException("gssName cannot be null");
-
-		UserDatabase database = null;
-
-		try {
-			database = lookupResource();
-		} catch (NamingException e) {
-			logger.error(sm.getString("userDatabaseRealm.lookupFailed", resourceName), e);
-
-			return null;
-		}
-
-		String username = gssName.toString();
-		User user = database.findUser(username);
-		if (user == null) {
-			return new GenericPrincipal(this, username, null);
-		}
-
-		List<String> roles = new ArrayList<String>();
-		Iterator<?> uroles = user.getRoles();
-		while (uroles.hasNext()) {
-			Role role = (Role) uroles.next();
-			roles.add(role.getName());
-		}
-		Iterator<?> groups = user.getGroups();
-		while (groups.hasNext()) {
-			Group group = (Group) groups.next();
-			uroles = group.getRoles();
-			while (uroles.hasNext()) {
-				Role role = (Role) uroles.next();
-				roles.add(role.getName());
+	public Principal authenticate(GSSContext gssContext, boolean storeCreds) {
+		if (gssContext.isEstablished()) {
+			GSSName gssName = null;
+			try {
+				gssName = gssContext.getSrcName();
+			} catch (GSSException e) {
+				logger.error(sm.getString("activeDirectoryRealm.gssNameFailed"), e);
 			}
-		}
 
-		return new GenericPrincipal(this, username, null, roles, user);
-	}
+			if (gssName != null) {
+				GSSCredential gssCredential = null;
+				if (storeCreds) {
+					if (gssContext.getCredDelegState()) {
+						try {
+							gssCredential = gssContext.getDelegCred();
+						} catch (GSSException e) {
+							logger.warn(sm.getString(
+									"activeDirectoryRealm.delegatedCredentialFailed", gssName), e);
+						}
+					} else {
+						if (logger.isDebugEnabled())
+							logger.debug(sm.getString(
+									"activeDirectoryRealm.credentialNotDelegable", gssName));
+					}
+				}
 
-	@Override
-	public Principal authenticate(GSSContext gssContext) {
-		if(gssContext == null)
-			throw new NullPointerException("gssContext cannot be null");
-
-		if(!gssContext.isEstablished())
-			throw new IllegalStateException("gssContext is not fully established");
-
-		try {
-			GSSName gssName = gssContext.getSrcName();
-			return authenticate(gssName);
-		} catch (GSSException e) {
-			logger.error(sm.getString("realm.inquireFailed"), e);
-
-			return null;
-		}
-	}
-
-	public boolean hasRole(Principal principal, String role) {
-		if (principal instanceof GenericPrincipal) {
-			GenericPrincipal gp = (GenericPrincipal) principal;
-			if (gp.getUserPrincipal() instanceof User) {
-				principal = gp.getUserPrincipal();
+				return getPrincipal(String.valueOf(gssName), gssCredential);
 			}
-		}
-		if (!(principal instanceof User)) {
-			// Play nice with SSO and mixed Realms
-			return super.hasRole(principal, role);
-		}
-		if ("*".equals(role)) {
-			return true;
-		} else if (role == null) {
-			return false;
-		}
-		User user = (User) principal;
+		} else
+			logger.error(sm.getString("activeDirectoryRealm.securityContextNotEstablished"));
 
-		UserDatabase database;
-		try {
-			database = lookupResource();
-		} catch (NamingException e) {
-			logger.error(sm.getString("userDatabaseRealm.lookupFailed", resourceName), e);
-
-			return false;
-		}
-
-		Role dbrole = database.findRole(role);
-		if (dbrole == null) {
-			return false;
-		}
-		if (user.isInRole(dbrole)) {
-			return true;
-		}
-		Iterator<?> groups = user.getGroups();
-		while (groups.hasNext()) {
-			Group group = (Group) groups.next();
-			if (group.isInRole(dbrole)) {
-				return true;
-			}
-		}
-		return false;
+		return null;
 	}
 
 }
