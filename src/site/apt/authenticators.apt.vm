@@ -1,5 +1,5 @@
 #*
- * Copyright 2013–2016 Michael Osipov
+ * Copyright 2013–2017 Michael Osipov
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@
 Choosing and Using Authenticators
 
   Choose an authenticator which will determine a user's identity. Usually, the {{{The_SPNEGO_Authenticator}<<<SpnegoAuthenticator>>>}}
-  will do but during local development you will find the {{{Using_an_Authenticator_During_Development}<<<CurrentWindowsIdentityAuthenticator>>>}}
+  will do, but during local development you will find the {{{Using_an_Authenticator_During_Development}<<<CurrentWindowsIdentityAuthenticator>>>}}
   very handy.
 
 * The SPNEGO Authenticator

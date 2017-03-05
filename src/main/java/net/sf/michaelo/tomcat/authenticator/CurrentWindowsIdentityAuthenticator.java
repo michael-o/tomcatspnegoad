@@ -1,5 +1,5 @@
 /*
- * Copyright 2013–2016 Michael Osipov
+ * Copyright 2013–2017 Michael Osipov
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,13 +23,11 @@ import java.security.PrivilegedExceptionAction;
 import javax.security.auth.Subject;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
+import javax.servlet.http.HttpServletResponse;
 
-import net.sf.michaelo.tomcat.realm.GSSRealmBase;
+import net.sf.michaelo.tomcat.realm.GSSRealm;
 
-import org.apache.catalina.authenticator.Constants;
 import org.apache.catalina.connector.Request;
-import org.apache.catalina.connector.Response;
-import org.apache.catalina.deploy.LoginConfig;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
 import org.ietf.jgss.GSSManager;
@@ -37,11 +35,6 @@ import org.ietf.jgss.GSSName;
 
 /**
  * A Windows Identity Authenticator which uses GSS-API to retrieve to currently logged in user.
- * <p>
- * This authenticator has the following configuration options:
- * <ul>
- * <li>{@code loginEntryName}: Login entry name with a configured {@code Krb5LoginModule}.</li>
- * </ul>
  *
  * @version $Id$
  */
@@ -51,39 +44,12 @@ public class CurrentWindowsIdentityAuthenticator extends GSSAuthenticatorBase {
 	protected static final String CURRENT_WINDOWS_IDENTITY_AUTH_SCHEME = "CWI";
 
 	@Override
-	public String getInfo() {
-		return "net.sf.michaelo.tomcat.authenticator.CurrentWindowsIdentityAuthenticator/2.0";
-	}
-
-	@Override
-	protected boolean authenticate(Request request, Response response, LoginConfig config)
+	protected boolean doAuthenticate(Request request, HttpServletResponse response)
 			throws IOException {
 
-		Principal principal = request.getUserPrincipal();
-		// String ssoId = (String) request.getNote(Constants.REQ_SSOID_NOTE);
-		if (principal != null) {
-			if (logger.isDebugEnabled())
-				logger.debug(sm.getString("authenticator.alreadyAuthenticated", principal));
-			String ssoId = (String) request.getNote(Constants.REQ_SSOID_NOTE);
-			if (ssoId != null)
-				associate(ssoId, request.getSessionInternal(true));
+		if (checkForCachedAuthentication(request, response, true)) {
 			return true;
 		}
-
-		// NOTE: We don't try to reauthenticate using any existing SSO session,
-		// because that will only work if the original authentication was
-		// BASIC or FORM, which are less secure than the CURRENT_WINDOWS_IDENTITY auth-type
-		// specified for this webapp
-
-		/*
-		if (ssoId != null) {
-			if (logger.isDebugEnabled())
-				logger.debug(String.format("SSO Id %s set; attempting reauthentication", ssoId));
-
-			if (reauthenticateFromSSO(ssoId, request))
-				return true;
-		}
-		*/
 
 		LoginContext lc = null;
 
@@ -121,23 +87,27 @@ public class CurrentWindowsIdentityAuthenticator extends GSSAuthenticatorBase {
 			}
 
 			try {
-				GSSRealmBase<?> realm = (GSSRealmBase<?>) context.getRealm();
-				GSSName srcName = gssCredential.getName();
+				GSSRealm realm = (GSSRealm) context.getRealm();
+				GSSName gssName = gssCredential.getName();
 
-				principal = realm.authenticate(srcName);
+				Principal principal = realm.authenticate(gssName,
+						isStoreDelegatedCredential() ? gssCredential : null);
 
-				if (principal == null) {
+				if (principal != null) {
+					register(request, response, principal, getAuthMethod(), principal.getName(),
+							null);
+					return true;
+				} else {
 					sendUnauthorized(request, response, CURRENT_WINDOWS_IDENTITY_AUTH_SCHEME,
-							"authenticator.userNotFound", srcName);
+							"gssAuthenticatorBase.userNotFound", gssName);
 					return false;
 				}
 			} catch (GSSException e) {
-				logger.error(sm.getString("cwiAuthenticator.inquireFailed"), e);
+				logger.error(sm.getString("gssAuthenticatorBase.inquireNameFailed"), e);
 
-				sendInternalServerError(request, response, "cwiAuthenticator.inquireFailed");
+				sendInternalServerError(request, response, "gssAuthenticatorBase.inquireNameFailed");
 				return false;
 			}
-
 		} finally {
 			if (lc != null) {
 				try {
@@ -147,10 +117,11 @@ public class CurrentWindowsIdentityAuthenticator extends GSSAuthenticatorBase {
 				}
 			}
 		}
+	}
 
-		register(request, response, principal, CURRENT_WINDOWS_IDENTITY_METHOD,
-				principal.getName(), null);
-		return true;
+	@Override
+	protected String getAuthMethod() {
+		return CURRENT_WINDOWS_IDENTITY_METHOD;
 	}
 
 }

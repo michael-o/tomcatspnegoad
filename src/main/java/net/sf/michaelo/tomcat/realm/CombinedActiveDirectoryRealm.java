@@ -1,5 +1,5 @@
 /*
- * Copyright 2013–2016 Michael Osipov
+ * Copyright 2013–2017 Michael Osipov
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,12 +24,13 @@ import javax.management.ObjectName;
 
 import org.apache.catalina.Container;
 import org.apache.catalina.Context;
+import org.apache.catalina.Lifecycle;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.Realm;
+import org.apache.catalina.Wrapper;
 import org.apache.catalina.realm.CombinedRealm;
-import org.apache.juli.logging.Log;
-import org.apache.juli.logging.LogFactory;
 import org.ietf.jgss.GSSContext;
+import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSName;
 
 /**
@@ -43,9 +44,9 @@ import org.ietf.jgss.GSSName;
  * <pre>
  *  &lt;Realm className="net.sf.michaelo.tomcat.realm.CombinedActiveDirectoryRealm"&gt;
  *    &lt;Realm className="net.sf.michaelo.tomcat.realm.ActiveDirectoryRealm"
- *      resourceName="my-active-directory1" /&gt;
+ *      dirContextSourceName="my-active-directory-forest1" /&gt;
  *    &lt;Realm className="net.sf.michaelo.tomcat.realm.ActiveDirectoryRealm"
- *      resourceName="my-active-directory2" /&gt;
+ *      dirContextSourceName="my-active-directory-forest2" /&gt;
  *  &lt;/Realm&gt;
  * </pre>
  * <p>
@@ -55,14 +56,17 @@ import org.ietf.jgss.GSSName;
  * @see ActiveDirectoryRealm
  * @version $Id$
  */
-public class CombinedActiveDirectoryRealm extends GSSRealmBase<Object> {
-
-	private static Log log = LogFactory.getLog(CombinedActiveDirectoryRealm.class);
+public class CombinedActiveDirectoryRealm extends GSSRealmBase {
 
 	/**
 	 * The list of Realms contained by this Realm.
 	 */
-	protected List<ActiveDirectoryRealm> realms = new LinkedList<ActiveDirectoryRealm>();
+	protected List<ActiveDirectoryRealm> realms = new LinkedList<>();
+
+	/**
+	 * Descriptive information about this Realm implementation.
+	 */
+	protected static final String name = "CombinedActiveDirectoryRealm";
 
 	/**
 	 * @see CombinedRealm#addRealm(Realm)
@@ -83,6 +87,13 @@ public class CombinedActiveDirectoryRealm extends GSSRealmBase<Object> {
 	}
 
 	/**
+	 * @see CombinedRealm#getNestedRealms()
+	 */
+	public Realm[] getNestedRealms() {
+		return realms.toArray(new Realm[0]);
+	}
+
+	/**
 	 * @see CombinedRealm#setContainer(Container)
 	 */
 	@Override
@@ -98,10 +109,10 @@ public class CombinedActiveDirectoryRealm extends GSSRealmBase<Object> {
 	}
 
 	/**
-	 * @see CombinedRealm#start()
+	 * @see CombinedRealm#startInternal()
 	 */
 	@Override
-	public void start() throws LifecycleException {
+	public void startInternal() throws LifecycleException {
 		// Start 'sub-realms' then this one
 		Iterator<ActiveDirectoryRealm> iter = realms.iterator();
 
@@ -112,22 +123,36 @@ public class CombinedActiveDirectoryRealm extends GSSRealmBase<Object> {
 			} catch (LifecycleException e) {
 				// If realm doesn't start can't authenticate against it
 				iter.remove();
-				log.error(sm.getString("combinedActiveDirectoryRealm.realmStartFailed", realm.getInfo()), e);
+				logger.error(sm.getString("combinedActiveDirectoryRealm.realmStartFailed",
+						realm.getClass().getName()), e);
 			}
 		}
-		super.start();
+		super.startInternal();
 	}
 
 	/**
-	 * @see CombinedRealm#stop()
+	 * @see CombinedRealm#stopInternal()
 	 */
 	@Override
-	public void stop() throws LifecycleException {
+	public void stopInternal() throws LifecycleException {
 		// Stop this realm, then the sub-realms (reverse order to start)
-		super.stop();
+		super.stopInternal();
 		for (ActiveDirectoryRealm realm : realms) {
 			realm.stop();
 		}
+	}
+
+	/**
+	 * @see CombinedRealm#destroyInternal()
+	 */
+	@Override
+	protected void destroyInternal() throws LifecycleException {
+		for (Realm realm : realms) {
+			if (realm instanceof Lifecycle) {
+				((Lifecycle) realm).destroy();
+			}
+		}
+		super.destroyInternal();
 	}
 
 	/**
@@ -143,53 +168,55 @@ public class CombinedActiveDirectoryRealm extends GSSRealmBase<Object> {
 	}
 
 	@Override
-	public String getInfo() {
-		return "net.sf.michaelo.tomcat.realm.CombinedActiveDirectoryRealm/2.0";
+	public Principal authenticate(GSSName gssName, GSSCredential gssCredential) {
+		ActiveDirectoryPrincipal principal = null;
+
+		for (ActiveDirectoryRealm realm : realms) {
+			principal = (ActiveDirectoryPrincipal) realm.authenticate(gssName, gssCredential);
+
+			if (principal != null)
+				break;
+		}
+
+		return principal;
+	}
+
+	@Override
+	public Principal authenticate(GSSContext gssContext, boolean storeCreds) {
+		ActiveDirectoryPrincipal principal = null;
+
+		for (ActiveDirectoryRealm realm : realms) {
+			principal = (ActiveDirectoryPrincipal) realm.authenticate(gssContext, storeCreds);
+
+			if (principal != null)
+				break;
+		}
+
+		return principal;
 	}
 
 	@Override
 	protected String getName() {
-		return "CombinedActiveDirectoryRealm";
+		return name;
 	}
 
 	@Override
-	public Principal authenticate(GSSName gssName) {
-		ActiveDirectoryPrincipal principal = null;
-
-		for (ActiveDirectoryRealm realm : realms) {
-			principal = (ActiveDirectoryPrincipal) realm.authenticate(gssName);
-
-			if (principal != null)
-				break;
+	public boolean hasRole(Wrapper wrapper, Principal principal, String role) {
+		// Check for a role alias defined in a <security-role-ref> element
+		if (wrapper != null) {
+			String realRole = wrapper.findSecurityReference(role);
+			if (realRole != null)
+				role = realRole;
 		}
 
-		return principal;
-	}
-
-	@Override
-	public Principal authenticate(GSSContext gssContext) {
-		ActiveDirectoryPrincipal principal = null;
-
-		for (ActiveDirectoryRealm realm : realms) {
-			principal = (ActiveDirectoryPrincipal) realm.authenticate(gssContext);
-
-			if (principal != null)
-				break;
-		}
-
-		return principal;
-	}
-
-	@Override
-	public boolean hasRole(Principal principal, String role) {
 		if (principal == null || role == null || !(principal instanceof ActiveDirectoryPrincipal))
 			return false;
 
 		ActiveDirectoryPrincipal adp = (ActiveDirectoryPrincipal) principal;
 
 		boolean result;
-		if (container instanceof Context) {
-			Context context = (Context) container;
+		if (getContainer() instanceof Context) {
+			Context context = (Context) getContainer();
 			result = adp.hasRole(context.findRoleMapping(role));
 		} else
 			result = adp.hasRole(role);
@@ -202,6 +229,16 @@ public class CombinedActiveDirectoryRealm extends GSSRealmBase<Object> {
 		}
 
 		return result;
+	}
+
+	/**
+	 * @throws UnsupportedOperationException
+	 *             always throws because not implemented
+	 */
+	@Override
+	protected Principal getPrincipal(GSSName gssName, GSSCredential gssCredential) {
+		throw new UnsupportedOperationException(
+				"getPrincipal(GSSName, GSSCredential) is not supported by this realm");
 	}
 
 }
