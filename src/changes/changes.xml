@@ -4,7 +4,7 @@
 						http://maven.apache.org/xsd/changes-1.0.0.xsd">
 
 	<body>
-		<release version="3.0-SNAPSHOT" date="TBD" description="Overhaul for Tomcat 8.5">
+		<release version="3.0" date="2017-03-05" description="Overhaul for Tomcat 8.5">
 			<action type="add" dev="michael-o">Introduce GSSRealm interface for third-party implementations</action>
 			<action type="update" dev="michael-o">ActiveDirectoryPrincipal now implements TomcatPrincipal</action>
 			<action type="add" dev="michael-o">Add proper warning if referrals are expected to handle, but Oracle JDNI provider not able to do so</action>
