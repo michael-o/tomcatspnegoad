@@ -53,7 +53,6 @@ import net.sf.michaelo.tomcat.realm.mapper.UsernameSearchMapper.MappedValues;
 import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.Server;
-import org.apache.catalina.Wrapper;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.naming.ContextBindings;
 import org.ietf.jgss.GSSContext;
@@ -289,15 +288,8 @@ public class ActiveDirectoryRealm extends GSSRealmBase {
 	}
 
 	@Override
-	public boolean hasRole(Wrapper wrapper, Principal principal, String role) {
-		// Check for a role alias defined in a <security-role-ref> element
-		if (wrapper != null) {
-			String realRole = wrapper.findSecurityReference(role);
-			if (realRole != null)
-				role = realRole;
-		}
-
-		if (principal == null || role == null || !(principal instanceof ActiveDirectoryPrincipal))
+	protected boolean hasRoleInternal(Principal principal, String role) {
+		if (!(principal instanceof ActiveDirectoryPrincipal))
 			return false;
 
 		ActiveDirectoryPrincipal adp = (ActiveDirectoryPrincipal) principal;
@@ -308,13 +300,6 @@ public class ActiveDirectoryRealm extends GSSRealmBase {
 			result = adp.hasRole(context.findRoleMapping(role));
 		} else
 			result = adp.hasRole(role);
-
-		if (logger.isDebugEnabled()) {
-			if (result)
-				logger.debug(sm.getString("activeDirectoryRealm.hasRole", principal, role));
-			else
-				logger.debug(sm.getString("activeDirectoryRealm.hasNotRole", principal, role));
-		}
 
 		return result;
 	}
