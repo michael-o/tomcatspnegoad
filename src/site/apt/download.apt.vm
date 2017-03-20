@@ -32,22 +32,18 @@ Download ${project.name}
 
  The preferred way to obtain this artifact is through dependency management.
  It is available, along with its sources and Javadoc JARs, in the
- {{{http://search.maven.org/#search|ga|1|g%3A%22${project.groupId}%22%20AND%20a%3A%22${project.artifactId}%22%20AND%20v%3A%22${project.version}%22}Maven Central}} repository.
+ {{{https://search.maven.org/#search|ga|1|g%3A%22${project.groupId}%22%20AND%20a%3A%22${project.artifactId}%22%20AND%20v%3A%22${project.version}%22}Maven Central}} repository.
  See the {{{./dependency-info.html}dependency information}} report for further
  integration details for your build tool of choice.
-
- Alternatively, you can obtain a binary distribution with all JARs plus the
- entire site for offline browsing from the project's
- {{{http://sourceforge.net/projects/tomcatspnegoad/files/${project.version}}SourceForge.net Files}} directory.
 
 * Building from Source
 
   If you rather prefer building from source you either have to check out a working
   copy from the project's public {{{./source-repository.html}Subversion}} repository,
-  or download a source tarball from the
-  {{{http://sourceforge.net/projects/tomcatspnegoad/files/${project.version}}SourceForge.net Files}} directory.
+  or download a {{{https://sourceforge.net/p/tomcatspnegoad/code/HEAD/tarball?path=/tags/${project.version}}source ZIP file}} from SourceForge.
 
   After you have obtained the source code, navigate to the source code directory
   and type <<<mvn install>>>. Prior to that, make sure that you have at least Maven
   $context.get("maven.version") and Java $context.get("maven.compiler.target") installed.
   After successful execution the artifact will be installed to your local repository.
+  
