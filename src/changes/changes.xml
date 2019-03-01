@@ -4,6 +4,12 @@
 						http://maven.apache.org/xsd/changes-1.0.0.xsd">
 
 	<body>
+		<release version="3.2-SNAPSHOT" date="TBD" description="Non-functional changes">
+			<action type="update" dev="michael-o">Update documentation</action>
+			<action type="update" dev="michael-o">Update parent to 11</action>
+			<action type="update" dev="michael-o">Upgrade to DirContextSource 2.2</action>
+			<action type="update" dev="michael-o">Upgrade to Tomcat 8.5.38</action>
+		</release>
 		<release version="3.1" date="2017-04-21" description="Minor updates">
 			<action type="remove" dev="michael-o">Complete removal of uploads to SourceForge</action>
 			<action type="update" dev="michael-o">Upgrade to DirContextSource 2.1</action>

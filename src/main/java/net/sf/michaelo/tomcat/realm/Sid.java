@@ -20,7 +20,7 @@ import java.nio.ByteOrder;
 import java.util.Arrays;
 
 /**
- * An immutuable class representing a
+ * An immutable class representing a
  * <a href="https://msdn.microsoft.com/en-us/library/gg465313.aspx">security identifier</a> from
  * Active Directory.
  * <p>

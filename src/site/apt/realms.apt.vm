@@ -40,7 +40,7 @@ Choosing and Using Realms
 
   The {{{./apidocs/net/sf/michaelo/tomcat/realm/ActiveDirectoryRealm.html}<<<ActiveDirectoryRealm>>>}}
   will query your Active Directory for a user by his/her
-  {{{http://msdn.microsoft.com/en-us/library/windows/desktop/aa380525%28v=vs.85%29.aspx#user_principal_name}implicit UPN}}
+  {{{https://msdn.microsoft.com/en-us/library/windows/desktop/aa380525%28v=vs.85%29.aspx#user_principal_name}implicit UPN}}
   and retrieve all the necessary information, e.g., his/her security groups.
 
   It requires two steps of setup: First, you will need to configure a <<<DirContextSourceFactory>>>
@@ -48,7 +48,7 @@ Choosing and Using Realms
 
 ** Configuring a Directory Context Source Factory
 
-  Please read the documentation of the {{{http://dirctxsrc.sourceforge.net/dircontextsourcefactory.html}<<<DirContextSourceFactory>>>}}
+  Please read the documentation of the {{{https://dirctxsrc.sourceforge.net/dircontextsourcefactory.html}<<<DirContextSourceFactory>>>}}
   on how to configure it in detail. Here is a minimal working configuration:
 
 +----------------------------
@@ -99,7 +99,7 @@ Choosing and Using Realms
   While it might not look convenient in the first place, it adds benefit when security groups are moved
   from/to other domains, the SID history is completely retained. I.e., your application will continue
   to work even with the old SID. If you would like to map SIDs to developer-friendly role names,
-  checkout the {{{http://mo-tomcat-ext.sourceforge.net/user-guide.html#PropertiesRoleMappingListener}<<<PropertiesRoleMappingListener>>>}}.
+  checkout the {{{https://mo-tomcat-ext.sourceforge.net/user-guide.html#PropertiesRoleMappingListener}<<<PropertiesRoleMappingListener>>>}}.
 
 * Using a Realm for Testing Purposes
 

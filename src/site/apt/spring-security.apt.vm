@@ -32,12 +32,12 @@ Integrating with Spring Security
   people for years for a proper implementation. Finally I have decided not to impelement anything
   for Spring Security at all. You might ask <<why>>? The answer is rather simple, Spring Security's
   APIs are so complex and different to those in Tomcat that it would mean to provide a complete
-  reimplementation which is a maintenance nightmare. Something I am not willing to do and see real
-  no benefit in. Fortunately, the Spring guys were smart enough to think about lazy people like me:
-  pre-athentication to the rescue! Spring Security comes with a set of classes completely wrapping
+  reimplementation which is a maintenance nightmare. Something I am not willing to do and see no real
+  benefit in. Fortunately, the Spring guys were smart enough to think about lazy people like me:
+  pre-authentication to the rescue! Spring Security comes with a set of classes completely wrapping
   authentication already perfomed by the container which is called Java EE Container Authentication.
 
-* Reconciling Spring Security with Container-managed Security (CMS)
+* Reconciling Spring Security with container-managed Security (CMS)
 
   Assuming that your webapp now perfectly works with the given authenticator and realm, you need to
   tell that Spring Security.

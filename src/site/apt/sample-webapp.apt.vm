@@ -115,7 +115,7 @@ Hello ${pageContext.request.remoteUser}, you should not see this!
   Open every single URL with a properly configured client like IE, Firefox, Chrome or even
   cURL on Windows. Your output should be as follows:\
   \
-  <<<index.jsp>>>: HTTP/1.1 200 OK, every user should see a response.\
-  <<<specific.jsp>>>: HTTP/1.1 403 Forbidden <<or>> HTTP/1.1 200 OK, depending whether a user is
+  <<<index.jsp>>>: <<<HTTP/1.1 200 >>>, every user should see a response.\
+  <<<specific.jsp>>>: <<<HTTP/1.1 403 >>> <<or>> <<<HTTP/1.1 200 >>>, depending whether a user is
   in the specific group, it should be a response or an error page.\
-  <<<bogus.jsp>>>: HTTP/1.1 403 Forbidden, every user should see an error page.
+  <<<bogus.jsp>>>: <<<HTTP/1.1 403 >>>, every user should see an error page.

@@ -35,13 +35,13 @@ Choosing and Using Authenticators
 * The SPNEGO Authenticator
 
   The {{{./apidocs/net/sf/michaelo/tomcat/authenticator/SpnegoAuthenticator.html}<<<SpnegoAuthenticator>>>}}
-  challenges the client to perform {{{http://tools.ietf.org/html/rfc4559}SPNEGO}} authentication. In
+  challenges the client to perform {{{https://tools.ietf.org/html/rfc4559}SPNEGO}} authentication. In
   turn the server accepts a GSS context by validating an authentication token and responds with a
   proper token to the client.
 
     [Attention] Though SPNEGO is intended to negotiate a mechanism, the Oracle JVM currently supports
                 Kerberos 5 only and not NTLM additionally due to its proprietary nature. Anyway, it
-                is discouraged by Microsoft ({{{http://blogs.technet.com/b/authentication/archive/2006/04/07/ntlm-s-time-has-passed.aspx}1}}, {{{http://serverfault.com/a/384721/116898}2}})
+                is discouraged by Microsoft {{{https://serverfault.com/a/384721/116898}1}})
                 to rely on NTLM anymore.
 
   Open or create your app's <<<context.xml>>> and add:
