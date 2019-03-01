@@ -20,7 +20,7 @@
 	<parent>
 		<groupId>net.sf.michael-o</groupId>
 		<artifactId>michael-o-parent</artifactId>
-		<version>10</version>
+		<version>11-SNAPSHOT</version>
 	</parent>
 
 	<groupId>net.sf.michael-o.tomcat</groupId>
@@ -30,7 +30,7 @@
 
 	<name>SPNEGO/Kerberos Authenticator and Active Directory Realm for Apache Tomcat</name>
 	<description>A fully featured, first-class SPNEGO/Kerberos Authenticator and Active Directory Realm for the Apache Tomcat servlet container.</description>
-	<url>http://tomcatspnegoad.sourceforge.net</url>
+	<url>https://tomcatspnegoad.sourceforge.net</url>
 	<inceptionYear>2013</inceptionYear>
 
 	<developers>
@@ -38,7 +38,7 @@
 			<id>michael-o</id>
 			<name>Michael Osipov</name>
 			<email>michael-o@users.sf.net</email>
-			<url>http://sourceforge.net/u/michael-o/profile</url>
+			<url>https://sourceforge.net/u/michael-o/profile</url>
 			<timezone>Europe/Berlin</timezone>
 		</developer>
 		<developer>
@@ -51,18 +51,18 @@
 		<mailingList>
 			<name>General Discussion</name>
 			<post>general@discussion.tomcatspnegoad.p.re.sf.net</post>
-			<archive>http://sourceforge.net/p/tomcatspnegoad/discussion/general</archive>
+			<archive>https://sourceforge.net/p/tomcatspnegoad/discussion/general</archive>
 		</mailingList>
 	</mailingLists>
 
 	<scm>
-		<connection>scm:svn:http://svn.code.sf.net/p/tomcatspnegoad/code/trunk</connection>
+		<connection>scm:svn:https://svn.code.sf.net/p/tomcatspnegoad/code/trunk</connection>
 		<developerConnection>scm:svn:https://svn.code.sf.net/p/tomcatspnegoad/code/trunk</developerConnection>
-		<url>http://sourceforge.net/p/tomcatspnegoad/code/HEAD/tree/trunk</url>
+		<url>https://sourceforge.net/p/tomcatspnegoad/code/HEAD/tree/trunk</url>
 	</scm>
 	<issueManagement>
 		<system>SourceForge.net Tickets</system>
-		<url>http://sourceforge.net/p/tomcatspnegoad/tickets</url>
+		<url>https://sourceforge.net/p/tomcatspnegoad/tickets</url>
 	</issueManagement>
 
 	<distributionManagement>
@@ -205,7 +205,7 @@
 					<locale>en</locale>
 					<links>
 						<link>https://tomcat.apache.org/tomcat-8.5-doc/api</link>
-						<link>http://dirctxsrc.sourceforge.net/apidocs</link>
+						<link>https://dirctxsrc.sourceforge.net/apidocs</link>
 					</links>
 				</configuration>
 			</plugin>
@@ -220,7 +220,7 @@
 					<locale>en</locale>
 					<links>
 						<link>https://tomcat.apache.org/tomcat-8.5-doc/api</link>
-						<link>http://dirctxsrc.sourceforge.net/apidocs</link>
+						<link>https://dirctxsrc.sourceforge.net/apidocs</link>
 					</links>
 				</configuration>
 			</plugin>
