@@ -25,7 +25,7 @@
 
 	<groupId>net.sf.michael-o.tomcat</groupId>
 	<artifactId>tomcat-authnz-spnego-ad</artifactId>
-	<version>3.2</version>
+	<version>3.3-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>SPNEGO/Kerberos Authenticator and Active Directory Realm for Apache Tomcat</name>
@@ -56,9 +56,9 @@
 	</mailingLists>
 
 	<scm>
-		<connection>scm:svn:https://svn.code.sf.net/p/tomcatspnegoad/code/tags/3.2</connection>
-		<developerConnection>scm:svn:https://svn.code.sf.net/p/tomcatspnegoad/code/tags/3.2</developerConnection>
-		<url>https://sourceforge.net/p/tomcatspnegoad/code/HEAD/tree/tags/3.2</url>
+		<connection>scm:svn:https://svn.code.sf.net/p/tomcatspnegoad/code/trunk</connection>
+		<developerConnection>scm:svn:https://svn.code.sf.net/p/tomcatspnegoad/code/trunk</developerConnection>
+		<url>https://sourceforge.net/p/tomcatspnegoad/code/HEAD/tree/trunk</url>
 	</scm>
 	<issueManagement>
 		<system>SourceForge.net Tickets</system>
