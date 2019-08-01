@@ -25,8 +25,7 @@ import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 import javax.servlet.http.HttpServletResponse;
 
-import net.sf.michaelo.tomcat.realm.GSSRealm;
-
+import org.apache.catalina.Realm;
 import org.apache.catalina.connector.Request;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.tomcat.util.codec.binary.Base64;
@@ -162,7 +161,7 @@ public class SpnegoAuthenticator extends GSSAuthenticatorBase {
 					if (logger.isDebugEnabled())
 						logger.debug(sm.getString("spnegoAuthenticator.contextSuccessfullyEstablished"));
 
-					GSSRealm realm = (GSSRealm) context.getRealm();
+					Realm realm = context.getRealm();
 					principal = realm.authenticate(gssContext, isStoreDelegatedCredential());
 
 					if (principal == null) {
