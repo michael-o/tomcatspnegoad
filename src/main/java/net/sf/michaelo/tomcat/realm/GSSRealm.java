@@ -42,16 +42,4 @@ public interface GSSRealm extends Realm {
 	// TODO Create issue for this to be added into Tomcat's Realm
 	Principal authenticate(GSSName gssName, GSSCredential gssCredential);
 
-	/**
-	 * Authenticates a user from a fully established GSS context.
-	 *
-	 * @param gssContext
-	 *            the GSS context established with the peer
-	 * @param storeCreds
-	 *            the store delegated credential indication
-	 * @return the retrieved principal
-	 */
-	// TODO Remove this method in the next iteration. It is already in RealmBase
-	Principal authenticate(GSSContext gssContext, boolean storeCreds);
-
 }
