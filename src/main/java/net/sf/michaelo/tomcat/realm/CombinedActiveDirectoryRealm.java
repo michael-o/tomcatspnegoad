@@ -27,8 +27,8 @@ import org.apache.catalina.Context;
 import org.apache.catalina.Lifecycle;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.Realm;
-import org.apache.catalina.Wrapper;
 import org.apache.catalina.realm.CombinedRealm;
+import org.apache.catalina.realm.RealmBase;
 import org.ietf.jgss.GSSContext;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSName;
@@ -68,6 +68,11 @@ public class CombinedActiveDirectoryRealm extends GSSRealmBase {
 	 */
 	protected static final String name = "CombinedActiveDirectoryRealm";
 
+	@Override
+	protected String getName() {
+		return name;
+	}
+
 	/**
 	 * @see CombinedRealm#addRealm(Realm)
 	 */
@@ -80,8 +85,9 @@ public class CombinedActiveDirectoryRealm extends GSSRealmBase {
 	 */
 	public ObjectName[] getRealms() {
 		ObjectName[] result = new ObjectName[realms.size()];
-		for (ActiveDirectoryRealm realm : realms) {
-			result[realms.indexOf(realm)] = realm.getObjectName();
+		for (Realm realm : realms) {
+			if (realm instanceof RealmBase)
+				result[realms.indexOf(realm)] = ((RealmBase) realm).getObjectName();
 		}
 		return result;
 	}
@@ -98,9 +104,11 @@ public class CombinedActiveDirectoryRealm extends GSSRealmBase {
 	 */
 	@Override
 	public void setContainer(Container container) {
-		for (ActiveDirectoryRealm realm : realms) {
+		for (Realm realm : realms) {
 			// Set the realmPath for JMX naming
-			realm.setRealmPath(getRealmPath() + "/realm" + realms.indexOf(realm));
+			if (realm instanceof RealmBase) {
+				((RealmBase) realm).setRealmPath(getRealmPath() + "/realm" + realms.indexOf(realm));
+			}
 
 			// Set the container for sub-realms. Mainly so logging works.
 			realm.setContainer(container);
@@ -112,19 +120,21 @@ public class CombinedActiveDirectoryRealm extends GSSRealmBase {
 	 * @see CombinedRealm#startInternal()
 	 */
 	@Override
-	public void startInternal() throws LifecycleException {
+	protected void startInternal() throws LifecycleException {
 		// Start 'sub-realms' then this one
 		Iterator<ActiveDirectoryRealm> iter = realms.iterator();
 
 		while (iter.hasNext()) {
-			ActiveDirectoryRealm realm = iter.next();
-			try {
-				realm.start();
-			} catch (LifecycleException e) {
-				// If realm doesn't start can't authenticate against it
-				iter.remove();
-				logger.error(sm.getString("combinedActiveDirectoryRealm.realmStartFailed",
-						realm.getClass().getName()), e);
+			Realm realm = iter.next();
+			if (realm instanceof Lifecycle) {
+				try {
+					((Lifecycle) realm).start();
+				} catch (LifecycleException e) {
+					// If realm doesn't start can't authenticate against it
+					iter.remove();
+					logger.error(sm.getString("combinedActiveDirectoryRealm.realmStartFailed",
+							realm.getClass().getName()), e);
+				}
 			}
 		}
 		super.startInternal();
@@ -134,11 +144,13 @@ public class CombinedActiveDirectoryRealm extends GSSRealmBase {
 	 * @see CombinedRealm#stopInternal()
 	 */
 	@Override
-	public void stopInternal() throws LifecycleException {
+	protected void stopInternal() throws LifecycleException {
 		// Stop this realm, then the sub-realms (reverse order to start)
 		super.stopInternal();
-		for (ActiveDirectoryRealm realm : realms) {
-			realm.stop();
+		for (Realm realm : realms) {
+			if (realm instanceof Lifecycle) {
+				((Lifecycle) realm).stop();
+			}
 		}
 	}
 
@@ -162,7 +174,7 @@ public class CombinedActiveDirectoryRealm extends GSSRealmBase {
 	public void backgroundProcess() {
 		super.backgroundProcess();
 
-		for (ActiveDirectoryRealm r : realms) {
+		for (Realm r : realms) {
 			r.backgroundProcess();
 		}
 	}
@@ -196,20 +208,8 @@ public class CombinedActiveDirectoryRealm extends GSSRealmBase {
 	}
 
 	@Override
-	protected String getName() {
-		return name;
-	}
-
-	@Override
-	public boolean hasRole(Wrapper wrapper, Principal principal, String role) {
-		// Check for a role alias defined in a <security-role-ref> element
-		if (wrapper != null) {
-			String realRole = wrapper.findSecurityReference(role);
-			if (realRole != null)
-				role = realRole;
-		}
-
-		if (principal == null || role == null || !(principal instanceof ActiveDirectoryPrincipal))
+	protected boolean hasRoleInternal(Principal principal, String role) {
+		if (!(principal instanceof ActiveDirectoryPrincipal))
 			return false;
 
 		ActiveDirectoryPrincipal adp = (ActiveDirectoryPrincipal) principal;
@@ -221,13 +221,6 @@ public class CombinedActiveDirectoryRealm extends GSSRealmBase {
 		} else
 			result = adp.hasRole(role);
 
-		if (logger.isDebugEnabled()) {
-			if (result)
-				logger.debug(sm.getString("activeDirectoryRealm.hasRole", principal, role));
-			else
-				logger.debug(sm.getString("activeDirectoryRealm.hasNotRole", principal, role));
-		}
-
 		return result;
 	}
 
@@ -238,7 +231,17 @@ public class CombinedActiveDirectoryRealm extends GSSRealmBase {
 	@Override
 	protected Principal getPrincipal(GSSName gssName, GSSCredential gssCredential) {
 		throw new UnsupportedOperationException(
-				"getPrincipal(GSSName, GSSCredential) is not supported by this realm");
+				"getPrincipal(GSSName, GSSCredential) is currently not supported by this realm");
+	}
+
+	@Override
+	public boolean isAvailable() {
+		for (Realm realm : realms) {
+			if (!realm.isAvailable()) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 }
