@@ -50,7 +50,6 @@ import net.sf.michaelo.tomcat.realm.mapper.UserPrincipalNameSearchMapper;
 import net.sf.michaelo.tomcat.realm.mapper.UsernameSearchMapper;
 import net.sf.michaelo.tomcat.realm.mapper.UsernameSearchMapper.MappedValues;
 
-import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.Server;
 import org.apache.commons.lang3.StringUtils;

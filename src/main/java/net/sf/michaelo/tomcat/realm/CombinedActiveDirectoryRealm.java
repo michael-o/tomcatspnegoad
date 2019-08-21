@@ -23,7 +23,6 @@ import java.util.List;
 import javax.management.ObjectName;
 
 import org.apache.catalina.Container;
-import org.apache.catalina.Context;
 import org.apache.catalina.Lifecycle;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.Realm;
