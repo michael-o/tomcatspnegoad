@@ -293,15 +293,7 @@ public class ActiveDirectoryRealm extends GSSRealmBase {
 			return false;
 
 		ActiveDirectoryPrincipal adp = (ActiveDirectoryPrincipal) principal;
-
-		boolean result;
-		if (getContainer() instanceof Context) {
-			Context context = (Context) getContainer();
-			result = adp.hasRole(context.findRoleMapping(role));
-		} else
-			result = adp.hasRole(role);
-
-		return result;
+		return adp.hasRole(role);
 	}
 
 	protected DirContext open() {
