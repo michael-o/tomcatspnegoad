@@ -21,8 +21,8 @@ import java.util.Arrays;
 
 /**
  * An immutable class representing a
- * <a href="https://msdn.microsoft.com/en-us/library/gg465313.aspx">security identifier</a> from
- * Active Directory.
+ * <a href="https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/f992ad60-0fe4-4b87-9fed-beb478836861">security identifier</a>
+ * from Active Directory.
  * <p>
  *
  * @version $Id$

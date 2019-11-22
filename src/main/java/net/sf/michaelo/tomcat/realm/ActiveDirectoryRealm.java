@@ -95,8 +95,8 @@ import org.ietf.jgss.GSSName;
  * contexts are queried and closed. Unfortunately, Oracle's LDAP implementation is not able to
  * handle this properly and only Oracle can fix this shortcoming. Issues have already been reported
  * (Review IDs 9089870 and 9089874, public issues
- * <a href="http://bugs.java.com/bugdatabase/view_bug.do?bug_id=JDK-8161361">JDK-8161361</a> and
- * <a href="http://bugs.java.com/bugdatabase/view_bug.do?bug_id=JDK-8160768">JDK-8161361</a>)!
+ * <a href="https://bugs.java.com/bugdatabase/view_bug.do?bug_id=JDK-8161361">JDK-8161361</a> and
+ * <a href="https://bugs.java.com/bugdatabase/view_bug.do?bug_id=JDK-8160768">JDK-8161361</a>)!
  * <p>
  * <em>What is the shortcoming and how can it be solved?</em> Microsoft takes a very sophisticated
  * approach on not to rely on host names because servers can be provisioned and decommissioned any
@@ -148,7 +148,7 @@ import org.ietf.jgss.GSSName;
  *
  * You will then have the principal properly looked up in the Active Directory.
  * <p>
- * This issue is also documented on <a href="http://stackoverflow.com/q/25436410/696632">Stack
+ * This issue is also documented on <a href="https://stackoverflow.com/q/25436410/696632">Stack
  * Overflow</a>. Additionally,
  * <a href="https://technet.microsoft.com/en-us/library/cc759550%28v=ws.10%29.aspx">How DNS Support
  * for Active Directory Works</a> is a good read on the DNS topic as well as
