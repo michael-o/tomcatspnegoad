@@ -5,7 +5,7 @@
 
 	<body>
 		<release version="3.3" date="2019-09-23" description="Code reduction">
-			<action type="update" dev="michael-o">Remove duplicate present in Tomcat already</action>
+			<action type="update" dev="michael-o">Remove duplicate code alredy present in Tomcat</action>
 			<action type="update" dev="michael-o">Upgrade to Tomcat 8.5.46</action>
 		</release>
 		<release version="3.2" date="2019-03-09" description="Non-functional changes">
