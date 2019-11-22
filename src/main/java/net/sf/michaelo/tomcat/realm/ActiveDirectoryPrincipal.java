@@ -67,7 +67,7 @@ public class ActiveDirectoryPrincipal implements TomcatPrincipal {
 		if (roles == null || roles.isEmpty())
 			this.roles = new String[0];
 		else {
-			this.roles = roles.toArray(new String[roles.size()]);
+			this.roles = roles.toArray(new String[0]);
 			Arrays.sort(this.roles);
 		}
 		this.gssCredential = gssCredential;

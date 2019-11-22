@@ -22,7 +22,6 @@ import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 import org.apache.tomcat.util.res.StringManager;
 import org.ietf.jgss.GSSContext;
-import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSName;
 
 /**
@@ -31,7 +30,7 @@ import org.ietf.jgss.GSSName;
  *
  * @version $Id$
  */
-public abstract class GSSRealmBase extends RealmBase implements GSSRealm {
+public abstract class ActiveDirectoryRealmBase extends RealmBase {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 	protected final StringManager sm = StringManager.getManager(getClass());
@@ -56,25 +55,24 @@ public abstract class GSSRealmBase extends RealmBase implements GSSRealm {
 				"getPrincipal(String) is not supported by this realm");
 	}
 
-	/**
-	 * Get the principal associated with the specified GSS name.
-	 *
-	 * @param gssName
-	 *            The GSS name
-	 * @return the principal associated with the given GSS name
-	 */
-	protected Principal getPrincipal(GSSName gssName) {
-		return getPrincipal(gssName, null);
+	@Override
+	protected boolean hasRoleInternal(Principal principal, String role) {
+		if (!(principal instanceof ActiveDirectoryPrincipal))
+			return false;
+
+		ActiveDirectoryPrincipal adp = (ActiveDirectoryPrincipal) principal;
+		return adp.hasRole(role);
 	}
 
-	/**
-	 * Get the principal associated with the specified GSS name.
-	 *
-	 * @param gssName
-	 *            The GSS name
-	 * @param gssCredential
-	 *            the GSS credential corresponding to the GSS name
-	 * @return the principal associated with the given GSS name
-	 */
-	protected abstract Principal getPrincipal(GSSName gssName, GSSCredential gssCredential);
+	@Override
+	public String[] getRoles(Principal principal) {
+		if (principal instanceof ActiveDirectoryPrincipal) {
+			return ((ActiveDirectoryPrincipal) principal).getRoles();
+		}
+
+		String className = principal.getClass().getName();
+		throw new IllegalStateException(sm.getString("activeDirectoryRealmBase.cannotGetRoles",
+				principal.getName(), className));
+	}
+
 }

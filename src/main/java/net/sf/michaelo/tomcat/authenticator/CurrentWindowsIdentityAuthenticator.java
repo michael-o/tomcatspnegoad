@@ -25,8 +25,7 @@ import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 import javax.servlet.http.HttpServletResponse;
 
-import net.sf.michaelo.tomcat.realm.GSSRealm;
-
+import org.apache.catalina.Realm;
 import org.apache.catalina.connector.Request;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
@@ -87,7 +86,7 @@ public class CurrentWindowsIdentityAuthenticator extends GSSAuthenticatorBase {
 			}
 
 			try {
-				GSSRealm realm = (GSSRealm) context.getRealm();
+				Realm realm = context.getRealm();
 				GSSName gssName = gssCredential.getName();
 
 				Principal principal = realm.authenticate(gssName,
