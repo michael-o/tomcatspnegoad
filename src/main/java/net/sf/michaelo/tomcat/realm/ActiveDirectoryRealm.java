@@ -52,11 +52,10 @@ import net.sf.michaelo.tomcat.realm.mapper.UsernameSearchMapper.MappedValues;
 
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.Server;
+import org.apache.catalina.realm.CombinedRealm;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.naming.ContextBindings;
-import org.ietf.jgss.GSSContext;
 import org.ietf.jgss.GSSCredential;
-import org.ietf.jgss.GSSException;
 import org.ietf.jgss.GSSName;
 
 /**
@@ -141,7 +140,7 @@ import org.ietf.jgss.GSSName;
  * {@code com.sun.jndi.ldap.LdapCtxFactory} to properly resolve DNS domain names to host names and
  * prepend it to the boot classpath and all referrals will be cleanly resolved, or</li>
  * <li>{@code ignore} with multiple {@code DirContextSources}, and create a
- * {@link CombinedActiveDirectoryRealm} with one {@code ActiveDirectoryRealm} per forest.</li>
+ * {@link CombinedRealm} with one {@code ActiveDirectoryRealm} per forest.</li>
  * </ul>
  * </li>
  * </ul>
@@ -162,7 +161,7 @@ import org.ietf.jgss.GSSName;
  * @see ActiveDirectoryPrincipal
  * @version $Id$
  */
-public class ActiveDirectoryRealm extends GSSRealmBase {
+public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 
 	private static final UsernameSearchMapper[] USERNAME_SEARCH_MAPPERS = {
 			new SamAccountNameRfc2247Mapper(), new UserPrincipalNameSearchMapper() };
@@ -220,46 +219,6 @@ public class ActiveDirectoryRealm extends GSSRealmBase {
 	}
 
 	@Override
-	public Principal authenticate(GSSName gssName, GSSCredential gssCredential) {
-		return getPrincipal(gssName, gssCredential);
-	}
-
-	@Override
-	public Principal authenticate(GSSContext gssContext, boolean storeCreds) {
-		if (gssContext.isEstablished()) {
-			GSSName gssName = null;
-			try {
-				gssName = gssContext.getSrcName();
-			} catch (GSSException e) {
-				logger.error(sm.getString("activeDirectoryRealm.gssNameFailed"), e);
-			}
-
-			if (gssName != null) {
-				GSSCredential gssCredential = null;
-				if (storeCreds) {
-					if (gssContext.getCredDelegState()) {
-						try {
-							gssCredential = gssContext.getDelegCred();
-						} catch (GSSException e) {
-							logger.warn(sm.getString(
-									"activeDirectoryRealm.delegatedCredentialFailed", gssName), e);
-						}
-					} else {
-						if (logger.isDebugEnabled())
-							logger.debug(sm.getString("activeDirectoryRealm.credentialNotDelegable",
-									gssName));
-					}
-				}
-
-				return getPrincipal(gssName, gssCredential);
-			}
-		} else
-			logger.error(sm.getString("activeDirectoryRealm.securityContextNotEstablished"));
-
-		return null;
-	}
-
-	@Override
 	protected Principal getPrincipal(GSSName gssName, GSSCredential gssCredential) {
 		if (gssName.isAnonymous())
 			return new ActiveDirectoryPrincipal(gssName, Sid.ANONYMOUS_SID, gssCredential);
@@ -284,15 +243,6 @@ public class ActiveDirectoryRealm extends GSSRealmBase {
 		}
 
 		return null;
-	}
-
-	@Override
-	protected boolean hasRoleInternal(Principal principal, String role) {
-		if (!(principal instanceof ActiveDirectoryPrincipal))
-			return false;
-
-		ActiveDirectoryPrincipal adp = (ActiveDirectoryPrincipal) principal;
-		return adp.hasRole(role);
 	}
 
 	protected DirContext open() {
@@ -357,17 +307,6 @@ public class ActiveDirectoryRealm extends GSSRealmBase {
 		} finally {
 			close(context);
 		}
-	}
-
-	@Override
-	public String[] getRoles(Principal principal) {
-		if (principal instanceof ActiveDirectoryPrincipal) {
-			return ((ActiveDirectoryPrincipal) principal).getRoles();
-		}
-
-		String className = principal.getClass().getName();
-		throw new IllegalStateException(sm.getString("activeDirectoryRealm.cannotGetRoles",
-				principal.getName(), className));
 	}
 
 	protected User getUser(DirContext context, GSSName gssName) throws NamingException {

@@ -30,9 +30,9 @@ Choosing and Using Realms
 
   After the authenticator has established a user's identity, it's time to search for it. Usually,
   the {{{The_Active_Directory_Realm}<<<ActiveDirectoryRealm>>>}} will do, but for testing purposes you
-  will find the {{{Using_a_Realm_for_Testing_Purposes}<<<GSSUserDatabaseRealm>>>}} very handy.
+  will find the default {{{Using_a_Realm_for_Testing_Purposes}<<<UserDatabaseRealm>>>}} very handy.
 
-    [Tip] I strongly recommend to try the {{{Using_a_Realm_for_Testing_Purposes}<<<GSSUserDatabaseRealm>>>}}
+    [Tip] I strongly recommend to try the {{{Using_a_Realm_for_Testing_Purposes}<<<UserDatabaseRealm>>>}}
           first, you'll see whether the authenticator works at all. If it does, go on to the
           {{{The_Active_Directory_Realm}<<<ActiveDirectoryRealm>>>}}.
 
@@ -104,12 +104,11 @@ Choosing and Using Realms
 * Using a Realm for Testing Purposes
 
   Usually, you are not able to modify Active Directory entries easily (usually admins can), e.g., adding
-  and removing groups. Therefore, I have modified the default {{{https://tomcat.apache.org/tomcat-8.5-doc/realm-howto.html#UserDatabaseRealm}<<<UserDatabaseRealm>>>}}
-  to a GSS-aware realm to make it work with my authenticators. You can fiddle quickly with users
-  and roles to test your application.
+  and removing groups. Therefore, you can use default {{{https://tomcat.apache.org/tomcat-8.5-doc/realm-howto.html#UserDatabaseRealm}<<<UserDatabaseRealm>>>}},
+  fiddle quickly with users and roles to test your application.
 
-  Follow the Tomcat documentation and configure a <<<users.xml>>> file with the according resource
-  declaration. Type in the user and group principals, but leave the password out.
+  Follow the Tomcat documentation and configure a <<<tomcat-users.xml>>> file with the according resource
+  declaration. Type in the user and group principals, but leave the passwords out.
 
   Open or create your app's <<<context.xml>>> and add:
 
@@ -117,18 +116,20 @@ Choosing and Using Realms
 <Context>
 [$ellipsis]
   <!-- Add this -->
-  <Realm className="net.sf.michaelo.tomcat.realm.GSSUserDatabaseRealm" />
+  <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
+    resourceName="UserDatabase" stripRealmForGss="false" />
 [$ellipsis]
 </Context>
 +----------------------------
 
-  You have successfully configured the <<<GSSUserDatabaseRealm>>> in your webapp. It is now ready to use.
+  You have successfully configured the <<<UserDatabaseRealm>>> in your webapp. It is now ready to use.
 
 * Alternative Realm Implementations
 
   If you are not using the Active Directory as a user repository (e.g. database or another directory
-  server) and can still make use of this library. Extend the {{{./apidocs/net/sf/michaelo/tomcat/realm/GSSRealmBase.html}<<<GSSRealmBase>>>}}
-  class and implement the abstract method <<<getPrincipal(GSSName, GSSCredential)>>>.
+  server) and can still make use of this library. Extend the Tomcat's default
+  {{{https://tomcat.apache.org/tomcat-8.5-doc/api/org/apache/catalina/realm/RealmBase.html}<<<RealmBase>>>}}
+  class and override the protected method <<<getPrincipal(GSSName, GSSCredential)>>>.
 
 The Next Step
 

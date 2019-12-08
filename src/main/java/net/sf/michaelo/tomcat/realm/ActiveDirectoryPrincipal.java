@@ -67,7 +67,7 @@ public class ActiveDirectoryPrincipal implements TomcatPrincipal {
 		if (roles == null || roles.isEmpty())
 			this.roles = new String[0];
 		else {
-			this.roles = roles.toArray(new String[roles.size()]);
+			this.roles = roles.toArray(new String[0]);
 			Arrays.sort(this.roles);
 		}
 		this.gssCredential = gssCredential;
@@ -118,6 +118,10 @@ public class ActiveDirectoryPrincipal implements TomcatPrincipal {
 	 * @return true if principal is associated with the role, else false
 	 */
 	public boolean hasRole(String role) {
+		if ("*".equals(role)) // Special 2.4 role meaning everyone
+			return true;
+		if (role == null)
+			return false;
 		return Arrays.binarySearch(roles, role) >= 0;
 	}
 
