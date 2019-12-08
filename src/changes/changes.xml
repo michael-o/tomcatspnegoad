@@ -5,6 +5,7 @@
 
 	<body>
 		<release version="3.4" date="in development" description="Code reduction">
+			<action type="remove" dev="michael-o">Complete removal of CombinedActiveDirectoryRealm</action>
 			<action type="update" dev="michael-o">GSSRealm functionally moved to ActiveDirectoryRealmBase</action>
 			<action type="remove" dev="michael-o">Complete removal of GSSRealm interface</action>
 			<action type="remove" dev="michael-o">Complete removal of GSSUserDatabaseRealm</action>

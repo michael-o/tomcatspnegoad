@@ -52,6 +52,7 @@ import net.sf.michaelo.tomcat.realm.mapper.UsernameSearchMapper.MappedValues;
 
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.Server;
+import org.apache.catalina.realm.CombinedRealm;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.naming.ContextBindings;
 import org.ietf.jgss.GSSCredential;
@@ -139,7 +140,7 @@ import org.ietf.jgss.GSSName;
  * {@code com.sun.jndi.ldap.LdapCtxFactory} to properly resolve DNS domain names to host names and
  * prepend it to the boot classpath and all referrals will be cleanly resolved, or</li>
  * <li>{@code ignore} with multiple {@code DirContextSources}, and create a
- * {@link CombinedActiveDirectoryRealm} with one {@code ActiveDirectoryRealm} per forest.</li>
+ * {@link CombinedRealm} with one {@code ActiveDirectoryRealm} per forest.</li>
  * </ul>
  * </li>
  * </ul>
