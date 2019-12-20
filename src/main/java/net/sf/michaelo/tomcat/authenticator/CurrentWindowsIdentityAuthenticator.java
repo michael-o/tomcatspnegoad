@@ -26,7 +26,6 @@ import javax.security.auth.login.LoginException;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.catalina.GSSRealm;
-import org.apache.catalina.Realm;
 import org.apache.catalina.connector.Request;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
