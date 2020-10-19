@@ -327,9 +327,9 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 		controls.setReturningAttributes(new String[] { "objectClass" });
 		controls.setTimeLimit(500);
 
+		NamingEnumeration<SearchResult> results = null;
 		try {
-			NamingEnumeration<SearchResult> results = connection.context.search("", "objectclass=*",
-					controls);
+			results = connection.context.search("", "objectclass=*", controls);
 
 			if (results.hasMore()) {
 				close(results);
@@ -340,6 +340,8 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 
 			return false;
 		}
+
+		close(results);
 
 		return false;
 	}
@@ -493,7 +495,6 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 								mapperClassName));
 
 					close(results);
-					results = null;
 				} else
 					break;
 			} catch (PartialResultException e) {
@@ -501,7 +502,6 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 						mapperClassName, e.getRemainingName()));
 
 				close(results);
-				results = null;
 			}
 		}
 
@@ -526,7 +526,7 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 				.parseInt((String) userAttributes.get("userAccountControl").get());
 
 		// Do not allow disabled accounts (UF_ACCOUNT_DISABLE)
-		if ((userAccountControl & 0x02) == 0x02) {
+		if ((userAccountControl & 0x02) != 0) {
 			logger.warn(sm.getString("activeDirectoryRealm.userFoundButDisabled", gssName));
 
 			close(results);
