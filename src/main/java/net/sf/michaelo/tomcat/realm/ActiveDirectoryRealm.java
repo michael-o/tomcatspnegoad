@@ -1,5 +1,5 @@
 /*
- * Copyright 2013–2019 Michael Osipov
+ * Copyright 2013–2020 Michael Osipov
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,14 +55,14 @@ import org.apache.catalina.Server;
 import org.apache.catalina.realm.CombinedRealm;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.naming.ContextBindings;
+import org.apache.tomcat.util.collections.SynchronizedStack;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSName;
 
 /**
  * A realm which retrieves authenticated users from Active Directory.
  *
- * <p>
- * Following options can be configured:
+ * <h2>Configuration</h2> Following options can be configured:
  * <ul>
  * <li>{@code dirContextSourceName}: the name of the {@link DirContextSource} in JNDI with which
  * principals will be retrieved.</li>
@@ -73,12 +73,29 @@ import org.ietf.jgss.GSSName;
  * principal. Binary attributes must end with {@code ;binary} and will be stored as {@code byte[]},
  * ordinary attributes will be stored as {@code String}. If an attribute is multivalued, it will be
  * stored as {@code List}.</li>
+ * <li>{@code connectionPoolSize}: the maximum amount of directory server connections the pool will
+ * hold. Default is zero which means no connections will be pooled.
+ * <li>{@code maxIdleTime}: the maximum amount of time in milliseconds a directory server connection
+ * should remain idle before it is closed. Default value is 15 minutes.</li>
  * </ul>
- * <p>
- * By default the SIDs ({@code objectSid} and {@code sIDHistory}) of the Active Directory security
- * groups will be retrieved.
- * <h3></h3>
- * <h4 id="referral-handling">Referral Handling</h4> When working with the default LDAP ports (not
+ * <br>
+ * <strong>Note</strong>: By default the SIDs ({@code objectSid} and {@code sIDHistory}) of the
+ * Active Directory security groups will be retrieved and no further configuration is required for
+ * them.
+ *
+ * <h2>Connection Pooling</h2> This realm offers a poor man's directory server connection pooling
+ * which can drastically improve access performance for non-session (stateless) applications. It
+ * utilizes a LIFO structure based on {@link SynchronizedStack}. No background thread is managing
+ * the connections. They are acquired, validated, eventually closed and opened when
+ * {@link #getPrincipal(GSSName, GSSCredential)} is invoked. Validation involves a minimal and
+ * limited query with at most 500 ms of wait time just to verify the connection is alive and
+ * healthy. If the query fails, the connection is closed immediately. If the amount of requested
+ * connections exceeds ones the available in the pool, new ones are opened and pushed onto the pool.
+ * If the pool does not accept any addtional connetions they are closed immediately. <br>
+ * This connection pool feature has to be explicitly enabled by setting {@code connectionPoolSize}
+ * to greater than zero.
+ *
+ * <h2 id="referral-handling">Referral Handling</h2> When working with the default LDAP ports (not
  * GC) or in a multi-forest environment, it is highly likely to receive referrals (either
  * subordinate or cross) during a search or lookup. JNDI takes several approaches to handle
  * referrals with the {@code java.naming.referral} property and its values: {@code ignore},
@@ -139,8 +156,8 @@ import org.ietf.jgss.GSSName;
  * <li>{@code follow} or {@code throw} with a {@link DirContextSource} in your home forest, patch
  * {@code com.sun.jndi.ldap.LdapCtxFactory} to properly resolve DNS domain names to host names and
  * prepend it to the boot classpath and all referrals will be cleanly resolved, or</li>
- * <li>{@code ignore} with multiple {@code DirContextSources}, and create a
- * {@link CombinedRealm} with one {@code ActiveDirectoryRealm} per forest.</li>
+ * <li>{@code ignore} with multiple {@code DirContextSources}, and create a {@link CombinedRealm}
+ * with one {@code ActiveDirectoryRealm} per forest.</li>
  * </ul>
  * </li>
  * </ul>
@@ -163,6 +180,12 @@ import org.ietf.jgss.GSSName;
  */
 public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 
+	// A mere holder class for directory server connections
+	protected static class DirContextConnection {
+		protected long lastBorrowTime;
+		protected DirContext context;
+	}
+
 	private static final UsernameSearchMapper[] USERNAME_SEARCH_MAPPERS = {
 			new SamAccountNameRfc2247Mapper(), new UserPrincipalNameSearchMapper() };
 
@@ -175,6 +198,11 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 	protected boolean localDirContextSource;
 	protected String dirContextSourceName;
 	protected String[] additionalAttributes;
+	protected int connectionPoolSize = 0;
+	protected long maxIdleTime = 900_000L;
+
+	// Poor man's connection pool
+	protected SynchronizedStack<DirContextConnection> connectionPool;
 
 	/**
 	 * Descriptive information about this Realm implementation.
@@ -207,10 +235,31 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 	 * principal.
 	 *
 	 * @param additionalAttributes
-	 *            the additional attributes.
+	 *            the additional attributes
 	 */
 	public void setAdditionalAttributes(String additionalAttributes) {
 		this.additionalAttributes = additionalAttributes.split(",");
+	}
+
+	/**
+	 * Sets the maximum amount of directory server connections the pool will hold.
+	 *
+	 * @param connectionPoolSize
+	 *            the connection pool size
+	 */
+	public void setConnectionPoolSize(int connectionPoolSize) {
+		this.connectionPoolSize = connectionPoolSize;
+	}
+
+	/**
+	 * Sets the maximum amount of time in milliseconds a directory server connection should remain
+	 * idle before it is closed.
+	 *
+	 * @param maxIdleTime
+	 *            the maximum idle time
+	 */
+	public void setMaxIdleTime(long maxIdleTime) {
+		this.maxIdleTime = maxIdleTime;
 	}
 
 	@Override
@@ -223,29 +272,108 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 		if (gssName.isAnonymous())
 			return new ActiveDirectoryPrincipal(gssName, Sid.ANONYMOUS_SID, gssCredential);
 
-		DirContext context = open();
-		if (context == null)
+		DirContextConnection connection = acquire();
+		if (connection.context == null)
 			return null;
 
 		try {
-			User user = getUser(context, gssName);
+			User user = getUser(connection.context, gssName);
 
 			if (user != null) {
-				List<String> roles = getRoles(context, user);
+				List<String> roles = getRoles(connection.context, user);
 
 				return new ActiveDirectoryPrincipal(gssName, user.getSid(), roles, gssCredential,
 						user.getAdditionalAttributes());
 			}
 		} catch (NamingException e) {
 			logger.error(sm.getString("activeDirectoryRealm.principalSearchFailed", gssName), e);
+
+			close(connection);
 		} finally {
-			close(context);
+			release(connection);
 		}
 
 		return null;
 	}
 
-	protected DirContext open() {
+	protected DirContextConnection acquire() {
+		if (logger.isDebugEnabled())
+			logger.debug(sm.getString("activeDirectoryRealm.acquire"));
+
+		DirContextConnection connection = null;
+
+		while (connection == null) {
+			connection = connectionPool.pop();
+
+			if (connection != null) {
+				long idleTime = System.currentTimeMillis() - connection.lastBorrowTime;
+				// TODO support maxIdleTime = -1 (no expiry)
+				if (idleTime > maxIdleTime) {
+					if (logger.isDebugEnabled())
+						logger.debug(sm.getString("activeDirectoryRealm.exceedMaxIdleTime"));
+					close(connection);
+					connection = null;
+				} else {
+					boolean valid = validate(connection);
+					if (valid) {
+						if (logger.isDebugEnabled())
+							logger.debug(sm.getString("activeDirectoryRealm.reuse"));
+					} else {
+						close(connection);
+						connection = null;
+					}
+				}
+			} else {
+				connection = new DirContextConnection();
+				open(connection);
+			}
+		}
+
+		connection.lastBorrowTime = System.currentTimeMillis();
+
+		return connection;
+	}
+
+	protected boolean validate(DirContextConnection connection) {
+		if (logger.isDebugEnabled())
+			logger.debug(sm.getString("activeDirectoryRealm.validate"));
+
+		SearchControls controls = new SearchControls();
+		controls.setSearchScope(SearchControls.OBJECT_SCOPE);
+		controls.setCountLimit(1);
+		controls.setReturningAttributes(new String[] { "objectClass" });
+		controls.setTimeLimit(500);
+
+		NamingEnumeration<SearchResult> results = null;
+		try {
+			results = connection.context.search("", "objectclass=*", controls);
+
+			if (results.hasMore()) {
+				close(results);
+				return true;
+			}
+		} catch (NamingException e) {
+			logger.error(sm.getString("activeDirectoryRealm.validate.namingException"), e);
+
+			return false;
+		}
+
+		close(results);
+
+		return false;
+	}
+
+	protected void release(DirContextConnection connection) {
+		if (connection.context == null)
+			return;
+
+		if (logger.isDebugEnabled())
+			logger.debug(sm.getString("activeDirectoryRealm.release"));
+		if (!connectionPool.push(connection))
+			close(connection);
+	}
+
+	protected void open(DirContextConnection connection) {
 		try {
 			javax.naming.Context context = null;
 
@@ -257,25 +385,29 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 				context = server.getGlobalNamingContext();
 			}
 
+			if (logger.isDebugEnabled())
+				logger.debug(sm.getString("activeDirectoryRealm.open"));
 			DirContextSource contextSource = (DirContextSource) context
 					.lookup(dirContextSourceName);
-			return contextSource.getDirContext();
+			connection.context = contextSource.getDirContext();
 		} catch (NamingException e) {
-			logger.error(sm.getString("activeDirectoryRealm.open"), e);
+			logger.error(sm.getString("activeDirectoryRealm.open.namingException"), e);
 		}
-
-		return null;
 	}
 
-	protected void close(DirContext context) {
-		if (context == null)
+	protected void close(DirContextConnection connection) {
+		if (connection.context == null)
 			return;
 
 		try {
-			context.close();
+			if (logger.isDebugEnabled())
+				logger.debug(sm.getString("activeDirectoryRealm.close"));
+			connection.context.close();
 		} catch (NamingException e) {
-			logger.error(sm.getString("activeDirectoryRealm.close"), e);
+			logger.error(sm.getString("activeDirectoryRealm.close.namingException"), e);
 		}
+
+		connection.context = null;
 	}
 
 	protected void close(NamingEnumeration<?> results) {
@@ -291,26 +423,40 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 
 	@Override
 	protected void startInternal() throws LifecycleException {
-		super.startInternal();
+		connectionPool = new SynchronizedStack<>(connectionPoolSize, connectionPoolSize);
 
-		DirContext context = open();
-		if (context == null)
+		DirContextConnection connection = acquire();
+		if (connection.context == null)
 			return;
 
 		try {
-			String referral = (String) context.getEnvironment().get(DirContext.REFERRAL);
+			String referral = (String) connection.context.getEnvironment().get(DirContext.REFERRAL);
 
 			if ("follow".equals(referral))
 				logger.warn(sm.getString("activeDirectoryRealm.referralFollow"));
 		} catch (NamingException e) {
 			logger.error(sm.getString("activeDirectoryRealm.environmentFailed"), e);
+
+			close(connection);
 		} finally {
-			close(context);
+			release(connection);
 		}
+
+		super.startInternal();
+	}
+
+	@Override
+	protected void stopInternal() throws LifecycleException {
+		super.stopInternal();
+
+		DirContextConnection connection = null;
+		while ((connection = connectionPool.pop()) != null)
+			close(connection);
+
+		connectionPool = null;
 	}
 
 	protected User getUser(DirContext context, GSSName gssName) throws NamingException {
-
 		String[] attributes = DEFAULT_USER_ATTRIBUTES;
 
 		if (additionalAttributes != null && additionalAttributes.length > 0) {
@@ -366,7 +512,6 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 								mapperClassName));
 
 					close(results);
-					results = null;
 				} else
 					break;
 			} catch (PartialResultException e) {
@@ -374,7 +519,6 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 						mapperClassName, e.getRemainingName()));
 
 				close(results);
-				results = null;
 			}
 		}
 
@@ -399,7 +543,7 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 				.parseInt((String) userAttributes.get("userAccountControl").get());
 
 		// Do not allow disabled accounts (UF_ACCOUNT_DISABLE)
-		if ((userAccountControl & 0x02) == 0x02) {
+		if ((userAccountControl & 0x02) != 0) {
 			logger.warn(sm.getString("activeDirectoryRealm.userFoundButDisabled", gssName));
 
 			close(results);
@@ -457,7 +601,6 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 	}
 
 	protected List<String> getRoles(DirContext context, User user) throws NamingException {
-
 		List<String> roles = new LinkedList<String>();
 
 		if (logger.isDebugEnabled())
@@ -581,7 +724,6 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 
 	protected Name getRelativeName(DirContext context, String distinguishedName)
 			throws NamingException {
-
 		NameParser parser = context.getNameParser(StringUtils.EMPTY);
 		LdapName nameInNamespace = (LdapName) parser.parse(context.getNameInNamespace());
 		LdapName name = (LdapName) parser.parse(distinguishedName);
@@ -615,6 +757,7 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 	}
 
 	protected static class User {
+
 		private final GSSName gssName;
 		private final Sid sid;
 		private final List<String> roles;
