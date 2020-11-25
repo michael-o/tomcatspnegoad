@@ -1,5 +1,5 @@
 /*
- * Copyright 2013–2019 Michael Osipov
+ * Copyright 2013–2020 Michael Osipov
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,13 +73,27 @@ import org.ietf.jgss.GSSName;
  * principal. Binary attributes must end with {@code ;binary} and will be stored as {@code byte[]},
  * ordinary attributes will be stored as {@code String}. If an attribute is multivalued, it will be
  * stored as {@code List}.</li>
- * <li>TODO Document pool options</li>
+ * <li>{@code connectionPoolSize}: the maximum amount of directory server connections the pool will
+ * hold. Default is zero which means no connections will be pooled.
+ * <li>{@code maxIdleTime}: the maximum amount of time in milliseconds a directory server connection
+ * should remain idle before it is closed. Default value is 15 minutes.</li>
  * </ul>
+ * <br>
  * <strong>Note</strong>: By default the SIDs ({@code objectSid} and {@code sIDHistory}) of the
  * Active Directory security groups will be retrieved and no further configuration is required for
  * them.
  *
- * <h2>Connection Pooling</h2> TODO Document me!
+ * <h2>Connection Pooling</h2> This realm offers a poor man's directory server connection pooling
+ * which can drastically improve access performance for non-session (stateless) applications. It
+ * utilizes a LIFO structure based on {@link SynchronizedStack}. No background thread is managing
+ * the connections. They are acquired, validated, eventually closed and opened when
+ * {@link #getPrincipal(GSSName, GSSCredential)} is invoked. Validation involves a minimal and
+ * limited query with at most 500 ms of wait time just to verify the connection is alive and
+ * healthy. If the query fails, the connection is closed immediately. If the amount of requested
+ * connections exceeds ones the available in the pool, new ones are opened and pushed onto the pool.
+ * If the pool does not accept any addtional connetions they are closed immediately. <br>
+ * This connection pool feature has to be explicitly enabled by setting {@code connectionPoolSize}
+ * to greater than zero.
  *
  * <h2 id="referral-handling">Referral Handling</h2> When working with the default LDAP ports (not
  * GC) or in a multi-forest environment, it is highly likely to receive referrals (either
@@ -184,8 +198,8 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 	protected boolean localDirContextSource;
 	protected String dirContextSourceName;
 	protected String[] additionalAttributes;
-	protected int connectionPoolSize = 1;
-	protected long maxIdleTime = 300_000L;
+	protected int connectionPoolSize = 0;
+	protected long maxIdleTime = 900_000L;
 
 	// Poor man's connection pool
 	protected SynchronizedStack<DirContextConnection> connectionPool;
@@ -221,25 +235,28 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 	 * principal.
 	 *
 	 * @param additionalAttributes
-	 *            the additional attributes.
+	 *            the additional attributes
 	 */
 	public void setAdditionalAttributes(String additionalAttributes) {
 		this.additionalAttributes = additionalAttributes.split(",");
 	}
 
 	/**
-	 * TODO Document me!
+	 * Sets the maximum amount of directory server connections the pool will hold.
 	 *
 	 * @param connectionPoolSize
+	 *            the connection pool size
 	 */
 	public void setConnectionPoolSize(int connectionPoolSize) {
 		this.connectionPoolSize = connectionPoolSize;
 	}
 
 	/**
-	 * TODO Document me!
+	 * Sets the maximum amount of time in milliseconds a directory server connection should remain
+	 * idle before it is closed.
 	 *
 	 * @param maxIdleTime
+	 *            the maximum idle time
 	 */
 	public void setMaxIdleTime(long maxIdleTime) {
 		this.maxIdleTime = maxIdleTime;
