@@ -1,0 +1,54 @@
+/*
+ * Copyright 2013–2021 Michael Osipov
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+ 
+.nav-header {
+	text-transform: none;
+}
+/* TODO File tickets in Fluido Skin's/Doxia's Jira for several deficiencies */
+
+div.source {
+	margin-right: 7px;
+}
+
+div.section > div.source {
+	margin-left: 7px;
+}
+
+pre.prettyprint {
+	padding: 5px;
+}
+
+.section li > p {
+	margin-left: 0px;
+}
+
+table.table, table.table th, table.table td {
+	border-style: hidden;
+}
+
+dl {
+	background-color: #FFFFCC;
+	border-radius: 4px;
+	/* Applies originally to dt only but should actually apply only here */
+	margin-right: 7px;
+	margin-left: 7px;
+	border: 1px dashed #888888;
+	padding: 5px;
+}
+
+dd {
+	margin-left: 20px;
+}
