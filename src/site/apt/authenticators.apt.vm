@@ -37,7 +37,7 @@ Choosing and Using Authenticators
   turn the server accepts a GSS context by validating an authentication token and responds with a
   proper token to the client.
 
-    [Attention] Though SPNEGO is intended to negotiate a mechanism, the Oracle JVM currently supports
+    [Attention] Though SPNEGO is intended to negotiate a mechanism, OpenJDK currently supports
                 Kerberos 5 only and not NTLM additionally due to its proprietary nature. Anyway, it
                 is discouraged by Microsoft {{{https://serverfault.com/a/384721/116898}1}})
                 to rely on NTLM anymore.
