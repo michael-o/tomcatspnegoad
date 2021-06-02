@@ -75,7 +75,7 @@
 <p>The <a href="./apidocs/net/sf/michaelo/tomcat/realm/ActiveDirectoryRealm.html"><code>ActiveDirectoryRealm</code></a> will query your Active Directory for a user by his/her <a class="externalLink" href="https://docs.microsoft.com/de-de/windows/win32/secauthn/user-name-formats#user-principal-name">implicit UPN</a> and retrieve all the necessary information, e.g., his/her security groups.</p>
 <p>It requires two steps of setup: First, you will need to configure a <code>DirContextSourceFactory</code> with the parameters of your Active Direcory. Second, the realm itself pointing to that Active Directory.</p><section>
 <h4><a name="Configuring_a_Directory_Context_Source_Factory"></a>Configuring a Directory Context Source Factory</h4>
-<p>Please read the documentation of the <a class="externalLink" href="http://dirctxsrc.sourceforge.net/dircontextsourcefactory.html"><code>DirContextSourceFactory</code></a> on how to configure it in detail. Here is a minimal working configuration:</p>
+<p>Please read the documentation of the <a class="externalLink" href="https://michael-o.github.io/dirctxsrc/dircontextsourcefactory.html"><code>DirContextSourceFactory</code></a> on how to configure it in detail. Here is a minimal working configuration:</p>
 <div class="source"><pre class="prettyprint">[&#x2026;]
   &lt;!-- Add this --&gt;
   &lt;Resource name=&quot;my-active-directory&quot; type=&quot;net.sf.michaelo.dirctxsrc.DirContextSource&quot;
