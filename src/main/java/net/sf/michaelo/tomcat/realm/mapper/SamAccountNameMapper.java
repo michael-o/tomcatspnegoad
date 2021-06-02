@@ -1,5 +1,5 @@
 /*
- * Copyright 2013–2019 Michael Osipov
+ * Copyright 2013–2021 Michael Osipov
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,6 @@ package net.sf.michaelo.tomcat.realm.mapper;
 
 /**
  * A base mapper for the AD attribute {@code sAMAccountName} and the realm.
- *
- * @version $Id$
  */
 public abstract class SamAccountNameMapper implements UsernameSearchMapper {
 

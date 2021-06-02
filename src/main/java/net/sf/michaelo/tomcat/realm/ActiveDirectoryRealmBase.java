@@ -1,5 +1,5 @@
 /*
- * Copyright 2013–2019 Michael Osipov
+ * Copyright 2013–2021 Michael Osipov
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,6 @@ import org.ietf.jgss.GSSName;
 /**
  * Base realm which is able to retrieve principals from {@link GSSName GSS names} or fully
  * established {@link GSSContext GSS contexts}.
- *
- * @version $Id$
  */
 public abstract class ActiveDirectoryRealmBase extends RealmBase {
 

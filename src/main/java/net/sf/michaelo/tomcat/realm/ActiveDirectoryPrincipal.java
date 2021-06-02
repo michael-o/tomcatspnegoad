@@ -1,5 +1,5 @@
 /*
- * Copyright 2013–2019 Michael Osipov
+ * Copyright 2013–2021 Michael Osipov
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,8 +39,6 @@ import org.ietf.jgss.GSSName;
  * <li>and a map with additional attributes which are either a {@code String}, {@code byte[]} or a
  * {@code List} of either one.</li>
  * </ul>
- *
- * @version $Id$
  */
 public class ActiveDirectoryPrincipal implements TomcatPrincipal {
 

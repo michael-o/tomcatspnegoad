@@ -1,5 +1,5 @@
 /*
- * Copyright 2013–2019 Michael Osipov
+ * Copyright 2013–2021 Michael Osipov
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,5 @@
 /**
  * Pluggable username search mappers for the
  * {@link net.sf.michaelo.tomcat.realm.ActiveDirectoryRealm}.
- *
- * @version $Id$
  */
 package net.sf.michaelo.tomcat.realm.mapper;

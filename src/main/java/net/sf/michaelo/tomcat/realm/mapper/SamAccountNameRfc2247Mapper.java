@@ -1,5 +1,5 @@
 /*
- * Copyright 2013–2019 Michael Osipov
+ * Copyright 2013–2021 Michael Osipov
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,8 +40,6 @@ import org.ietf.jgss.GSSName;
  * <strong>Note:</strong> This mapper requires to operate from the {@code RootDSE} of a domain
  * controller or better yet, a GC. No root DN normalization (stripping DC components) happens here
  * (yet).
- *
- * @version $Id$
  */
 public class SamAccountNameRfc2247Mapper extends SamAccountNameMapper {
 

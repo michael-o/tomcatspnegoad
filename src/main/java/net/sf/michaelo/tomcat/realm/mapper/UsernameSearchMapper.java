@@ -1,5 +1,5 @@
 /*
- * Copyright 2013–2019 Michael Osipov
+ * Copyright 2013–2021 Michael Osipov
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,6 @@ import net.sf.michaelo.tomcat.realm.ActiveDirectoryRealm;
 /**
  * A mapper interface (strategy pattern) for translating GSS names to Active Directory search
  * parameters.
- *
- * @version $Id$
  */
 public interface UsernameSearchMapper {
 

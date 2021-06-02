@@ -1,5 +1,5 @@
 /*
- * Copyright 2013–2019 Michael Osipov
+ * Copyright 2013–2021 Michael Osipov
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,8 +37,6 @@ import org.ietf.jgss.GSSName;
 
 /**
  * A SPNEGO Authenticator which utilizes GSS-API to authenticate a client.
- *
- * @version $Id$
  */
 public class SpnegoAuthenticator extends GSSAuthenticatorBase {
 

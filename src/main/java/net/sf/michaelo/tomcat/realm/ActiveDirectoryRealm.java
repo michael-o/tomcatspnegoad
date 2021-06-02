@@ -1,5 +1,5 @@
 /*
- * Copyright 2013–2020 Michael Osipov
+ * Copyright 2013–2021 Michael Osipov
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -176,7 +176,6 @@ import org.ietf.jgss.GSSName;
  * make the entire process slower.
  *
  * @see ActiveDirectoryPrincipal
- * @version $Id$
  */
 public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013–2019 Michael Osipov
+ * Copyright 2013–2021 Michael Osipov
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,6 @@ import org.ietf.jgss.GSSName;
  * overwritten by the explicit (enterprise) UPN. In this case, the result will be empty. No
  * assumption is made about the root DN set in the given context, so you can narrow down your search
  * base if you like.
- *
- * @version $Id$
  */
 public class UserPrincipalNameSearchMapper implements UsernameSearchMapper {
 

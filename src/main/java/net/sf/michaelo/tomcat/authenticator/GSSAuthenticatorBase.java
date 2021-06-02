@@ -1,5 +1,5 @@
 /*
- * Copyright 2013–2019 Michael Osipov
+ * Copyright 2013–2021 Michael Osipov
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,8 +31,6 @@ import org.ietf.jgss.Oid;
 /**
  * Base implementation for GSS-based authenticators which holds common configuration information.
  * See setter methods of configuration options for this authenticator.
- *
- * @version $Id$
  */
 abstract class GSSAuthenticatorBase extends AuthenticatorBase {
 
