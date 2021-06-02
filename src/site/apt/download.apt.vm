@@ -37,8 +37,8 @@ Download ${project.name}
 * Building from Source
 
   If you rather prefer building from source you either have to check out a working
-  copy from the project's public {{{./source-repository.html}Subversion}} repository,
-  or download a {{{https://sourceforge.net/p/tomcatspnegoad/code/HEAD/tarball?path=/tags/${project.version}}source ZIP file}} from SourceForge.
+  copy from the project's public {{{./scm.html}repository}},
+  or download a {{{https://github.com/michael-o/tomcatspnegoad/archive/refs/tags/${project.version}.zip}source ZIP file}} from GitHub.
 
   After you have obtained the source code, navigate to the source code directory
   and type <<<mvn install>>>. Prior to that, make sure that you have at least Maven

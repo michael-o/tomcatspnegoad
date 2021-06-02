@@ -38,7 +38,7 @@ Choosing and Using Realms
 
   The {{{./apidocs/net/sf/michaelo/tomcat/realm/ActiveDirectoryRealm.html}<<<ActiveDirectoryRealm>>>}}
   will query your Active Directory for a user by his/her
-  {{{https://docs.microsoft.com/de-de/windows/win32/secauthn/user-name-formats#user-principal-name}implicit UPN}}
+  {{{https://docs.microsoft.com/en-us/windows/win32/secauthn/user-name-formats#user-principal-name}implicit UPN}}
   and retrieve all the necessary information, e.g., his/her security groups.
 
   It requires two steps of setup: First, you will need to configure a <<<DirContextSourceFactory>>>
@@ -46,7 +46,7 @@ Choosing and Using Realms
 
 ** Configuring a Directory Context Source Factory
 
-  Please read the documentation of the {{{http://dirctxsrc.sourceforge.net/dircontextsourcefactory.html}<<<DirContextSourceFactory>>>}}
+  Please read the documentation of the {{{https://michael-o.github.io/dirctxsrc/dircontextsourcefactory.html}<<<DirContextSourceFactory>>>}}
   on how to configure it in detail. Here is a minimal working configuration:
 
 +----------------------------
@@ -80,7 +80,7 @@ Choosing and Using Realms
 
   Provide the <<<dirContextSourceName>>> you have configured for the <<<DirContextSource>>> above and
   hint whether this directory context source has been configured
-  {{{http://dirctxsrc.sourceforge.net/dircontextsourcefactory.html#Resource_Declaration_Examples}locally or globally}}.
+  {{{https://michael-o.github.io/dirctxsrc/dircontextsourcefactory.html#Resource_Declaration_Examples}locally or globally}}.
   Default value is <<<false>>>.
 
   You have successfully configured the <<<ActiveDirectoryRealm>>> in your webapp. It is now ready to use.
