@@ -62,10 +62,8 @@ Integrating with Spring Security
   otherwise it won't secure your sites. Moreover, <<<mappable-roles>>> have to match the security
   roles defined in your <<<web.xml>>>.
 
-    [Attention] Spring Security suffers from a series of bugs effectively limiting proper usage of
-                pre-authentication scenarios: {{{https://github.com/spring-projects/spring-security/issues/2101}SEC-1869}},
-                {{{https://github.com/spring-projects/spring-security/pull/69}SEC-1869 additions}},
-                {{{https://github.com/spring-projects/spring-security/issues/3357}SEC-3198}},
+    [Attention] Spring Security 5.5.0 suffers from a series of bugs effectively limiting proper usage of
+                pre-authentication scenarios:
                 {{{https://github.com/spring-projects/spring-security/issues/3358}SEC-3199}}, and
                 {{{https://github.com/spring-projects/spring-security/issues/3359}SEC-3200}}.
 
