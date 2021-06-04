@@ -1,5 +1,5 @@
 /*
- * Copyright 2013–2019 Michael Osipov
+ * Copyright 2013–2021 Michael Osipov
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,8 +36,6 @@ import org.ietf.jgss.GSSName;
  * A Windows Identity Authenticator which uses GSS-API to retrieve to currently logged in user.
  *
  * This authenticator requires a realm which implements the {@link GSSRealm} interface.
- *
- * @version $Id$
  */
 public class CurrentWindowsIdentityAuthenticator extends GSSAuthenticatorBase {
 
