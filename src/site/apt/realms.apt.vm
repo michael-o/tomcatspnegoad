@@ -49,6 +49,11 @@ Choosing and Using Realms
   Please read the documentation of the {{{https://michael-o.github.io/dirctxsrc/dircontextsourcefactory.html}<<<DirContextSourceFactory>>>}}
   on how to configure it in detail. Here is a minimal working configuration:
 
+    [Tip] Never rely on hard coded hostnames, use my {{{https://michael-o.github.io/activedirectory-dns-locator/}<<<ActiveDirectoryLdapDnsProvider>>>}}
+          to auto-locate servers for Active Directory domains via DNS.
+
+    []
+
 +----------------------------
 [$ellipsis]
   <!-- Add this -->
