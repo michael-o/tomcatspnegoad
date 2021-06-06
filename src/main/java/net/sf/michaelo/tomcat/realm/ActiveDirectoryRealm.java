@@ -95,67 +95,58 @@ import org.ietf.jgss.GSSName;
  * This connection pool feature has to be explicitly enabled by setting {@code connectionPoolSize}
  * to greater than zero.
  *
- * <h2 id="referral-handling">Referral Handling</h2> When working with the default LDAP ports (not
+ * <h2 id="referral-handling">Referral Handling</h2> Active Directory uses two type of responses
+ * when it cannot complete a search request: referrals and search result references. Both are
+ * different in nature, read more about them <a href="https://documentation.avaya.com/en-US/bundle/DeployingAvayaDeviceServices_R8.1.4/page/LDAP_Search_Results_and_Referrals.html">here</a>.
+ * For this section I will use the term <i>referral</i> for both types synomously as does the
+ * <a href="https://docs.oracle.com/javase/jndi/tutorial/ldap/referral/jndi.html">JNDI/LDAP Provider documentation</a>.
+ * <br>
+ * When working with the default LDAP ports (not
  * GC) or in a multi-forest environment, it is highly likely to receive referrals (either
- * subordinate or cross) during a search or lookup. JNDI takes several approaches to handle
- * referrals with the {@code java.naming.referral} property and its values: {@code ignore},
- * {@code throw}, and {@code follow}. You can ignore referrals altogether, but the Active Directory
- * will still signal a {@link PartialResultException} when a {@link NamingEnumeration} is iterated.
- * The reason is because Oracle's LDAP implementation adds a {@link ManageReferralControl} when
- * {@code ignore} is set but Active Directory does not support it and returns a referral anyway.
- * This realm will catch this and continue to process the enumeration. If the
- * {@code DirContextSource} is set to {@code throw}, this realm will catch the
- * {@link ReferralException} but avoid to follow the referral(s) manually (for several reasons) and
- * will continue with the process. Following referrals automatically is a completely opaque
- * operation to the application, the {@code ReferralException} is handled internally and referral
- * contexts are queried and closed. Unfortunately, Oracle's LDAP implementation is not able to
- * handle this properly and only Oracle can fix this shortcoming. Issues have already been reported
- * (Review IDs 9089870 and 9089874, public issues
+ * subordinate or cross) during a search or lookup. Sun's JNDI/LDAP Provider takes the following
+ * approach to handle referrals with the {@code java.naming.referral} property and its values:
+ * {@code ignore}, {@code throw}, and {@code follow}. You can ignore referrals altogether, but
+ * the provider will still signal a {@link PartialResultException} when a {@link NamingEnumeration}
+ * is iterated. The reason is because it adds a {@link ManageReferralControl} when {@code ignore}
+ * is set and assumes that the target server will ignore referrals, but this is a misconception
+ * in this provider implementation, see
+ * <a href="https://openldap-software.0penldap.narkive.com/cuImLMRw/managedsait#post2">here</a>
+ * and <a href="https://bugs.openjdk.java.net/browse/JDK-5109452">here</a>. It is also unclear
+ * whether Microsoft Active Directory supports this control.
+ * <br>
+ * This realm will catch this exception and continue to process the enumeration. If the {@code DirContextSource}
+ * is set to {@code throw}, this realm will catch the {@link ReferralException} also, but avoid
+ * following referrals manually (for several reasons) and will continue with the process.
+ * Following referrals automatically is a completely opaque operation to the application, no
+ * {@code ReferralException} is thrown, but the referrals are handled internally and referral
+ * contexts are queried and closed. If you choose to {@code follow} referrals you <strong>must</strong>
+ * use my <a href="https://michael-o.github.io/activedirectory-dns-locator/">Active Directory DNS Locator</a>
+ * otherwise the queries <strong>will</strong> fail and you will suffer from
  * <a href="https://bugs.java.com/bugdatabase/view_bug.do?bug_id=JDK-8161361">JDK-8161361</a> and
- * <a href="https://bugs.java.com/bugdatabase/view_bug.do?bug_id=JDK-8160768">JDK-8161361</a>)!
+ * <a href="https://bugs.java.com/bugdatabase/view_bug.do?bug_id=JDK-8160768">JDK-8160768</a>!
  * <p>
- * <em>What is the shortcoming and how can it be solved?</em> Microsoft takes a very sophisticated
- * approach on not to rely on host names because servers can be provisioned and decommissioned any
- * time. Instead, they heavily rely on DNS domain names and DNS SRV records at runtime. I.e., an
- * initial or a referral URL does not contain a host name, but only a DNS domain name. While you can
- * connect to the service with this name, you cannot easily authenticate against it with Kerberos
- * because one cannot bind the same SPN {@code ldap/<dnsDomainName>@<REALM>}, e.g.,
- * {@code ldap/example.com@EXAMPLE.COM} to more than one account. If you try authenticate anyway,
- * you will receive a "Server not found in Kerberos database (7)" error. Therefore, one has to
- * perform a DNS SRV query ({@code _ldap._tcp.<dnsDomainName>}) to test whether this name is a host
- * name or a DNS domain name served by one or more machines. If it turns out to be a DNS domain
- * name, you have to select one target host from the query response (according to RFC 2782),
- * construct a domain-based SPN {@code ldap/<targetHost>/<dnsDomainName>@<REALM>} or a host-based
+ * <em>Why do you need to use my Active Directory DNS Locator?</em> Microsoft takes a very
+ * sophisticated approach on not to rely on hostnames because servers can be provisioned and
+ * decommissioned any time. Instead, they heavily rely on DNS domain names and DNS SRV records
+ * at runtime. I.e., an initial or a referral URL do not contain a hostname, but only a domain
+ * name. While you can connect to the service with this name, you cannot easily authenticate
+ * against it with Kerberos because one cannot bind the same SPN {@code ldap/<dnsDomainName>@<REALM>},
+ * e.g., {@code ldap/example.com@EXAMPLE.COM} to more than one account. If you try authenticate
+ * anyway, you will receive a "Server not found in Kerberos database (7)" error. Therefore, one has
+ * to perform a DNS SRV query ({@code _ldap._tcp.<dnsDomainName>}) to test whether this name is a
+ * hostname or a domain name served by one or more servers. If it turns out to be a domain name,
+ * you have to select one target host from the query response (according to RFC 2782), construct
+ * a domain-based SPN {@code ldap/<targetHost>/<dnsDomainName>@<REALM>} or a host-based
  * one {@code ldap/<targetHost>@<REALM>}, obtain a service ticket for and connect to that target
- * host. If it is a regular host name, which is not the usual case with Active Directory, Oracle's
- * internal implementation will behave correctly.<br>
- * The {@code follow} implementation cannot be made to work because there is no way to tell the
- * internal classes to perform this DNS SRV query and pass the appropriate server name(s) for the
- * SPN to the {@link SaslClient}. It is deemed to fail. Note, that host name canocalization might
- * sound reasonable within the {@code SaslClient}, but this is deemed to fail too for two reasons:
- * First, the {@code SaslClient} will receive an arbitrary IP address without knowing whether the
- * LDAP client socket will use the same one. You will have a service ticket issued for another host
- * and your authentication will fail. Second, most Kerberos implementations rely on reverse DNS
- * records, but Microsoft's Active Directory concept does not care about reverse DNS, it does not
- * canonicalize host names by default and there is no guarantee, that reverse DNS is set up
- * properly. Some environments do not even have control over the reverse DNS zone ({@code PTR}
- * records). Using {@code throw} will not make it any better because the referral URL returned by
- * {@link ReferralException#getReferralInfo()} cannot be changed with the calculated value(s) from
- * DNS. {@link ReferralException#getReferralContext()} will unconditionally reuse that value. The
- * only way (theoretically) to achieve this is to construct an {@link InitialDirContext} with the
- * new URL manually and work with it appropriately. Though, this approach has not been evaluated and
- * at this time and won't be implemented. (Changing the URLs manually in the debugger makes it work
- * actually)
+ * host.
+ * <br>
  * <p>
- * <em>How to work around this issue?</em> There are several ways depending on your setup: Use the
- * Global Catalog (port 3268) with
+ * <em>How to handle referrals?</em> There are several ways depending on your setup: Use the
+ * Global Catalog (port 3268) with a single forest and set referrals to {@code ignore}, or
+ * with multiple forests and set referrals to either
  * <ul>
- * <li>a single forest and set referrals to {@code ignore}, or</li>
- * <li>multiple forests and set referrals to either
- * <ul>
- * <li>{@code follow} or {@code throw} with a {@link DirContextSource} in your home forest, patch
- * {@code com.sun.jndi.ldap.LdapCtxFactory} to properly resolve DNS domain names to host names and
- * prepend it to the boot classpath and all referrals will be cleanly resolved, or</li>
+ * <li>{@code follow} with a {@link DirContextSource} in your home forest and use my Active
+ * Directory DNS Locator, or</li>
  * <li>{@code ignore} with multiple {@code DirContextSources}, and create a {@link CombinedRealm}
  * with one {@code ActiveDirectoryRealm} per forest.</li>
  * </ul>
@@ -164,15 +155,14 @@ import org.ietf.jgss.GSSName;
  *
  * You will then have the principal properly looked up in the Active Directory.
  * <p>
- * This issue is also documented on <a href="https://stackoverflow.com/q/25436410/696632">Stack
- * Overflow</a>. Additionally,
+ * Further references:
  * <a href="https://technet.microsoft.com/en-us/library/cc759550%28v=ws.10%29.aspx">How DNS Support
  * for Active Directory Works</a> is a good read on the DNS topic as well as
  * <a href="https://technet.microsoft.com/en-us/library/cc978012.aspx">Global Catalog and LDAP
  * Searches</a> and <a href="https://technet.microsoft.com/en-us/library/cc978014.aspx">LDAP
  * Referrals</a>.
  * <p>
- * <strong>Note:</strong> always remember, referrals incur an amplification in time and space and
+ * <strong>Note:</strong> Always remember, referrals incur an amplification in time and space and
  * make the entire process slower.
  *
  * @see ActiveDirectoryPrincipal
