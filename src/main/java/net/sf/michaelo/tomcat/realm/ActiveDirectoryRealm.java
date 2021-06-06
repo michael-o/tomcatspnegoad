@@ -74,7 +74,7 @@ import org.ietf.jgss.GSSName;
  * ordinary attributes will be stored as {@code String}. If an attribute is multivalued, it will be
  * stored as {@code List}.</li>
  * <li>{@code connectionPoolSize}: the maximum amount of directory server connections the pool will
- * hold. Default is zero which means no connections will be pooled.
+ * hold. Default is zero which means no connections will be pooled.</li>
  * <li>{@code maxIdleTime}: the maximum amount of time in milliseconds a directory server connection
  * should remain idle before it is closed. Default value is 15 minutes.</li>
  * </ul>
@@ -91,7 +91,8 @@ import org.ietf.jgss.GSSName;
  * limited query with at most 500 ms of wait time just to verify the connection is alive and
  * healthy. If the query fails, the connection is closed immediately. If the amount of requested
  * connections exceeds ones the available in the pool, new ones are opened and pushed onto the pool.
- * If the pool does not accept any addtional connetions they are closed immediately. <br>
+ * If the pool does not accept any addtional connetions they are closed immediately.
+ * <br>
  * This connection pool feature has to be explicitly enabled by setting {@code connectionPoolSize}
  * to greater than zero.
  *
@@ -139,7 +140,6 @@ import org.ietf.jgss.GSSName;
  * a domain-based SPN {@code ldap/<targetHost>/<dnsDomainName>@<REALM>} or a host-based
  * one {@code ldap/<targetHost>@<REALM>}, obtain a service ticket for and connect to that target
  * host.
- * <br>
  * <p>
  * <em>How to handle referrals?</em> There are several ways depending on your setup: Use the
  * Global Catalog (port 3268) with a single forest and set referrals to {@code ignore}, or
@@ -149,8 +149,6 @@ import org.ietf.jgss.GSSName;
  * Directory DNS Locator, or</li>
  * <li>{@code ignore} with multiple {@code DirContextSources}, and create a {@link CombinedRealm}
  * with one {@code ActiveDirectoryRealm} per forest.</li>
- * </ul>
- * </li>
  * </ul>
  *
  * You will then have the principal properly looked up in the Active Directory.
