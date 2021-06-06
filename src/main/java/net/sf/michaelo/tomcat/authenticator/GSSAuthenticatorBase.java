@@ -111,7 +111,7 @@ abstract class GSSAuthenticatorBase extends AuthenticatorBase {
 	 *
 	 * <p>
 	 * It is not always desired or necessary to produce an error page, e.g., non-human clients do
-	 * not analyze it anyway but have to consume the response (wasted time and resources). When a
+	 * not analyze it anyway, but have to consume the response (wasted time and resources). When a
 	 * client issues a request, the server will write the error messages to either one header:
 	 * {@code Auth-Error} or {@code Server-Error}.
 	 * <p>
