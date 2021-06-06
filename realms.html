@@ -86,7 +86,7 @@
     urls=&quot;ldap://ad.example.com&quot; auth=&quot;gssapi&quot; loginEntryName=&quot;my-client&quot; /&gt;
 [&#x2026;]</pre></div></section><section>
 <h4><a name="Referral_Handling"></a>Referral Handling</h4>
-<p>In general, you should pick LDAP URLs which avoid any referral incursion because it amplifies execution in space and time. You are highly recommended using the Global Catalog (port 3268) only. More details on how this realm deals with referrals can be found in the <a href="./apidocs/net/sf/michaelo/tomcat/realm/ActiveDirectoryRealm.html#referral-handling">Javadoc</a>.</p></section><section>
+<p>In general, you should pick LDAP URLs which avoid any referral chasing because it amplifies execution in space and time. You are highly recommended using the Global Catalog (port 3268) only. More details on how this realm deals with referrals can be found in the <a href="./apidocs/net/sf/michaelo/tomcat/realm/ActiveDirectoryRealm.html#referral-handling">Javadoc</a>.</p></section><section>
 <h4><a name="Configuring_the_Realm"></a>Configuring the Realm</h4>
 <p>Now we need to wire that to the realm. Open or create your app's <code>context.xml</code> and add:</p>
 <div class="source"><pre class="prettyprint">&lt;Context&gt;
