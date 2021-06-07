@@ -36,13 +36,11 @@ import javax.naming.ReferralException;
 import javax.naming.directory.Attribute;
 import javax.naming.directory.Attributes;
 import javax.naming.directory.DirContext;
-import javax.naming.directory.InitialDirContext;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
 import javax.naming.ldap.LdapName;
 import javax.naming.ldap.ManageReferralControl;
 import javax.naming.ldap.Rdn;
-import javax.security.sasl.SaslClient;
 
 import net.sf.michaelo.dirctxsrc.DirContextSource;
 import net.sf.michaelo.tomcat.realm.mapper.SamAccountNameRfc2247Mapper;
