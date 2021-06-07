@@ -19,10 +19,12 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.naming.CompositeName;
@@ -67,6 +69,16 @@ import org.ietf.jgss.GSSName;
  * <li>{@code localDirContextSource}: whether this {@code DirContextSource} is locally configured in
  * the {@code context.xml} or globally configured in the {@code server.xml} (optional). Default
  * value is {@code false}.</li>
+ * <li>{@code roleFormats}: comma-separated list of role formats to be applied to user security
+ * groups. The following values are possible: {@code sid} retrieves the {@code objectSid} and
+ * {@code sIDHistory} attribute values, {@code name} retrieves the {@code msDS-PrincipalName} attribute
+ * value representing the down-level logon name format: <code>{netbiosDomain}\{samAccountName}</code>,
+ * and {@code nameEx} retrieves the {@code distinguishedName} and {@code sAMAccountName} attribute
+ * values and converts the DC RDNs from the DN to the Kerberos realm and appends the
+ * {@code sAMAccountName} (reversed RFC 2247) with format <code>{realm}\{samAccountName}</code>.
+ * Default is {@code sid}.</li>
+ * <li>{@code prependRoleFormat}: whether the role format is prepended to the role as
+ * <code>{roleFormat}:{role}</code>. Default is {@code false}.
  * <li>{@code additionalAttributes}: comma-separated list of attributes to be retrieved for the
  * principal. Binary attributes must end with {@code ;binary} and will be stored as {@code byte[]},
  * ordinary attributes will be stored as {@code String}. If an attribute is multivalued, it will be
@@ -77,10 +89,6 @@ import org.ietf.jgss.GSSName;
  * should remain idle before it is closed. Default value is 15 minutes.</li>
  * </ul>
  * <br>
- * <strong>Note</strong>: By default the SIDs ({@code objectSid} and {@code sIDHistory}) of the
- * Active Directory security groups will be retrieved and no further configuration is required for
- * them.
- *
  * <h2>Connection Pooling</h2> This realm offers a poor man's directory server connection pooling
  * which can drastically improve access performance for non-session (stateless) applications. It
  * utilizes a LIFO structure based on {@link SynchronizedStack}. No background thread is managing
@@ -177,12 +185,28 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 	private static final String[] DEFAULT_USER_ATTRIBUTES = new String[] { "userAccountControl",
 			"memberOf", "objectSid;binary" };
 
-	private static final String[] DEFAULT_ROLE_ATTRIBUTES = new String[] { "groupType",
-			"objectSid;binary", "sIDHistory;binary" };
+	private static final String[] DEFAULT_ROLE_ATTRIBUTES = new String[] { "groupType" };
+
+	private static final String DEFAULT_ROLE_FORMAT = "sid";
+
+	private static final Map<String, String[]> ROLE_FORMAT_ATTRIBUTES = new HashMap<>();
+
+	static {
+		ROLE_FORMAT_ATTRIBUTES.put("sid", new String[] { "objectSid;binary", "sIDHistory;binary" });
+		ROLE_FORMAT_ATTRIBUTES.put("name", new String [] { "msDS-PrincipalName" } );
+		ROLE_FORMAT_ATTRIBUTES.put("nameEx", new String [] { "distinguishedName", "sAMAccountName" } );
+	}
 
 	protected boolean localDirContextSource;
 	protected String dirContextSourceName;
+
+	protected String[] roleFormats;
+	protected String[] roleAttributes;
+
+	protected boolean prependRoleFormat;
+
 	protected String[] additionalAttributes;
+
 	protected int connectionPoolSize = 0;
 	protected long maxIdleTime = 900_000L;
 
@@ -224,6 +248,34 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 	 */
 	public void setAdditionalAttributes(String additionalAttributes) {
 		this.additionalAttributes = additionalAttributes.split(",");
+	}
+
+
+	/**
+	 * Sets a comma-separated list of role formats to be applied to user security groups
+	 * from Active Directory.
+	 *
+	 * @param roleFormats the role formats
+	 */
+	public void setRoleFormats(String roleFormats) {
+		this.roleFormats = roleFormats.split(",");
+		List<String> attributes = new ArrayList<>(Arrays.asList(DEFAULT_ROLE_ATTRIBUTES));
+		for (String roleFormat : this.roleFormats) {
+			if (ROLE_FORMAT_ATTRIBUTES.get(roleFormat) != null)
+				attributes.addAll(Arrays.asList(ROLE_FORMAT_ATTRIBUTES.get(roleFormat)));
+		}
+
+		this.roleAttributes = attributes.toArray(new String[0]);
+	}
+
+	/**
+	 * Sets whether the role format is prepended to the role.
+	 *
+	 * @param prependRoleFormat
+	 *            the prepend role format indication
+	 */
+	public void setPrependRoleFormat(boolean prependRoleFormat) {
+		this.prependRoleFormat = prependRoleFormat;
 	}
 
 	/**
@@ -404,6 +456,14 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 		} catch (NamingException e) {
 			; // swallow
 		}
+	}
+
+	@Override
+	protected void initInternal() throws LifecycleException {
+		super.initInternal();
+
+		if (roleFormats == null)
+			setRoleFormats(DEFAULT_ROLE_FORMAT);
 	}
 
 	@Override
@@ -596,7 +656,7 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 
 			Attributes roleAttributes = null;
 			try {
-				roleAttributes = context.getAttributes(roleRdn, DEFAULT_ROLE_ATTRIBUTES);
+				roleAttributes = context.getAttributes(roleRdn, this.roleAttributes);
 			} catch (ReferralException e) {
 				logger.warn(sm.getString("activeDirectoryRealm.role.referralException", role,
 						e.getRemainingName(), e.getReferralInfo()));
@@ -621,32 +681,77 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 				continue;
 			}
 
-			byte[] objectSidBytes = (byte[]) roleAttributes.get("objectSid;binary").get();
-			String sidString = new Sid(objectSidBytes).toString();
+			for (String roleFormat: roleFormats) {
 
-			Attribute sidHistory = roleAttributes.get("sIDHistory;binary");
-			List<String> sidHistoryStrings = new LinkedList<String>();
-			if (sidHistory != null) {
-				NamingEnumeration<?> sidHistoryEnum = sidHistory.getAll();
-				while (sidHistoryEnum.hasMore()) {
-					byte[] sidHistoryBytes = (byte[]) sidHistoryEnum.next();
-					sidHistoryStrings.add(new Sid(sidHistoryBytes).toString());
+				String roleFormatPrefix = prependRoleFormat ? roleFormat + ":" : "";
+
+				switch(roleFormat) {
+				case "sid":
+					byte[] objectSidBytes = (byte[]) roleAttributes.get("objectSid;binary").get();
+					String sidString = new Sid(objectSidBytes).toString();
+
+					roles.add(roleFormatPrefix + sidString);
+
+					Attribute sidHistory = roleAttributes.get("sIDHistory;binary");
+					List<String> sidHistoryStrings = new LinkedList<String>();
+					if (sidHistory != null) {
+						NamingEnumeration<?> sidHistoryEnum = sidHistory.getAll();
+						while (sidHistoryEnum.hasMore()) {
+							byte[] sidHistoryBytes = (byte[]) sidHistoryEnum.next();
+							String sidHistoryString = new Sid(sidHistoryBytes).toString();
+							sidHistoryStrings.add(sidHistoryString);
+
+							roles.add(roleFormatPrefix + sidHistoryString);
+						}
+
+						close(sidHistoryEnum);
+					}
+
+					if (logger.isTraceEnabled()) {
+						if (sidHistoryStrings.isEmpty())
+							logger.trace(sm.getString("activeDirectoryRealm.foundRoleSidConverted", role,
+									sidString));
+						else
+							logger.trace(
+									sm.getString("activeDirectoryRealm.foundRoleSidConverted.withSidHistory",
+											role, sidString, sidHistoryStrings));
+					}
+					break;
+				case "name":
+					String msDsPrincipalName = (String) roleAttributes.get("msDS-PrincipalName").get();
+
+					roles.add(roleFormatPrefix + msDsPrincipalName);
+
+					if (logger.isTraceEnabled()) {
+						logger.trace(sm.getString("activeDirectoryRealm.foundRoleNameConverted", role,
+								msDsPrincipalName));
+					}
+					break;
+				case "nameEx":
+						String distinguishedName = (String) roleAttributes.get("distinguishedName").get();
+						String samAccountName = (String) roleAttributes.get("sAMAccountName").get();
+
+						NameParser parser = context.getNameParser(StringUtils.EMPTY);
+						LdapName dn = (LdapName) parser.parse(distinguishedName);
+
+						StringBuilder realm = new StringBuilder();
+						for(Rdn rdn : dn.getRdns()) {
+							if (rdn.getType().equalsIgnoreCase("DC")) {
+								realm.insert(0, ((String) rdn.getValue()).toUpperCase(Locale.ROOT) + ".");
+							}
+						}
+						realm.deleteCharAt(realm.length() - 1);
+
+						roles.add(roleFormatPrefix + realm + "\\" + samAccountName);
+
+						if (logger.isTraceEnabled()) {
+							logger.trace(sm.getString("activeDirectoryRealm.foundRoleNameExConverted", role,
+									realm + "\\" + samAccountName));
+						}
+					break;
+				default:
+					throw new IllegalArgumentException("The role format '" + roleFormat + "' is invalid");
 				}
-
-				close(sidHistoryEnum);
-			}
-
-			roles.add(sidString);
-			roles.addAll(sidHistoryStrings);
-
-			if (logger.isTraceEnabled()) {
-				if (sidHistoryStrings.isEmpty())
-					logger.trace(sm.getString("activeDirectoryRealm.foundRoleConverted", role,
-							sidString));
-				else
-					logger.trace(
-							sm.getString("activeDirectoryRealm.foundRoleConverted.withSidHistory",
-									role, sidString, sidHistoryStrings));
 			}
 		}
 

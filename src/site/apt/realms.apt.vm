@@ -103,6 +103,7 @@ Choosing and Using Realms
   from/to other domains, the SID history is completely retained. I.e., your application will continue
   to work even with the old SID. If you would like to map SIDs to developer-friendly role names,
   checkout the {{{http://mo-tomcat-ext.sourceforge.net/user-guide.html#PropertiesRoleMappingListener}<<<PropertiesRoleMappingListener>>>}}.
+  See extended capabilities of this realm in the {{{./apidocs/net/sf/michaelo/tomcat/realm/ActiveDirectoryPrincipal.html}Javadoc}}.
 
 * Using a Realm for Testing Purposes
 
