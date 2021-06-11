@@ -200,12 +200,13 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 	protected boolean localDirContextSource;
 	protected String dirContextSourceName;
 
+	protected String[] attributes;
+	protected String[] additionalAttributes;
+
 	protected String[] roleFormats;
 	protected String[] roleAttributes;
 
 	protected boolean prependRoleFormat;
-
-	protected String[] additionalAttributes;
 
 	protected int connectionPoolSize = 0;
 	protected long maxIdleTime = 900_000L;
@@ -248,8 +249,13 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 	 */
 	public void setAdditionalAttributes(String additionalAttributes) {
 		this.additionalAttributes = additionalAttributes.split(",");
-	}
 
+		this.attributes = new String[DEFAULT_USER_ATTRIBUTES.length + this.additionalAttributes.length];
+			System.arraycopy(DEFAULT_USER_ATTRIBUTES, 0, this.attributes, 0,
+					DEFAULT_USER_ATTRIBUTES.length);
+			System.arraycopy(this.additionalAttributes, 0, this.attributes, DEFAULT_USER_ATTRIBUTES.length,
+					this.additionalAttributes.length);
+	}
 
 	/**
 	 * Sets a comma-separated list of role formats to be applied to user security groups
@@ -462,6 +468,9 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 	protected void initInternal() throws LifecycleException {
 		super.initInternal();
 
+		if (attributes == null)
+			attributes = DEFAULT_USER_ATTRIBUTES;
+
 		if (roleFormats == null)
 			setRoleFormats(DEFAULT_ROLE_FORMAT);
 	}
@@ -502,16 +511,6 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 	}
 
 	protected User getUser(DirContext context, GSSName gssName) throws NamingException {
-		String[] attributes = DEFAULT_USER_ATTRIBUTES;
-
-		if (additionalAttributes != null && additionalAttributes.length > 0) {
-			attributes = new String[DEFAULT_USER_ATTRIBUTES.length + additionalAttributes.length];
-			System.arraycopy(DEFAULT_USER_ATTRIBUTES, 0, attributes, 0,
-					DEFAULT_USER_ATTRIBUTES.length);
-			System.arraycopy(additionalAttributes, 0, attributes, DEFAULT_USER_ATTRIBUTES.length,
-					additionalAttributes.length);
-		}
-
 		SearchControls searchCtls = new SearchControls();
 		searchCtls.setSearchScope(SearchControls.SUBTREE_SCOPE);
 		searchCtls.setReturningAttributes(attributes);

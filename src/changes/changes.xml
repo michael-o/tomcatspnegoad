@@ -5,6 +5,7 @@
 
 	<body>
 		<release version="3.7.0-SNAPSHOT" date="TBD" description="New features">
+			<action type="update" dev="michael-o">Precalculate required user attribute names</action>
 			<action type="add" dev="michael-o">Add configuration option for role format of security groups</action>
 		</release>
 		<release version="3.6.0" date="2021-06-07" description="Non-functional changes">
