@@ -603,13 +603,13 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 
 		Attribute memberOfAttr = userAttributes.get("memberOf");
 
-		List<String> roles = new LinkedList<String>();
+		List<String> memberOfs = new LinkedList<String>();
 
 		if (memberOfAttr != null && memberOfAttr.size() > 0) {
 			NamingEnumeration<?> memberOfValues = memberOfAttr.getAll();
 
 			while (memberOfValues.hasMore())
-				roles.add((String) memberOfValues.next());
+				memberOfs.add((String) memberOfValues.next());
 
 			close(memberOfValues);
 		}
@@ -641,14 +641,14 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 		}
 
 		close(results);
-		return new User(gssName, sid, roles, additionalAttributesMap);
+		return new User(gssName, sid, memberOfs, additionalAttributesMap);
 	}
 
 	protected List<String> getRoles(DirContext context, User user) throws NamingException {
 		List<String> roles = new LinkedList<String>();
 
 		if (logger.isDebugEnabled())
-			logger.debug(sm.getString("activeDirectoryRealm.retrievingRoles", user.getGssName()));
+			logger.debug(sm.getString("activeDirectoryRealm.retrievingRoles", user.getRoles().size(), user.getGssName()));
 
 		for (String role : user.getRoles()) {
 			Name roleRdn = getRelativeName(context, role);
@@ -754,11 +754,11 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 			}
 		}
 
-		if (logger.isDebugEnabled())
+		if (logger.isTraceEnabled())
+			logger.trace(sm.getString("activeDirectoryRealm.foundRoles", roles.size(), user.getGssName(), roles));
+		else if (logger.isDebugEnabled())
 			logger.debug(sm.getString("activeDirectoryRealm.foundRolesCount", roles.size(),
 					user.getGssName()));
-		if (logger.isTraceEnabled())
-			logger.trace(sm.getString("activeDirectoryRealm.foundRoles", user.getGssName(), roles));
 
 		return roles;
 	}
