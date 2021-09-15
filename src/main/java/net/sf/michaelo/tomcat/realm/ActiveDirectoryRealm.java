@@ -402,17 +402,15 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 		try {
 			results = connection.context.search("", "objectclass=*", controls);
 
-			if (results.hasMore()) {
-				close(results);
+			if (results.hasMore())
 				return true;
-			}
 		} catch (NamingException e) {
 			logger.error(sm.getString("activeDirectoryRealm.validate.namingException", connection.id), e);
 
 			return false;
+		} finally {
+			close(results);
 		}
-
-		close(results);
 
 		return false;
 	}
