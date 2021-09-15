@@ -5,6 +5,7 @@
 
 	<body>
 		<release version="3.7.0-SNAPSHOT" date="TBD" description="New features">
+			<action type="fix" dev="michael-o">Fix a connection leak</action>
 			<action type="add" dev="michael-o">Improve logging by introducing a connection id</action>
 			<action type="update" dev="michael-o">Log how many roles we are retrieving from AD</action>
 			<action type="update" dev="michael-o">Precalculate required user attribute names</action>

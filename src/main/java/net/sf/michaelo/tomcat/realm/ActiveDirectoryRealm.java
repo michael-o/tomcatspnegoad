@@ -582,9 +582,10 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 			}
 		}
 
-		if (results == null) {
+		if (!results.hasMore()) {
 			logger.debug(sm.getString("activeDirectoryRealm.userNotFound", gssName));
 
+			close(results);
 			return null;
 		}
 
