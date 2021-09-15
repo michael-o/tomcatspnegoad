@@ -26,6 +26,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 
 import javax.naming.CompositeName;
 import javax.naming.InvalidNameException;
@@ -175,9 +176,12 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 
 	// A mere holder class for directory server connections
 	protected static class DirContextConnection {
+		protected String id;
 		protected long lastBorrowTime;
 		protected DirContext context;
 	}
+
+	private static final AtomicLong COUNT = new AtomicLong(0);
 
 	private static final UsernameSearchMapper[] USERNAME_SEARCH_MAPPERS = {
 			new SamAccountNameRfc2247Mapper(), new UserPrincipalNameSearchMapper() };
@@ -218,6 +222,10 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 	 * Descriptive information about this Realm implementation.
 	 */
 	protected static final String name = "ActiveDirectoryRealm";
+
+	protected static String getNextConnectionId() {
+		return String.format("conn-%06d", COUNT.incrementAndGet());
+	}
 
 	/**
 	 * Sets whether the {@code DirContextSource} is locally ({@code context.xml} defined or globally
@@ -353,14 +361,14 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 				// TODO support maxIdleTime = -1 (no expiry)
 				if (idleTime > maxIdleTime) {
 					if (logger.isDebugEnabled())
-						logger.debug(sm.getString("activeDirectoryRealm.exceedMaxIdleTime"));
+						logger.debug(sm.getString("activeDirectoryRealm.exceedMaxIdleTime", connection.id));
 					close(connection);
 					connection = null;
 				} else {
 					boolean valid = validate(connection);
 					if (valid) {
 						if (logger.isDebugEnabled())
-							logger.debug(sm.getString("activeDirectoryRealm.reuse"));
+							logger.debug(sm.getString("activeDirectoryRealm.reuse", connection.id));
 					} else {
 						close(connection);
 						connection = null;
@@ -374,12 +382,15 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 
 		connection.lastBorrowTime = System.currentTimeMillis();
 
+		if (logger.isDebugEnabled())
+			logger.debug(sm.getString("activeDirectoryRealm.acquired", connection.id));
+
 		return connection;
 	}
 
 	protected boolean validate(DirContextConnection connection) {
 		if (logger.isDebugEnabled())
-			logger.debug(sm.getString("activeDirectoryRealm.validate"));
+			logger.debug(sm.getString("activeDirectoryRealm.validate", connection.id));
 
 		SearchControls controls = new SearchControls();
 		controls.setSearchScope(SearchControls.OBJECT_SCOPE);
@@ -396,7 +407,7 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 				return true;
 			}
 		} catch (NamingException e) {
-			logger.error(sm.getString("activeDirectoryRealm.validate.namingException"), e);
+			logger.error(sm.getString("activeDirectoryRealm.validate.namingException", connection.id), e);
 
 			return false;
 		}
@@ -411,7 +422,7 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 			return;
 
 		if (logger.isDebugEnabled())
-			logger.debug(sm.getString("activeDirectoryRealm.release"));
+			logger.debug(sm.getString("activeDirectoryRealm.release", connection.id));
 		if (!connectionPool.push(connection))
 			close(connection);
 	}
@@ -433,6 +444,9 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 			DirContextSource contextSource = (DirContextSource) context
 					.lookup(dirContextSourceName);
 			connection.context = contextSource.getDirContext();
+			connection.id = getNextConnectionId();;
+			if (logger.isDebugEnabled())
+				logger.debug(sm.getString("activeDirectoryRealm.opened", connection.id));
 		} catch (NamingException e) {
 			logger.error(sm.getString("activeDirectoryRealm.open.namingException"), e);
 		}
@@ -444,10 +458,12 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 
 		try {
 			if (logger.isDebugEnabled())
-				logger.debug(sm.getString("activeDirectoryRealm.close"));
+				logger.debug(sm.getString("activeDirectoryRealm.close", connection.id));
 			connection.context.close();
+			if (logger.isDebugEnabled())
+				logger.debug(sm.getString("activeDirectoryRealm.closed", connection.id));
 		} catch (NamingException e) {
-			logger.error(sm.getString("activeDirectoryRealm.close.namingException"), e);
+			logger.error(sm.getString("activeDirectoryRealm.close.namingException", connection.id), e);
 		}
 
 		connection.context = null;
