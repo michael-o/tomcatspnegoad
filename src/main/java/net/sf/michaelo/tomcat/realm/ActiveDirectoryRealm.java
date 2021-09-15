@@ -396,6 +396,8 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 		controls.setSearchScope(SearchControls.OBJECT_SCOPE);
 		controls.setCountLimit(1);
 		controls.setReturningAttributes(new String[] { "objectClass" });
+		// This applies to a server-side time limit which is actually translated to a second resolution and
+		// does not apply to a socket read timeout
 		controls.setTimeLimit(500);
 
 		NamingEnumeration<SearchResult> results = null;
