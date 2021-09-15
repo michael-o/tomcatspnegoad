@@ -598,6 +598,8 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 			return null;
 		}
 
+		close(results);
+
 		Attributes userAttributes = result.getAttributes();
 
 		int userAccountControl = Integer
@@ -606,8 +608,6 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 		// Do not allow disabled accounts (UF_ACCOUNT_DISABLE)
 		if ((userAccountControl & 0x02) != 0) {
 			logger.warn(sm.getString("activeDirectoryRealm.userFoundButDisabled", gssName));
-
-			close(results);
 			return null;
 		}
 
@@ -657,7 +657,6 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 			}
 		}
 
-		close(results);
 		return new User(gssName, sid, memberOfs, additionalAttributesMap);
 	}
 
