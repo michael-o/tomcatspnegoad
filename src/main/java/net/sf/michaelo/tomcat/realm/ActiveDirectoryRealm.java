@@ -347,7 +347,7 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 		return null;
 	}
 
-	protected DirContextConnection acquire() {
+	protected DirContextConnection acquire() throws NamingException {
 		if (logger.isDebugEnabled())
 			logger.debug(sm.getString("activeDirectoryRealm.acquire"));
 
@@ -427,8 +427,7 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 			close(connection);
 	}
 
-	protected void open(DirContextConnection connection) {
-		try {
+	protected void open(DirContextConnection connection) throws NamingException {
 			javax.naming.Context context = null;
 
 			if (localDirContextSource) {
@@ -447,9 +446,6 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 			connection.id = getNextConnectionId();;
 			if (logger.isDebugEnabled())
 				logger.debug(sm.getString("activeDirectoryRealm.opened", connection.id));
-		} catch (NamingException e) {
-			logger.error(sm.getString("activeDirectoryRealm.open.namingException"), e);
-		}
 	}
 
 	protected void close(DirContextConnection connection) {
@@ -495,9 +491,9 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 	protected void startInternal() throws LifecycleException {
 		connectionPool = new SynchronizedStack<>(connectionPoolSize, connectionPoolSize);
 
-		DirContextConnection connection = acquire();
-		if (connection.context == null)
-			return;
+		DirContextConnection connection = null;
+		try {
+			connection = acquire();
 
 		try {
 			String referral = (String) connection.context.getEnvironment().get(DirContext.REFERRAL);
@@ -508,6 +504,9 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 			logger.error(sm.getString("activeDirectoryRealm.environmentFailed"), e);
 
 			close(connection);
+			}
+		} catch (NamingException e) {
+			logger.error(sm.getString("activeDirectoryRealm.acquire.namingException"), e);
 		} finally {
 			release(connection);
 		}
