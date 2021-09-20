@@ -28,6 +28,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
+import javax.naming.CommunicationException;
 import javax.naming.CompositeName;
 import javax.naming.InvalidNameException;
 import javax.naming.Name;
@@ -36,6 +37,7 @@ import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 import javax.naming.PartialResultException;
 import javax.naming.ReferralException;
+import javax.naming.ServiceUnavailableException;
 import javax.naming.directory.Attribute;
 import javax.naming.directory.Attributes;
 import javax.naming.directory.DirContext;
@@ -323,23 +325,50 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 		if (gssName.isAnonymous())
 			return new ActiveDirectoryPrincipal(gssName, Sid.ANONYMOUS_SID, gssCredential);
 
-		DirContextConnection connection = acquire();
-		if (connection.context == null)
-			return null;
+		return getPrincipal(gssName, gssCredential, true);
+	}
 
+	protected Principal getPrincipal(GSSName gssName, GSSCredential gssCredential, boolean retry) {
+		DirContextConnection connection = null;
 		try {
-			User user = getUser(connection.context, gssName);
+			connection = acquire();
 
-			if (user != null) {
-				List<String> roles = getRoles(connection.context, user);
+			try {
+				User user = getUser(connection.context, gssName);
 
-				return new ActiveDirectoryPrincipal(gssName, user.getSid(), roles, gssCredential,
-						user.getAdditionalAttributes());
+				if (user != null) {
+					List<String> roles = getRoles(connection.context, user);
+
+					return new ActiveDirectoryPrincipal(gssName, user.getSid(), roles, gssCredential,
+							user.getAdditionalAttributes());
+				}
+			} catch (NamingException e) {
+				// This construct is an ugly hack for
+				// https://bugs.openjdk.java.net/browse/JDK-8273402
+				boolean canRetry = false;
+				if (e instanceof CommunicationException || e instanceof ServiceUnavailableException)
+					canRetry = true;
+				else {
+					String explanation = e.getExplanation();
+					if (explanation.equals("LDAP connection has been closed")
+							|| explanation.startsWith("LDAP response read timed out, timeout used:"))
+						canRetry = true;
+				}
+
+				if (retry && canRetry) {
+					logger.error(sm.getString("activeDirectoryRealm.principalSearchFailed.retry", gssName), e);
+
+					close(connection);
+
+					return getPrincipal(gssName, gssCredential, false);
+				}
+
+				logger.error(sm.getString("activeDirectoryRealm.principalSearchFailed", gssName), e);
+
+				close(connection);
 			}
 		} catch (NamingException e) {
-			logger.error(sm.getString("activeDirectoryRealm.principalSearchFailed", gssName), e);
-
-			close(connection);
+			logger.error(sm.getString("activeDirectoryRealm.acquire.namingException"), e);
 		} finally {
 			release(connection);
 		}
@@ -428,24 +457,24 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 	}
 
 	protected void open(DirContextConnection connection) throws NamingException {
-			javax.naming.Context context = null;
+		javax.naming.Context context = null;
 
-			if (localDirContextSource) {
-				context = ContextBindings.getClassLoader();
-				context = (javax.naming.Context) context.lookup("comp/env");
-			} else {
-				Server server = getServer();
-				context = server.getGlobalNamingContext();
-			}
+		if (localDirContextSource) {
+			context = ContextBindings.getClassLoader();
+			context = (javax.naming.Context) context.lookup("comp/env");
+		} else {
+			Server server = getServer();
+			context = server.getGlobalNamingContext();
+		}
 
-			if (logger.isDebugEnabled())
-				logger.debug(sm.getString("activeDirectoryRealm.open"));
-			DirContextSource contextSource = (DirContextSource) context
-					.lookup(dirContextSourceName);
-			connection.context = contextSource.getDirContext();
-			connection.id = getNextConnectionId();;
-			if (logger.isDebugEnabled())
-				logger.debug(sm.getString("activeDirectoryRealm.opened", connection.id));
+		if (logger.isDebugEnabled())
+			logger.debug(sm.getString("activeDirectoryRealm.open"));
+		DirContextSource contextSource = (DirContextSource) context
+				.lookup(dirContextSourceName);
+		connection.context = contextSource.getDirContext();
+		connection.id = getNextConnectionId();;
+		if (logger.isDebugEnabled())
+			logger.debug(sm.getString("activeDirectoryRealm.opened", connection.id));
 	}
 
 	protected void close(DirContextConnection connection) {
@@ -495,15 +524,15 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 		try {
 			connection = acquire();
 
-		try {
-			String referral = (String) connection.context.getEnvironment().get(DirContext.REFERRAL);
+			try {
+				String referral = (String) connection.context.getEnvironment().get(DirContext.REFERRAL);
 
-			if ("follow".equals(referral))
-				logger.warn(sm.getString("activeDirectoryRealm.referralFollow"));
-		} catch (NamingException e) {
-			logger.error(sm.getString("activeDirectoryRealm.environmentFailed"), e);
+				if ("follow".equals(referral))
+					logger.warn(sm.getString("activeDirectoryRealm.referralFollow"));
+			} catch (NamingException e) {
+				logger.error(sm.getString("activeDirectoryRealm.environmentFailed"), e);
 
-			close(connection);
+				close(connection);
 			}
 		} catch (NamingException e) {
 			logger.error(sm.getString("activeDirectoryRealm.acquire.namingException"), e);
