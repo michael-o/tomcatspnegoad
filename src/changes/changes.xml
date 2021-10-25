@@ -4,7 +4,7 @@
 						https://maven.apache.org/xsd/changes-1.0.0.xsd">
 
 	<body>
-		<release version="3.7.0-SNAPSHOT" date="TBD" description="New features">
+		<release version="3.7.0" date="2021-10-25" description="New features">
 			<action type="update" dev="michael-o">Upgrade to Tomcat 8.5.69</action>
 			<action type="add" dev="michael-o">Try to recover from intermittent network issues during principal search</action>
 			<action type="fix" dev="michael-o">Fix a connection leak</action>
