@@ -619,11 +619,19 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 
 		SearchResult result = results.next();
 
-		if (results.hasMore()) {
-			logger.error(sm.getString("activeDirectoryRealm.duplicateUser", gssName));
+		try {
+			if (results.hasMore()) {
+				logger.error(sm.getString("activeDirectoryRealm.duplicateUser", gssName));
 
-			close(results);
-			return null;
+				close(results);
+				return null;
+			}
+		} catch (ReferralException e) {
+			logger.warn(sm.getString("activeDirectoryRealm.duplicateUser.referralException", gssName,
+					e.getRemainingName(), e.getReferralInfo()));
+		} catch (PartialResultException e) {
+			logger.debug(sm.getString("activeDirectoryRealm.duplicateUser.partialResultException", gssName,
+					e.getRemainingName()));
 		}
 
 		close(results);
