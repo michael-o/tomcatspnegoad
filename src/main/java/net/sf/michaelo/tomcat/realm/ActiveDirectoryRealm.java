@@ -209,6 +209,7 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 	protected String[] attributes;
 	protected String[] additionalAttributes;
 
+	protected String roleRetrievalMode;
 	protected String[] roleFormats;
 	protected String[] roleAttributes;
 
@@ -697,88 +698,104 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 	}
 
 	protected List<String> getRoles(DirContext context, User user) throws NamingException {
-		List<String> roles = new LinkedList<String>();
-
 		if (logger.isDebugEnabled())
 			logger.debug(sm.getString("activeDirectoryRealm.retrievingRoles", user.getRoles().size(), user.getGssName()));
 
-		for (String role : user.getRoles()) {
-			Name roleRdn = getRelativeName(context, role);
+		StringBuilder searchFilter = new StringBuilder("(|");
+		for (int i = 0; i < user.getRoles().size(); i++)
+			searchFilter.append("(distinguishedName={").append(i).append("})");
+		searchFilter.append(')');
 
-			Attributes roleAttributes = null;
-			try {
-				roleAttributes = context.getAttributes(roleRdn, this.roleAttributes);
-			} catch (ReferralException e) {
-				logger.warn(sm.getString("activeDirectoryRealm.role.referralException", role,
-						e.getRemainingName(), e.getReferralInfo()));
+		SearchControls searchCtls = new SearchControls();
+		searchCtls.setSearchScope(SearchControls.SUBTREE_SCOPE);
+		searchCtls.setReturningAttributes( this.roleAttributes);
 
-				continue;
-			} catch (PartialResultException e) {
-				logger.debug(sm.getString("activeDirectoryRealm.role.partialResultException", role,
-						e.getRemainingName()));
+		NamingEnumeration<SearchResult> results = context.search(StringUtils.EMPTY, searchFilter.toString(),
+				user.getRoles().toArray(new String[0]), searchCtls);
 
-				continue;
-			}
+		List<String> roles = new LinkedList<String>();
 
-			int groupType = Integer.parseInt((String) roleAttributes.get("groupType").get());
+		try {
+			do {
+				Attributes roleAttributes = null;
+				String role = "(none)";
+				try {
+					if (results.hasMore()) {
+						SearchResult result = results.next();
+						role = result.getNameInNamespace();
+						roleAttributes = result.getAttributes();
+					} else {
+						break;
+					}
+				} catch (ReferralException e) {
+					logger.warn(sm.getString("activeDirectoryRealm.role.referralException", role, e.getRemainingName(),
+							e.getReferralInfo()));
 
-			// Skip distribution groups, i.e., we want security-enabled groups only
-			// (ADS_GROUP_TYPE_SECURITY_ENABLED)
-			if ((groupType & Integer.MIN_VALUE) == 0) {
-				if (logger.isTraceEnabled())
-					logger.trace(
-							sm.getString("activeDirectoryRealm.skippingDistributionRole", role));
+					break;
+				} catch (PartialResultException e) {
+					logger.debug(sm.getString("activeDirectoryRealm.role.partialResultException", role,
+							e.getRemainingName()));
 
-				continue;
-			}
+					break;
+				}
 
-			for (String roleFormat: roleFormats) {
+				int groupType = Integer.parseInt((String) roleAttributes.get("groupType").get());
 
-				String roleFormatPrefix = prependRoleFormat ? roleFormat + ":" : "";
+				// Skip distribution groups, i.e., we want security-enabled groups only
+				// (ADS_GROUP_TYPE_SECURITY_ENABLED)
+				if ((groupType & Integer.MIN_VALUE) == 0) {
+					if (logger.isTraceEnabled())
+						logger.trace(sm.getString("activeDirectoryRealm.skippingDistributionRole", role));
 
-				switch(roleFormat) {
-				case "sid":
-					byte[] objectSidBytes = (byte[]) roleAttributes.get("objectSid;binary").get();
-					String sidString = new Sid(objectSidBytes).toString();
+					continue;
+				}
 
-					roles.add(roleFormatPrefix + sidString);
+				for (String roleFormat : roleFormats) {
 
-					Attribute sidHistory = roleAttributes.get("sIDHistory;binary");
-					List<String> sidHistoryStrings = new LinkedList<String>();
-					if (sidHistory != null) {
-						NamingEnumeration<?> sidHistoryEnum = sidHistory.getAll();
-						while (sidHistoryEnum.hasMore()) {
-							byte[] sidHistoryBytes = (byte[]) sidHistoryEnum.next();
-							String sidHistoryString = new Sid(sidHistoryBytes).toString();
-							sidHistoryStrings.add(sidHistoryString);
+					String roleFormatPrefix = prependRoleFormat ? roleFormat + ":" : "";
 
-							roles.add(roleFormatPrefix + sidHistoryString);
+					switch (roleFormat) {
+					case "sid":
+						byte[] objectSidBytes = (byte[]) roleAttributes.get("objectSid;binary").get();
+						String sidString = new Sid(objectSidBytes).toString();
+
+						roles.add(roleFormatPrefix + sidString);
+
+						Attribute sidHistory = roleAttributes.get("sIDHistory;binary");
+						List<String> sidHistoryStrings = new LinkedList<String>();
+						if (sidHistory != null) {
+							NamingEnumeration<?> sidHistoryEnum = sidHistory.getAll();
+							while (sidHistoryEnum.hasMore()) {
+								byte[] sidHistoryBytes = (byte[]) sidHistoryEnum.next();
+								String sidHistoryString = new Sid(sidHistoryBytes).toString();
+								sidHistoryStrings.add(sidHistoryString);
+
+								roles.add(roleFormatPrefix + sidHistoryString);
+							}
+
+							close(sidHistoryEnum);
 						}
 
-						close(sidHistoryEnum);
-					}
+						if (logger.isTraceEnabled()) {
+							if (sidHistoryStrings.isEmpty())
+								logger.trace(
+										sm.getString("activeDirectoryRealm.foundRoleSidConverted", role, sidString));
+							else
+								logger.trace(sm.getString("activeDirectoryRealm.foundRoleSidConverted.withSidHistory",
+										role, sidString, sidHistoryStrings));
+						}
+						break;
+					case "name":
+						String msDsPrincipalName = (String) roleAttributes.get("msDS-PrincipalName").get();
 
-					if (logger.isTraceEnabled()) {
-						if (sidHistoryStrings.isEmpty())
-							logger.trace(sm.getString("activeDirectoryRealm.foundRoleSidConverted", role,
-									sidString));
-						else
-							logger.trace(
-									sm.getString("activeDirectoryRealm.foundRoleSidConverted.withSidHistory",
-											role, sidString, sidHistoryStrings));
-					}
-					break;
-				case "name":
-					String msDsPrincipalName = (String) roleAttributes.get("msDS-PrincipalName").get();
+						roles.add(roleFormatPrefix + msDsPrincipalName);
 
-					roles.add(roleFormatPrefix + msDsPrincipalName);
-
-					if (logger.isTraceEnabled()) {
-						logger.trace(sm.getString("activeDirectoryRealm.foundRoleNameConverted", role,
-								msDsPrincipalName));
-					}
-					break;
-				case "nameEx":
+						if (logger.isTraceEnabled()) {
+							logger.trace(sm.getString("activeDirectoryRealm.foundRoleNameConverted", role,
+									msDsPrincipalName));
+						}
+						break;
+					case "nameEx":
 						String distinguishedName = (String) roleAttributes.get("distinguishedName").get();
 						String samAccountName = (String) roleAttributes.get("sAMAccountName").get();
 
@@ -786,7 +803,7 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 						LdapName dn = (LdapName) parser.parse(distinguishedName);
 
 						StringBuilder realm = new StringBuilder();
-						for(Rdn rdn : dn.getRdns()) {
+						for (Rdn rdn : dn.getRdns()) {
 							if (rdn.getType().equalsIgnoreCase("DC")) {
 								realm.insert(0, ((String) rdn.getValue()).toUpperCase(Locale.ROOT) + ".");
 							}
@@ -799,11 +816,14 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 							logger.trace(sm.getString("activeDirectoryRealm.foundRoleNameExConverted", role,
 									realm + "\\" + samAccountName));
 						}
-					break;
-				default:
-					throw new IllegalArgumentException("The role format '" + roleFormat + "' is invalid");
+						break;
+					default:
+						throw new IllegalArgumentException("The role format '" + roleFormat + "' is invalid");
+					}
 				}
-			}
+			} while (true);
+		} finally {
+			close(results);
 		}
 
 		if (logger.isTraceEnabled())
