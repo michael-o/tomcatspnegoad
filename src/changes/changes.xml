@@ -5,6 +5,7 @@
 
 	<body>
 		<release version="3.8.0-SNAPSHOT" date="TBD" description="TBD">
+			<action type="add" dev="michael-o" issue="3">Add support for string name types in UsernameSearchMapper</action>
 			<action type="update" dev="michael-o" issue="1">Make ActiveDirectoryRealmBase#getPassword(String) behave like Tomcat's AuthenticatedUserRealm#getPassword(String)</action>
 			<action type="fix" dev="michael-o">Fix possible ReferralException/PartialResultException in duplicate user check</action>
 		</release>

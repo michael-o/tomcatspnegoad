@@ -15,6 +15,7 @@
  */
 package net.sf.michaelo.tomcat.realm.mapper;
 
+import java.util.Arrays;
 import java.util.Locale;
 
 import javax.naming.Name;
@@ -23,7 +24,9 @@ import javax.naming.NamingException;
 import javax.naming.directory.DirContext;
 
 import org.apache.commons.lang3.StringUtils;
+import org.ietf.jgss.GSSException;
 import org.ietf.jgss.GSSName;
+import org.ietf.jgss.Oid;
 
 /**
  * A mapper for the AD attribute {@code sAMAccountName} and the realm. This mapper splits the GSS
@@ -43,8 +46,37 @@ import org.ietf.jgss.GSSName;
  */
 public class SamAccountNameRfc2247Mapper extends SamAccountNameMapper {
 
+	protected final static Oid KRB5_NT_PRINCIPAL;
+
+	static {
+		try {
+			KRB5_NT_PRINCIPAL = new Oid("1.2.840.113554.1.2.2.1");
+		} catch (GSSException e) {
+			throw new IllegalStateException("Failed to create OID for KRB5_NT_PRINCIPAL");
+		}
+	}
+
+	private static final Oid[] SUPPORTED_STRING_NAME_TYPES = new Oid[] { KRB5_NT_PRINCIPAL };
+
+	@Override
+	public Oid[] getSupportedStringNameTypes() {
+		return Arrays.copyOf(SUPPORTED_STRING_NAME_TYPES, SUPPORTED_STRING_NAME_TYPES.length);
+	}
+
+	@Override
+	public boolean supportsGssName(GSSName gssName) {
+		try {
+			return gssName.getStringNameType().containedIn(SUPPORTED_STRING_NAME_TYPES);
+		} catch (GSSException e) {
+			// Can this ever happen?
+			return false;
+		}
+	}
+
 	public synchronized MappedValues map(DirContext context, GSSName gssName)
 			throws NamingException {
+		if (!supportsGssName(gssName))
+			throw new IllegalArgumentException("GSS name '" + gssName + "' is not supported");
 
 		String[] upnComponents = StringUtils.split(gssName.toString(), '@');
 		String samAccountName = upnComponents[0];

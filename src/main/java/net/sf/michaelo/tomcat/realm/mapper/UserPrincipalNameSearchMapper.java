@@ -15,11 +15,15 @@
  */
 package net.sf.michaelo.tomcat.realm.mapper;
 
+import java.util.Arrays;
+
 import javax.naming.NamingException;
 import javax.naming.directory.DirContext;
 
 import org.apache.commons.lang3.StringUtils;
+import org.ietf.jgss.GSSException;
 import org.ietf.jgss.GSSName;
+import org.ietf.jgss.Oid;
 
 /**
  * A mapper for the AD attribute {@code userPrincipalName}. This mapper maps the GSS name to the AD
@@ -29,6 +33,48 @@ import org.ietf.jgss.GSSName;
  * base if you like.
  */
 public class UserPrincipalNameSearchMapper implements UsernameSearchMapper {
+
+	protected final static Oid KRB5_NT_PRINCIPAL;
+	protected final static Oid KRB5_NT_ENTERPRISE_PRINCIPAL;
+	protected final static Oid MS_UPN;
+
+	static {
+		try {
+			KRB5_NT_PRINCIPAL = new Oid("1.2.840.113554.1.2.2.1");
+		} catch (GSSException e) {
+			throw new IllegalStateException("Failed to create OID for KRB5_NT_PRINCIPAL");
+		}
+
+		try {
+			KRB5_NT_ENTERPRISE_PRINCIPAL = new Oid("1.2.840.113554.1.2.2.6");
+		} catch (GSSException e) {
+			throw new IllegalStateException("Failed to create OID for KRB5_NT_ENTERPRISE_PRINCIPAL");
+		}
+
+		try {
+			MS_UPN = new Oid("1.3.6.1.4.1.311.20.2.3");
+		} catch (GSSException e) {
+			throw new IllegalStateException("Failed to create OID for MS_UPN");
+		}
+	}
+
+	private static final Oid[] SUPPORTED_STRING_NAME_TYPES = new Oid[] { MS_UPN, KRB5_NT_ENTERPRISE_PRINCIPAL,
+			KRB5_NT_PRINCIPAL };
+
+	@Override
+	public Oid[] getSupportedStringNameTypes() {
+		return Arrays.copyOf(SUPPORTED_STRING_NAME_TYPES, SUPPORTED_STRING_NAME_TYPES.length);
+	}
+
+	@Override
+	public boolean supportsGssName(GSSName gssName) {
+		try {
+			return gssName.getStringNameType().containedIn(SUPPORTED_STRING_NAME_TYPES);
+		} catch (GSSException e) {
+			// Can this ever happen?
+			return false;
+		}
+	}
 
 	protected static class UserPrincipalNameMappedValues implements MappedValues {
 
@@ -57,6 +103,8 @@ public class UserPrincipalNameSearchMapper implements UsernameSearchMapper {
 
 	public synchronized MappedValues map(DirContext context, GSSName gssName)
 			throws NamingException {
+		if (!supportsGssName(gssName))
+			throw new IllegalArgumentException("GSS name '" + gssName + "' is not supported");
 
 		return new UserPrincipalNameMappedValues(gssName.toString());
 	}

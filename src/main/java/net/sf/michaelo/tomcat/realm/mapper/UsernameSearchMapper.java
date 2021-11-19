@@ -19,6 +19,7 @@ import javax.naming.NamingException;
 import javax.naming.directory.DirContext;
 
 import org.ietf.jgss.GSSName;
+import org.ietf.jgss.Oid;
 
 import net.sf.michaelo.tomcat.realm.ActiveDirectoryRealm;
 
@@ -43,6 +44,22 @@ public interface UsernameSearchMapper {
 	}
 
 	/**
+	 * Returns an array of name type OIDs which a mapper is able to map into AD search space.
+	 *
+	 * @return supported string name type OIDs
+	 */
+	Oid[] getSupportedStringNameTypes();
+
+
+	/**
+	 * Determines whether a mapper is able to map a given GSS name into AD search space.
+	 *
+	 * @param gssName the gssName to test
+	 * @return {@code} if this mapper is able to map a name, {@code false} otherwise
+	 */
+	boolean supportsGssName(GSSName gssName);
+
+	/**
 	 * Maps a GSS name to AD search parameters. A mapper implementation must assure that the user
 	 * can be found in the given {@code context} when an approriate GSS name is presented. The
 	 * implementor must be aware that the returned search base might need to be relativized to the
@@ -55,6 +72,8 @@ public interface UsernameSearchMapper {
 	 * @return mapped values for user retrieval
 	 * @throws NamingException
 	 *             if a context-related error has occured
+	 * @throws IllegalArgumentException
+	 *             if the GSS name is not supported
 	 */
 	MappedValues map(DirContext context, GSSName gssName) throws NamingException;
 

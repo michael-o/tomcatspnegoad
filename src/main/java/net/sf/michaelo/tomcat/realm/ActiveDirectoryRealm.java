@@ -60,7 +60,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.naming.ContextBindings;
 import org.apache.tomcat.util.collections.SynchronizedStack;
 import org.ietf.jgss.GSSCredential;
+import org.ietf.jgss.GSSException;
 import org.ietf.jgss.GSSName;
+import org.ietf.jgss.Oid;
 
 /**
  * A realm which retrieves authenticated users from Active Directory.
@@ -571,6 +573,23 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 		NamingEnumeration<SearchResult> results = null;
 		for (UsernameSearchMapper mapper : USERNAME_SEARCH_MAPPERS) {
 			String mapperClassName = mapper.getClass().getSimpleName();
+
+			if (!mapper.supportsGssName(gssName)) {
+				if (logger.isDebugEnabled()) {
+					Oid stringNameType = null;
+
+					try {
+						stringNameType = gssName.getStringNameType();
+					} catch (GSSException e) {
+						; // ignore
+					}
+					logger.debug(sm.getString("activeDirectoryRealm.nameTypeNotSupported", mapperClassName,
+							stringNameType, gssName));
+				}
+
+				continue;
+			}
+
 			mappedValues = mapper.map(context, gssName);
 
 			searchBase = getRelativeName(context, mappedValues.getSearchBase());
@@ -596,7 +615,7 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 			try {
 				if (!results.hasMore()) {
 					if (logger.isDebugEnabled())
-						logger.debug(sm.getString("activeDirectoryRealm.userNotMapped", gssName,
+						logger.debug(sm.getString("activeDirectoryRealm.userNotFoundWithMapper", gssName,
 								mapperClassName));
 
 					close(results);
@@ -610,7 +629,7 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 			}
 		}
 
-		if (!results.hasMore()) {
+		if (results == null || !results.hasMore()) {
 			logger.debug(sm.getString("activeDirectoryRealm.userNotFound", gssName));
 
 			close(results);
