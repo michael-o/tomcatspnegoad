@@ -68,6 +68,7 @@ import org.apache.tomcat.util.codec.binary.Base64;
 import org.apache.tomcat.util.collections.SynchronizedStack;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
+import org.ietf.jgss.GSSManager;
 import org.ietf.jgss.GSSName;
 import org.ietf.jgss.Oid;
 
@@ -114,7 +115,9 @@ import org.ietf.jgss.Oid;
  * This connection pool feature has to be explicitly enabled by setting {@code connectionPoolSize}
  * to greater than zero.
  *
- * <h2>Supported Username Types</h2> Only a subset of username types are accepted in contrast to
+ * <h2>On Usernames</h2>
+ * This realm processes supplied usernames in different aspects.
+ * <h3>Supported Types</h3> Only a subset of username types are accepted in contrast to
  * other realm implementations. Namely, this realm must know what type is passed to properly map
  * it into Active Directory search space with a {@link UsernameSearchMapper} implementation.
  * The supported username types are:
@@ -124,6 +127,12 @@ import org.ietf.jgss.Oid;
  * MS UPN type id (1.3.6.1.4.1.311.20.2.3).</li>
  * </ul>
  * Both types represent already <em>authenticated</em> users by means of GSS-API and/or TLS.
+ *<h3>Canonicalization</h3>
+ * This realm will always try to canonicalize a given username type to a real {@link GSSName}
+ * with the string name type of {@code KRB5_NT_PRINCIPAL} (1.2.840.113554.1.2.2.1) similar to
+ * the {@code canonicalize} flag in the <a href="https://web.mit.edu/kerberos/krb5-1.19/doc/admin/conf_files/krb5_conf.html">
+ * {@code krb5.conf}</a> file. This makes the final {@link GSSName} fully usable in subsequent
+ * GSS-API calls.
  *
  * <h2 id="referral-handling">Referral Handling</h2> Active Directory uses two type of responses
  * when it cannot complete a search request: referrals and search result references. Both are
@@ -210,6 +219,7 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 			(byte) 0x82, (byte) 0x37, (byte) 0x14, (byte) 0x02, (byte) 0x03 };
 
 	private final static Oid MS_UPN;
+	private final static Oid KRB5_NT_PRINCIPAL;
 
 	private final static Map<String, String> X500_PRINCIPAL_OID_MAP = new HashMap<String, String>();
 
@@ -217,7 +227,7 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 			new SamAccountNameRfc2247Mapper(), new UserPrincipalNameSearchMapper() };
 
 	private static final String[] DEFAULT_USER_ATTRIBUTES = new String[] { "userAccountControl",
-			"memberOf", "objectSid;binary" };
+			"memberOf", "objectSid;binary", "sAMAccountName" };
 
 	private static final String[] DEFAULT_ROLE_ATTRIBUTES = new String[] { "groupType" };
 
@@ -230,6 +240,12 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 			MS_UPN = new Oid("1.3.6.1.4.1.311.20.2.3");
 		} catch (GSSException e) {
 			throw new IllegalStateException("Failed to create OID for MS_UPN");
+		}
+
+		try {
+			KRB5_NT_PRINCIPAL = new Oid("1.2.840.113554.1.2.2.1");
+		} catch (GSSException e) {
+			throw new IllegalStateException("Failed to create OID for KRB5_NT_PRINCIPAL");
 		}
 
 		X500_PRINCIPAL_OID_MAP.put("1.2.840.113549.1.9.1", "emailAddress");
@@ -420,7 +436,7 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 				if (user != null) {
 					List<String> roles = getRoles(connection.context, user);
 
-					return new ActiveDirectoryPrincipal(gssName, user.getSid(), roles, gssCredential,
+					return new ActiveDirectoryPrincipal(user.getGssName(), user.getSid(), roles, gssCredential,
 							user.getAdditionalAttributes());
 				}
 			} catch (NamingException e) {
@@ -635,6 +651,28 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 		connectionPool = null;
 	}
 
+	private Oid getStringNameType(GSSName gssName) {
+		try {
+			return gssName.getStringNameType();
+		} catch (GSSException e) {
+			return null;
+		}
+	}
+
+	private String toRealm(Name distinguishedName) {
+		LdapName dn = (LdapName) distinguishedName;
+
+		StringBuilder realm = new StringBuilder();
+		for(Rdn rdn : dn.getRdns())
+			if (rdn.getType().equalsIgnoreCase("DC"))
+				realm.insert(0, ((String) rdn.getValue()).toUpperCase(Locale.ROOT) + ".");
+
+		if (realm.length() > 0)
+			realm.deleteCharAt(realm.length() - 1);
+
+		return realm.toString();
+	}
+
 	protected User getUser(DirContext context, GSSName gssName) throws NamingException {
 		SearchControls searchCtls = new SearchControls();
 		searchCtls.setSearchScope(SearchControls.SUBTREE_SCOPE);
@@ -654,17 +692,9 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 			String mapperClassName = mapper.getClass().getSimpleName();
 
 			if (!mapper.supportsGssName(gssName)) {
-				if (logger.isDebugEnabled()) {
-					Oid stringNameType = null;
-
-					try {
-						stringNameType = gssName.getStringNameType();
-					} catch (GSSException e) {
-						; // ignore
-					}
+				if (logger.isDebugEnabled())
 					logger.debug(sm.getString("activeDirectoryRealm.nameTypeNotSupported", mapperClassName,
-							stringNameType, gssName));
-				}
+							getStringNameType(gssName), gssName));
 
 				continue;
 			}
@@ -751,6 +781,30 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 
 		if (logger.isDebugEnabled())
 			logger.debug(sm.getString("activeDirectoryRealm.userFound", gssName, dn, sid));
+
+		if (!KRB5_NT_PRINCIPAL.equals(getStringNameType(gssName))) {
+			String samAccountName = (String) userAttributes.get("sAMAccountName").get();
+			String realm = toRealm(dn);
+			String krb5Principal = samAccountName + "@" + realm;
+
+			if (logger.isTraceEnabled())
+				logger.trace(sm.getString("activeDirectoryRealm.canonicalizingUser", getStringNameType(gssName),
+						KRB5_NT_PRINCIPAL));
+
+			GSSName canonGssName = null;
+			try {
+				canonGssName = GSSManager.getInstance().createName(krb5Principal, KRB5_NT_PRINCIPAL);
+			} catch (GSSException e) {
+				logger.warn(sm.getString("activeDirectoryRealm.canonicalizeUserFailed", gssName));
+
+				return null;
+			}
+
+			if (logger.isDebugEnabled())
+				logger.debug(sm.getString("activeDirectoryRealm.userCanonicalized", canonGssName));
+
+			gssName = canonGssName;
+		}
 
 		Attribute memberOfAttr = userAttributes.get("memberOf");
 
@@ -871,10 +925,9 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 
 					roles.add(roleFormatPrefix + msDsPrincipalName);
 
-					if (logger.isTraceEnabled()) {
+					if (logger.isTraceEnabled())
 						logger.trace(sm.getString("activeDirectoryRealm.foundRoleNameConverted", role,
 								msDsPrincipalName));
-					}
 					break;
 				case "nameEx":
 						String distinguishedName = (String) roleAttributes.get("distinguishedName").get();
@@ -882,21 +935,14 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 
 						NameParser parser = context.getNameParser(StringUtils.EMPTY);
 						LdapName dn = (LdapName) parser.parse(distinguishedName);
+						String realm = toRealm(dn);
+						String nameEx = realm + "\\" + samAccountName;
 
-						StringBuilder realm = new StringBuilder();
-						for(Rdn rdn : dn.getRdns()) {
-							if (rdn.getType().equalsIgnoreCase("DC")) {
-								realm.insert(0, ((String) rdn.getValue()).toUpperCase(Locale.ROOT) + ".");
-							}
-						}
-						realm.deleteCharAt(realm.length() - 1);
+						roles.add(roleFormatPrefix + nameEx);
 
-						roles.add(roleFormatPrefix + realm + "\\" + samAccountName);
-
-						if (logger.isTraceEnabled()) {
+						if (logger.isTraceEnabled())
 							logger.trace(sm.getString("activeDirectoryRealm.foundRoleNameExConverted", role,
-									realm + "\\" + samAccountName));
-						}
+									nameEx));
 					break;
 				default:
 					throw new IllegalArgumentException("The role format '" + roleFormat + "' is invalid");
