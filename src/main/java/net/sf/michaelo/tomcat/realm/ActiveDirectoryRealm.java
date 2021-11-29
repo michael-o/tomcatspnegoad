@@ -18,8 +18,11 @@ package net.sf.michaelo.tomcat.realm;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.Principal;
+import java.security.cert.CertificateParsingException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -46,8 +49,11 @@ import javax.naming.directory.SearchResult;
 import javax.naming.ldap.LdapName;
 import javax.naming.ldap.ManageReferralControl;
 import javax.naming.ldap.Rdn;
+import javax.security.auth.x500.X500Principal;
 
 import net.sf.michaelo.dirctxsrc.DirContextSource;
+import net.sf.michaelo.tomcat.realm.asn1.OtherNameAsn1Parser;
+import net.sf.michaelo.tomcat.realm.asn1.OtherNameParseResult;
 import net.sf.michaelo.tomcat.realm.mapper.SamAccountNameRfc2247Mapper;
 import net.sf.michaelo.tomcat.realm.mapper.UserPrincipalNameSearchMapper;
 import net.sf.michaelo.tomcat.realm.mapper.UsernameSearchMapper;
@@ -58,6 +64,7 @@ import org.apache.catalina.Server;
 import org.apache.catalina.realm.CombinedRealm;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.naming.ContextBindings;
+import org.apache.tomcat.util.codec.binary.Base64;
 import org.apache.tomcat.util.collections.SynchronizedStack;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
@@ -65,7 +72,7 @@ import org.ietf.jgss.GSSName;
 import org.ietf.jgss.Oid;
 
 /**
- * A realm which retrieves authenticated users from Active Directory.
+ * A realm which retrieves <em>authenticated</em> users from Active Directory.
  *
  * <h2>Configuration</h2> Following options can be configured:
  * <ul>
@@ -100,12 +107,23 @@ import org.ietf.jgss.Oid;
  * the connections. They are acquired, validated, eventually closed and opened when
  * {@link #getPrincipal(GSSName, GSSCredential)} is invoked. Validation involves a minimal and
  * limited query with at most 500 ms of wait time just to verify the connection is alive and
- * healthy. If the query fails, the connection is closed immediately. If the amount of requested
- * connections exceeds ones the available in the pool, new ones are opened and pushed onto the pool.
- * If the pool does not accept any addtional connetions they are closed immediately.
+ * healthy. If this query fails, the connection is closed immediately. If the amount of requested
+ * connections exceeds the ones available in the pool, new ones are opened and pushed onto the pool.
+ * If the pool does not accept any addtional connections they are closed immediately.
  * <br>
  * This connection pool feature has to be explicitly enabled by setting {@code connectionPoolSize}
  * to greater than zero.
+ *
+ * <h2>Supported Username Types</h2> Only a subset of username types are accepted in contrast to
+ * other realm implementations. Namely, this realm must know what type is passed to properly map
+ * it into Active Directory search space with a {@link UsernameSearchMapper} implementation.
+ * The supported username types are:
+ * <ul>
+ * <li>{@link GSSName} by inspecting the string name type,</li>
+ * <li>{@link X509Certificate} by extracting the {@code SAN:otherName} field and matching for
+ * MS UPN type id (1.3.6.1.4.1.311.20.2.3).</li>
+ * </ul>
+ * Both types represent already <em>authenticated</em> users by means of GSS-API and/or TLS.
  *
  * <h2 id="referral-handling">Referral Handling</h2> Active Directory uses two type of responses
  * when it cannot complete a search request: referrals and search result references. Both are
@@ -187,6 +205,14 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 
 	private static final AtomicLong COUNT = new AtomicLong(0);
 
+	// 1.3.6.1.4.1.311.20.2.3
+	private static final byte[] MS_UPN_OID_BYTES = { (byte) 0x2B, (byte) 0x06, (byte) 0x01, (byte) 0x04, (byte) 0x01,
+			(byte) 0x82, (byte) 0x37, (byte) 0x14, (byte) 0x02, (byte) 0x03 };
+
+	private final static Oid MS_UPN;
+
+	private final static Map<String, String> X500_PRINCIPAL_OID_MAP = new HashMap<String, String>();
+
 	private static final UsernameSearchMapper[] USERNAME_SEARCH_MAPPERS = {
 			new SamAccountNameRfc2247Mapper(), new UserPrincipalNameSearchMapper() };
 
@@ -200,6 +226,19 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 	private static final Map<String, String[]> ROLE_FORMAT_ATTRIBUTES = new HashMap<>();
 
 	static {
+		try {
+			MS_UPN = new Oid("1.3.6.1.4.1.311.20.2.3");
+		} catch (GSSException e) {
+			throw new IllegalStateException("Failed to create OID for MS_UPN");
+		}
+
+		X500_PRINCIPAL_OID_MAP.put("1.2.840.113549.1.9.1", "emailAddress");
+		X500_PRINCIPAL_OID_MAP.put("2.5.4.5", "serialNumber");
+		// surname
+		X500_PRINCIPAL_OID_MAP.put("2.5.4.4", "SN");
+		// givenName
+		X500_PRINCIPAL_OID_MAP.put("2.5.4.42", "GN");
+
 		ROLE_FORMAT_ATTRIBUTES.put("sid", new String[] { "objectSid;binary", "sIDHistory;binary" });
 		ROLE_FORMAT_ATTRIBUTES.put("name", new String [] { "msDS-PrincipalName" } );
 		ROLE_FORMAT_ATTRIBUTES.put("nameEx", new String [] { "distinguishedName", "sAMAccountName" } );
@@ -320,6 +359,46 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 	@Override
 	protected String getName() {
 		return name;
+	}
+
+	@Override
+	protected Principal getPrincipal(X509Certificate userCert) {
+		try {
+			Collection<List<?>> san = userCert.getSubjectAlternativeNames();
+			if (san == null)
+				return null;
+
+			String dn = userCert.getSubjectX500Principal().getName(X500Principal.RFC2253, X500_PRINCIPAL_OID_MAP);
+			for (List<?> sanField : san) {
+				Integer nameType = (Integer) sanField.get(0);
+				if (nameType == 0) {
+					byte[] otherName = (byte[]) sanField.get(1);
+					if (logger.isDebugEnabled())
+						logger.debug(sm.getString("activeDirectoryRealm.processingSanOtherName",
+								Base64.encodeBase64String(otherName), dn));
+					try {
+						OtherNameParseResult result = OtherNameAsn1Parser.parse(otherName);
+						if (Arrays.equals(result.getTypeId(), MS_UPN_OID_BYTES)) {
+							String upn = OtherNameAsn1Parser.parseUtf8String(result.getValue());
+							if (logger.isDebugEnabled())
+								logger.debug(sm.getString("activeDirectoryRealm.msUpnExtracted", upn, dn));
+
+							GSSName gssName = new StubGSSName(upn, MS_UPN);
+
+							return getPrincipal(gssName, null, true);
+						}
+					} catch (CertificateParsingException e) {
+						logger.warn(sm.getString("sanOtherNameParsingFailed"), e);
+					}
+				}
+			}
+		} catch (CertificateParsingException e) {
+			logger.warn(sm.getString("activeDirectoryRealm.sanParsingFailed"), e);
+
+			return null;
+		}
+
+		return null;
 	}
 
 	@Override
