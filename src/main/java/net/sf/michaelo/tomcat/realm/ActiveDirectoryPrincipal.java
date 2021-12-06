@@ -124,9 +124,9 @@ public class ActiveDirectoryPrincipal implements TomcatPrincipal {
 	}
 
 	/**
-	 * Returns the role SID strings of the given principal.
+	 * Returns the sorted role SID strings of the given principal.
 	 *
-	 * @return a read-only view of the roles
+	 * @return a sorted read-only view of the roles
 	 */
 	public String[] getRoles() {
 		return Arrays.copyOf(roles, roles.length);
