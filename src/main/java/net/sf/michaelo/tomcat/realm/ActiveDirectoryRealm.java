@@ -472,7 +472,7 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 		DirContextSource contextSource = (DirContextSource) context
 				.lookup(dirContextSourceName);
 		connection.context = contextSource.getDirContext();
-		connection.id = getNextConnectionId();;
+		connection.id = getNextConnectionId();
 		if (logger.isDebugEnabled())
 			logger.debug(sm.getString("activeDirectoryRealm.opened", connection.id));
 	}
