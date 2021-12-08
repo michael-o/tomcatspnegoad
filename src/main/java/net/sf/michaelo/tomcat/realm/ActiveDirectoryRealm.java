@@ -501,7 +501,7 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 		try {
 			results.close();
 		} catch (NamingException e) {
-			; // swallow
+			; // Ignore
 		}
 	}
 
