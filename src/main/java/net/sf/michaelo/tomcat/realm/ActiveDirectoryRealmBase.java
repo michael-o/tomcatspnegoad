@@ -34,13 +34,13 @@ public abstract class ActiveDirectoryRealmBase extends RealmBase {
 	protected final StringManager sm = StringManager.getManager(getClass());
 
 	/**
-	 * @throws UnsupportedOperationException
-	 *             always throws because not implemented
+	 * @return Always {@code null} as this realm has no way of obtaining this
+	 * information.
 	 */
 	@Override
 	protected String getPassword(String username) {
-		throw new UnsupportedOperationException(
-				"getPassword(String) is not supported by this realm");
+		// Always return null
+		return null;
 	}
 
 	/**

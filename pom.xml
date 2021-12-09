@@ -55,12 +55,13 @@
   </scm>
 	<issueManagement>
 		<system>GitHub</system>
-		<url>https://github.com/michael-o/tomcatspnegoad/issues</url>
+		<url>https://github.com/michael-o/tomcatspnegoad/issues/</url>
 	</issueManagement>
 
 	<distributionManagement>
 		<site>
 			<id>github</id>
+			<!-- See https://issues.apache.org/jira/browse/MCHANGES-411 -->
 			<url>scm:git:https://github.com/michael-o/tomcatspnegoad.git</url>
 		</site>
 	</distributionManagement>
