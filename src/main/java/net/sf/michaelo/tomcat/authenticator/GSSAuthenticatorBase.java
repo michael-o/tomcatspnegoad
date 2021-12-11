@@ -29,7 +29,7 @@ import org.ietf.jgss.GSSException;
 import org.ietf.jgss.Oid;
 
 /**
- * Base implementation for GSS-based authenticators which holds common configuration information.
+ * Base implementation for GSS-based authenticators which holds common configuration.
  * See setter methods of configuration options for this authenticator.
  */
 abstract class GSSAuthenticatorBase extends AuthenticatorBase {
@@ -110,7 +110,7 @@ abstract class GSSAuthenticatorBase extends AuthenticatorBase {
 	 * Sets whether error messages will be returned as headers.
 	 *
 	 * <p>
-	 * It is not always desired or necessary to produce an error page, e.g., non-human clients do
+	 * It is not always desired or necessary to produce an error page, e.g., non-interactive clients do
 	 * not analyze it anyway, but have to consume the response (wasted time and resources). When a
 	 * client issues a request, the server will write the error messages to either one header:
 	 * {@code Auth-Error} or {@code Server-Error}.

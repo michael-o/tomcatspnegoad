@@ -33,9 +33,8 @@ import org.ietf.jgss.GSSName;
  * <li>the GSS name,</li>
  * <li>the security identifier (SID),</li>
  * <li>an optional GSS credential for credential delegation (impersonation),</li>
- * <li>the array of security groups the user has been assigned to, stored as SID strings (the actual
- * values are queried with {@code memberOf} and retrieved from {@code objectSid} and
- * {@code sIDHistory}),</li>
+ * <li>an array of security groups the user has been assigned to, stored according to the
+ * role format configured in the realm,</li>
  * <li>and a map with additional attributes which are either a {@code String}, {@code byte[]} or a
  * {@code List} of either one.</li>
  * </ul>
@@ -124,7 +123,7 @@ public class ActiveDirectoryPrincipal implements TomcatPrincipal {
 	}
 
 	/**
-	 * Returns the sorted role SID strings of the given principal.
+	 * Returns the sorted roles of the given principal.
 	 *
 	 * @return a sorted read-only view of the roles
 	 */

@@ -26,11 +26,12 @@
 
 Choosing and Using Authenticators
 
-  Choose an authenticator which will determine a user's identity. Usually, the {{{The_SPNEGO_Authenticator}<<<SpnegoAuthenticator>>>}}
+  Choose an authenticator which will determine a user's identity. Usually, the
+  {{{SPNEGO_Authenticator}<<<SpnegoAuthenticator>>>}} or {{{SSL_Authenticator}<<<SSLAuthenticator>>>}}
   will do, but during local development you will find the {{{Using_an_Authenticator_During_Development}<<<CurrentWindowsIdentityAuthenticator>>>}}
   very handy.
 
-* The SPNEGO Authenticator
+* SPNEGO Authenticator
 
   The {{{./apidocs/net/sf/michaelo/tomcat/authenticator/SpnegoAuthenticator.html}<<<SpnegoAuthenticator>>>}}
   challenges the client to perform {{{https://tools.ietf.org/html/rfc4559}SPNEGO}} authentication. In
@@ -39,7 +40,7 @@ Choosing and Using Authenticators
 
     [Attention] Though SPNEGO is intended to negotiate a mechanism, OpenJDK currently supports
                 Kerberos 5 only and not NTLM additionally due to its proprietary nature. Anyway, it
-                is discouraged by Microsoft {{{https://serverfault.com/a/384721/116898}1}})
+                is {{{https://serverfault.com/a/384721/116898}discouraged by Microsoft}}
                 to rely on NTLM anymore.
 
   Open or create your app's <<<context.xml>>> and add:
@@ -54,18 +55,39 @@ Choosing and Using Authenticators
 </Context>
 +----------------------------
 
-  Provide the login entry name from your <<<login.conf>>> configured for the machine account
+  Provide the login entry name from your <<<login.conf>>> configured for the machine or service account
   capable of accepting GSS contexts with SPNEGO/Kerberos.
 
   You have successfully configured the <<<SpnegoAuthenticator>>> in your webapp. It is now ready to use.
 
+* SSL Authenticator
+
+  The {{{https://tomcat.apache.org/tomcat-8.5-doc/api/org/apache/catalina/authenticator/SSLAuthenticator.html}<<<SSLAuthenticator>>>}}
+  comes bundled with Tomcat and extracts user certificates from the TLS context.
+
+  Open or create your app's <<<context.xml>>> and add:
+
++----------------------------
+<Context>
+[$ellipsis]
+  <!-- Add this -->
+  <Valve className="org.apache.catalina.authenticator.SSLAuthenticator" />
+[$ellipsis]
+</Context>
++----------------------------
+
+  It is expected that you follow the Tomcat documentation to properly configure your <<<Connector>>>
+  for certificate-based authentication.
+
+  You have successfully configured the <<<SSLAuthenticator>>> in your webapp. It is now ready to use.
+
 * Using an Authenticator During Development
 
-  After examining the authenticator above and probably ask yourself: How do I use that on my local
+  After examining the authenticators above and probably ask yourself: How do I use that on my local
   development machine? {{{./apidocs/net/sf/michaelo/tomcat/authenticator/CurrentWindowsIdentityAuthenticator.html}<<<CurrentWindowsIdentityAuthenticator>>>}}
   to the rescue. It will automatically obtain the GSS credential of the currently logged in domain
   user and auto-login you in the application. This is very handy when you are running your Tomcat
-  instance inside Eclipse.
+  instance inside an IDE.
 
   Open or create your app's <<<context.xml>>> and add:
 
@@ -89,6 +111,6 @@ Choosing and Using Authenticators
   Now you have successfully configured the <<<CurrentWindowsIdentityAuthenticator>>> in your webapp.
   It is now ready to use.
 
-The Next Step
+Next Step
 
   After you have properly configured an authenticator, go on to the {{{./realms.html}realm}}.

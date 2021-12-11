@@ -25,7 +25,7 @@ import net.sf.michaelo.tomcat.realm.ActiveDirectoryRealm;
 
 /**
  * A mapper interface (strategy pattern) for translating GSS names to Active Directory search
- * parameters.
+ * space parameters.
  */
 public interface UsernameSearchMapper {
 
@@ -60,8 +60,8 @@ public interface UsernameSearchMapper {
 	boolean supportsGssName(GSSName gssName);
 
 	/**
-	 * Maps a GSS name to AD search parameters. A mapper implementation must assure that the user
-	 * can be found in the given {@code context} when an approriate GSS name is presented. The
+	 * Maps a GSS name to AD search space parameters. A mapper implementation must assure that the
+	 * user can be found in the given {@code context} when an approriate GSS name is presented. The
 	 * implementor must be aware that the returned search base might need to be relativized to the
 	 * root DN of the context.
 	 *

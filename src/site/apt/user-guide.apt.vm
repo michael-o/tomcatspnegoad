@@ -39,15 +39,15 @@ User Guide
   [[1]] {{{./authenticators.html}Authenticators}}: an authenticator challenges a client to present
         the necessary authentication token to prove its identity.
 
-  [[2]] {{{./realms.html}Realms}}: a realm looks up the roles and other data of a user in the
+  [[2]] {{{./realms.html}Realms}}: a realm looks up the roles and other data of a user in
         Active Directory or any other user repository.
 
   []
 
   Your will need <both> components configured properly to enjoy true SSO in your company network.
 
-  Before using this library, make sure that the main artifact and its dependencies are in the class
-  path of your Tomcat instance, i.e., in <<<$CATALINA_BASE/lib>>> or <<<$CATALINA_HOME/lib>>>.
+  Before using this library, make sure that the main artifact and its dependencies (if not shaded)
+  are in the class path of your Tomcat instance, i.e., in <<<$CATALINA_BASE/lib>>> or <<<$CATALINA_HOME/lib>>>.
 
 * Sample Webapp
 
@@ -60,5 +60,5 @@ User Guide
 * Not using Active Directory but another Kerberos KDC implementation?
 
   If you happen <not> to use Active Directory, but MIT Kerberos or Heimdal as your KDC &#x2013; no
-  problem, the authenticators are not tied to the Active Directory, but simply require a working Kerberos
-  setup. As for the realm, read the chapter on {{{./realms.html#Alternative_Realm_Implementations}alternative realm implementations}}.
+  problem, the authenticators are not tied to Active Directory, but simply require a working Kerberos
+  setup. As for the realm, read the section on {{{./realms.html#Alternative_Realm_Implementations}alternative realm implementations}}.

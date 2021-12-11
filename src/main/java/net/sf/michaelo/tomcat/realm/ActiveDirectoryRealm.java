@@ -73,9 +73,9 @@ import org.ietf.jgss.GSSName;
 import org.ietf.jgss.Oid;
 
 /**
- * A realm which retrieves <em>authenticated</em> users from Active Directory.
+ * A realm which retrieves <em>already authenticated</em> users from Active Directory.
  *
- * <h2>Configuration</h2> Following options can be configured:
+ * <h2 id="configuration">Configuration</h2> Following options can be configured:
  * <ul>
  * <li>{@code dirContextSourceName}: the name of the {@link DirContextSource} in JNDI with which
  * principals will be retrieved.</li>
@@ -101,7 +101,6 @@ import org.ietf.jgss.Oid;
  * <li>{@code maxIdleTime}: the maximum amount of time in milliseconds a directory server connection
  * should remain idle before it is closed. Default value is 15 minutes.</li>
  * </ul>
- * <br>
  * <h2>Connection Pooling</h2> This realm offers a poor man's directory server connection pooling
  * which can drastically improve access performance for non-session (stateless) applications. It
  * utilizes a LIFO structure based on {@link SynchronizedStack}. No background thread is managing
@@ -111,12 +110,12 @@ import org.ietf.jgss.Oid;
  * healthy. If this query fails, the connection is closed immediately. If the amount of requested
  * connections exceeds the ones available in the pool, new ones are opened and pushed onto the pool.
  * If the pool does not accept any addtional connections they are closed immediately.
- * <br>
- * This connection pool feature has to be explicitly enabled by setting {@code connectionPoolSize}
- * to greater than zero.
+ * <p>
+ * <strong>Note:</strong> This connection pool feature has to be explicitly enabled by setting
+ * {@code connectionPoolSize} to greater than zero.
  *
- * <h2>On Usernames</h2>
- * This realm processes supplied usernames in different aspects.
+ * <h2 id="on-usernames">On Usernames</h2>
+ * This realm processes supplied usernames with different types.
  * <h3>Supported Types</h3> Only a subset of username types are accepted in contrast to
  * other realm implementations. Namely, this realm must know what type is passed to properly map
  * it into Active Directory search space with a {@link UsernameSearchMapper} implementation.
@@ -126,7 +125,9 @@ import org.ietf.jgss.Oid;
  * <li>{@link X509Certificate} by extracting the {@code SAN:otherName} field and matching for
  * MS UPN type id (1.3.6.1.4.1.311.20.2.3).</li>
  * </ul>
- * Both types represent already <em>authenticated</em> users by means of GSS-API and/or TLS.
+ * <p>
+ * <strong>Note:</strong> Both types represent <em>already authenticated</em> users by means of a
+ * GSS and/or TLScontext.
  *<h3>Canonicalization</h3>
  * This realm will always try to canonicalize a given username type to a real {@link GSSName}
  * with the string name type of {@code KRB5_NT_PRINCIPAL} (1.2.840.113554.1.2.2.1) similar to
@@ -167,7 +168,7 @@ import org.ietf.jgss.Oid;
  * <em>Why do you need to use my Active Directory DNS Locator?</em> Microsoft takes a very
  * sophisticated approach on not to rely on hostnames because servers can be provisioned and
  * decommissioned any time. Instead, they heavily rely on DNS domain names and DNS SRV records
- * at runtime. I.e., an initial or a referral URL do not contain a hostname, but only a domain
+ * at runtime. I.e., an initial or a referral URL does not contain a hostname, but only a domain
  * name. While you can connect to the service with this name, you cannot easily authenticate
  * against it with Kerberos because one cannot bind the same SPN {@code ldap/<dnsDomainName>@<REALM>},
  * e.g., {@code ldap/example.com@EXAMPLE.COM} to more than one account. If you try authenticate
@@ -188,8 +189,8 @@ import org.ietf.jgss.Oid;
  * <li>{@code ignore} with multiple {@code DirContextSources}, and create a {@link CombinedRealm}
  * with one {@code ActiveDirectoryRealm} per forest.</li>
  * </ul>
- *
- * You will then have the principal properly looked up in the Active Directory.
+ *<p>
+ * You will then have the principal properly looked up in Active Directory.
  * <p>
  * Further references:
  * <a href="https://technet.microsoft.com/en-us/library/cc759550%28v=ws.10%29.aspx">How DNS Support

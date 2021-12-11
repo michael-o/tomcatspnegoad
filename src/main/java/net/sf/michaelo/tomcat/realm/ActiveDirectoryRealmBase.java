@@ -16,6 +16,7 @@
 package net.sf.michaelo.tomcat.realm;
 
 import java.security.Principal;
+import java.security.cert.X509Certificate;
 
 import org.apache.catalina.realm.RealmBase;
 import org.apache.juli.logging.Log;
@@ -25,8 +26,8 @@ import org.ietf.jgss.GSSContext;
 import org.ietf.jgss.GSSName;
 
 /**
- * Base realm which is able to retrieve principals from {@link GSSName GSS names} or fully
- * established {@link GSSContext GSS contexts}.
+ * Base realm which is able to retrieve principals from {@link GSSName GSS names}, fully
+ * established {@link GSSContext GSS contexts} or {@link X509Certificate TLS client certificates}.
  */
 public abstract class ActiveDirectoryRealmBase extends RealmBase {
 

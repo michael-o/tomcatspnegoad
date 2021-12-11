@@ -36,8 +36,8 @@ About ${project.name}
   Working in a corporate environment leaves you virtually no option of not having real SSO for a
   (Java) webapp, especially when this works with Microsoft IIS with a few clicks. Unfortunately,
   the Apache Tomcat did not have anything like this out of the box for years.\
-  After a deep dive into Kerberos, GSS-API, Active Directory and LDAP in Java, I made a custom component
-  to fill that gap. Portions of this project have been {{{https://bz.apache.org/bugzilla/show_bug.cgi?id=48685}integrated}}
+  After a deep dive into Kerberos, GSS-API, TLS, PKI, Active Directory and LDAP in Java, I made a
+  custom components to fill that gap. Portions of this project have been {{{https://bz.apache.org/bugzilla/show_bug.cgi?id=48685}integrated}}
   into Apache Tomcat 7 and onwards. Though, this project covers much more than an authenticator.
 
   This library has served me very well for many years and still does a great job in a complex

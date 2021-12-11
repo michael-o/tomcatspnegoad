@@ -27,29 +27,29 @@
 Choosing and Using Realms
 
   After the authenticator has established a user's identity, it's time to search for it. Usually,
-  the {{{The_Active_Directory_Realm}<<<ActiveDirectoryRealm>>>}} will do, but for testing purposes you
+  the {{{Active_Directory_Realm}<<<ActiveDirectoryRealm>>>}} will do, but for testing purposes you
   will find the default {{{Using_a_Realm_for_Testing_Purposes}<<<UserDatabaseRealm>>>}} very handy.
 
     [Tip] I strongly recommend to try the {{{Using_a_Realm_for_Testing_Purposes}<<<UserDatabaseRealm>>>}}
           first, you'll see whether the authenticator works at all. If it does, go on to the
           {{{The_Active_Directory_Realm}<<<ActiveDirectoryRealm>>>}}.
 
-* The Active Directory Realm
+* Active Directory Realm
 
   The {{{./apidocs/net/sf/michaelo/tomcat/realm/ActiveDirectoryRealm.html}<<<ActiveDirectoryRealm>>>}}
-  will query your Active Directory for a user by his/her
-  {{{https://docs.microsoft.com/en-us/windows/win32/secauthn/user-name-formats#user-principal-name}implicit UPN}}
+  will query your Active Directory domain for a user by the {{{./apidocs/net/sf/michaelo/tomcat/realm/ActiveDirectoryRealm.html#on-usernames}string name type of the supplied username}}
   and retrieve all the necessary information, e.g., his/her security groups.
 
-  It requires two steps of setup: First, you will need to configure a <<<DirContextSourceFactory>>>
-  with the parameters of your Active Direcory. Second, the realm itself pointing to that Active Directory.
+  It requires a two-step setup: First, you will need to configure a <<<DirContextSourceFactory>>>
+  with the parameters of your Active Directory domain. Second, the realm itself pointing to that Active
+  Directory domain.
 
 ** Configuring a Directory Context Source Factory
 
   Please read the documentation of the {{{https://michael-o.github.io/dirctxsrc/dircontextsourcefactory.html}<<<DirContextSourceFactory>>>}}
   on how to configure it in detail. Here is a minimal working configuration:
 
-    [Tip] Never rely on hard coded hostnames, use my {{{https://michael-o.github.io/activedirectory-dns-locator/}<<<ActiveDirectoryLdapDnsProvider>>>}}
+    [Tip] Never rely on hard-coded hostnames, use my {{{https://michael-o.github.io/activedirectory-dns-locator/}<<<ActiveDirectoryLdapDnsProvider>>>}}
           to auto-locate servers for Active Directory domains via DNS.
 
     []
@@ -98,17 +98,18 @@ Choosing and Using Realms
 
 ** Using Security Groups from Active Directory
 
-  By default the <<<ActiveDirectoryRealm>>> will populate all roles as SID strings for the given principal.
+  The <<<ActiveDirectoryRealm>>> will populate all roles as SID strings for the given principal by default.
   While it might not look convenient in the first place, it adds benefit when security groups are moved
   from/to other domains, the SID history is completely retained. I.e., your application will continue
   to work even with the old SID. If you would like to map SIDs to developer-friendly role names,
-  checkout the {{{http://mo-tomcat-ext.sourceforge.net/user-guide.html#PropertiesRoleMappingListener}<<<PropertiesRoleMappingListener>>>}}.
-  See extended capabilities of this realm in the {{{./apidocs/net/sf/michaelo/tomcat/realm/ActiveDirectoryPrincipal.html}Javadoc}}.
+  checkout the {{{http://mo-tomcat-ext.sourceforge.net/user-guide.html#PropertiesRoleMappingListener}<<<PropertiesRoleMappingListener>>>}}
+  or use other role formats, but the SID see extended capabilities of this realm in the
+  {{{./apidocs/net/sf/michaelo/tomcat/realm/ActiveDirectoryRealm.html#configuration}Javadoc}}.
 
 * Using a Realm for Testing Purposes
 
-  Usually, you are not able to modify Active Directory entries easily (usually admins can), e.g., adding
-  and removing groups. Therefore, you can use default {{{https://tomcat.apache.org/tomcat-8.5-doc/realm-howto.html#UserDatabaseRealm}<<<UserDatabaseRealm>>>}},
+  In most cases you are not able to modify Active Directory entries easily (usually admins can), e.g.,
+  adding and removing groups or their members. Therefore, you can use the {{{https://tomcat.apache.org/tomcat-8.5-doc/realm-howto.html#UserDatabaseRealm}<<<UserDatabaseRealm>>>}},
   fiddle quickly with users and roles to test your application.
 
   Follow the Tomcat documentation and configure a <<<tomcat-users.xml>>> file with the according resource
@@ -130,12 +131,16 @@ Choosing and Using Realms
 
 * Alternative Realm Implementations
 
-  If you are not using the Active Directory as a user repository (e.g. database or another directory
-  server) and can still make use of this library. Extend the Tomcat's default
+  If you are not using Active Directory as a user repository (e.g. database or another directory
+  server) and can still make use of this library. Extend Tomcat's
   {{{https://tomcat.apache.org/tomcat-8.5-doc/api/org/apache/catalina/realm/RealmBase.html}<<<RealmBase>>>}}
-  class and override the protected method <<<getPrincipal(GSSName, GSSCredential)>>>.
+  class and override any of these methods:
 
-The Next Step
+    * {{{https://tomcat.apache.org/tomcat-8.5-doc/api/org/apache/catalina/realm/RealmBase.html${esc.hash}getPrincipal(org.ietf.jgss.GSSName,%20org.ietf.jgss.GSSCredential)}<<<protected Principal getPrincipal(GSSName, GSSCredential)>>>}},
+
+    * {{{https://tomcat.apache.org/tomcat-8.5-doc/api/org/apache/catalina/realm/RealmBase.html${esc.hash}getPrincipal(java.security.cert.X509Certificate)}<<<protected Principal getPrincipal(X509Certificate userCert)>>>}}.
+
+Next Step
 
   You have freed your users from typing usernames and passwords over and over again. Go on and try
   your new {{{./sample-webapp.html}SSO setup}}.

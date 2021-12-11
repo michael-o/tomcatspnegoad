@@ -28,7 +28,7 @@ Integrating with Spring Security
 
   Once in a while people ask on Stack Overflow how to use this with Spring Security. I was consoling
   people for years for a proper implementation. Finally I have decided not to impelement anything
-  for Spring Security at all. You might ask <<why>>? The answer is rather simple, Spring Security's
+  for Spring Security at all. You might ask <<why>>? The answer is rather simple, The Spring Security
   APIs are so complex and different to those in Tomcat that it would mean to provide a complete
   reimplementation which is a maintenance nightmare. Something I am not willing to do and see no real
   benefit in. Fortunately, the Spring guys were smart enough to think about lazy people like me:

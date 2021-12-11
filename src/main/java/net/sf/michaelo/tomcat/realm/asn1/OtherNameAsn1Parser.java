@@ -43,7 +43,7 @@ public class OtherNameAsn1Parser {
 	};
 
 	/**
-	 * Parses a DER-encoded ASN.1 {@code SAN:otherName} field into its components:
+	 * Parses the DER-encoded ASN.1 {@code SAN:otherName} field into its components:
 	 * {@code type-id} and {@code value}.
 	 *
 	 * @param otherName a DER-encoded byte array
@@ -51,7 +51,7 @@ public class OtherNameAsn1Parser {
 	 * @throws NullPointerException        if {@code null} is passed as
 	 *                                     {@code otherName}
 	 * @throws CertificateParsingException if the DER-encoded byte array does not
-	 *                                     comply with ASN.1 defininiton
+	 *                                     comply with ASN.1 DER encoding rules
 	 */
 	public static OtherNameParseResult parse(byte[] otherName) throws CertificateParsingException {
 		Objects.requireNonNull(otherName, "otherName cannot be null");

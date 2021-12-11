@@ -30,8 +30,8 @@ Sample Webapp
 
 * Prerequisites
 
-  Create a Servlet 3.1 compatible webapp project with a method of your choice, .e.g., Maven archetype
-  or Eclipse project wizard. Configure the resources (authenticator and realm).
+  Create a Servlet 3.1 compatible webapp project with a method of your choice, e.g., Maven archetype
+  or Eclipse project wizard. Configure the components (authenticator and realm).
 
 * Modifying the Deployment Descriptor (<<<web.xml>>>)
 
@@ -58,7 +58,7 @@ Sample Webapp
     </web-resource-collection>
     <auth-constraint>
       <!-- Every user in the $AD_GROUP can view this specific page -->
-      <!-- Replace $AD_GROUP with a SID of a group or the mapped role name you are actually a member of -->
+      <!-- Replace $AD_GROUP with role format value of a group or the mapped role name you are actually a member of -->
       <role-name>$AD_GROUP</role-name>
     </auth-constraint>
   </security-constraint>
@@ -110,7 +110,7 @@ Hello ${pageContext.request.remoteUser}, you should not see this!
 
 * Verification
 
-  Open every single URL with a properly configured client like IE, Firefox, Chrome or even
+  Open every single URL with a properly configured client like Edge, Firefox, Chrome or even
   cURL on Windows. Your output should be as follows:\
   \
   <<<index.jsp>>>: <<<HTTP/1.1 200 >>>, every user should see a response.\
