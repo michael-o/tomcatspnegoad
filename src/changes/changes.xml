@@ -5,6 +5,7 @@
 
 	<body>
 		<release version="3.8.0" date="2022-04-06" description="Support certificate-based authentication">
+			<action type="update" dev="michael-o">Upgrade to Tomcat 8.5.78</action>
 			<action type="add" dev="michael-o" issue="3">Canonicalize all username types to KRB5_NT_PRINCIPAL string name type</action>
 			<action type="add" dev="michael-o" issue="3">Enable ActiveDirectoryRealm to search by X.509 user certificates</action>
 			<action type="add" dev="michael-o" issue="3">Add a minimalist X.509 SAN:otherName ASN.1 parser</action>
