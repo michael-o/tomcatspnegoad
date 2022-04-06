@@ -1,4 +1,5 @@
 net.sf.michaelo.tomcat
 net.sf.michaelo.tomcat.authenticator
 net.sf.michaelo.tomcat.realm
+net.sf.michaelo.tomcat.realm.asn1
 net.sf.michaelo.tomcat.realm.mapper
