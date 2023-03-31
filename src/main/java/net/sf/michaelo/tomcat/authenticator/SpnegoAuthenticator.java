@@ -214,6 +214,13 @@ public class SpnegoAuthenticator extends GSSAuthenticatorBase {
 	}
 
 	@Override
+	protected boolean isPreemptiveAuthPossible(Request request) {
+		String authorization = request.getHeader("Authorization");
+
+		return StringUtils.startsWithIgnoreCase(authorization, SPNEGO_AUTH_SCHEME);
+	}
+
+	@Override
 	protected String getAuthMethod() {
 		return SPNEGO_METHOD;
 	}
