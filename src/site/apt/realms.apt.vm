@@ -1,5 +1,5 @@
 #*
- * Copyright 2013–2021 Michael Osipov
+ * Copyright 2013–2023 Michael Osipov
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,7 +109,7 @@ Choosing and Using Realms
 * Using a Realm for Testing Purposes
 
   In most cases you are not able to modify Active Directory entries easily (usually admins can), e.g.,
-  adding and removing groups or their members. Therefore, you can use the {{{https://tomcat.apache.org/tomcat-8.5-doc/realm-howto.html#UserDatabaseRealm}<<<UserDatabaseRealm>>>}},
+  adding and removing groups or their members. Therefore, you can use the {{{https://tomcat.apache.org/tomcat-${tomcatMainVersion}-doc/realm-howto.html#UserDatabaseRealm}<<<UserDatabaseRealm>>>}},
   fiddle quickly with users and roles to test your application.
 
   Follow the Tomcat documentation and configure a <<<tomcat-users.xml>>> file with the according resource
@@ -133,12 +133,12 @@ Choosing and Using Realms
 
   If you are not using Active Directory as a user repository (e.g. database or another directory
   server) and can still make use of this library. Extend Tomcat's
-  {{{https://tomcat.apache.org/tomcat-8.5-doc/api/org/apache/catalina/realm/RealmBase.html}<<<RealmBase>>>}}
+  {{{https://tomcat.apache.org/tomcat-${tomcatMainVersion}-doc/api/org/apache/catalina/realm/RealmBase.html}<<<RealmBase>>>}}
   class and override any of these methods:
 
-    * {{{https://tomcat.apache.org/tomcat-8.5-doc/api/org/apache/catalina/realm/RealmBase.html${esc.hash}getPrincipal(org.ietf.jgss.GSSName,%20org.ietf.jgss.GSSCredential)}<<<protected Principal getPrincipal(GSSName, GSSCredential)>>>}},
+    * {{{https://tomcat.apache.org/tomcat-${tomcatMainVersion}-doc/api/org/apache/catalina/realm/RealmBase.html${esc.hash}getPrincipal(org.ietf.jgss.GSSName,org.ietf.jgss.GSSCredential)}<<<protected Principal getPrincipal(GSSName, GSSCredential)>>>}},
 
-    * {{{https://tomcat.apache.org/tomcat-8.5-doc/api/org/apache/catalina/realm/RealmBase.html${esc.hash}getPrincipal(java.security.cert.X509Certificate)}<<<protected Principal getPrincipal(X509Certificate userCert)>>>}}.
+    * {{{https://tomcat.apache.org/tomcat-${tomcatMainVersion}-doc/api/org/apache/catalina/realm/RealmBase.html${esc.hash}getPrincipal(java.security.cert.X509Certificate)}<<<protected Principal getPrincipal(X509Certificate userCert)>>>}}.
 
 Next Step
 

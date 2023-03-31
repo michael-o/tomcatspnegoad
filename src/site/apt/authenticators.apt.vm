@@ -1,5 +1,5 @@
 #*
- * Copyright 2013–2021 Michael Osipov
+ * Copyright 2013–2023 Michael Osipov
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,7 +62,7 @@ Choosing and Using Authenticators
 
 * SSL Authenticator
 
-  The {{{https://tomcat.apache.org/tomcat-8.5-doc/api/org/apache/catalina/authenticator/SSLAuthenticator.html}<<<SSLAuthenticator>>>}}
+  The {{{https://tomcat.apache.org/tomcat-${tomcatMainVersion}-doc/api/org/apache/catalina/authenticator/SSLAuthenticator.html}<<<SSLAuthenticator>>>}}
   comes bundled with Tomcat and extracts user certificates from the TLS context.
 
   Open or create your app's <<<context.xml>>> and add:

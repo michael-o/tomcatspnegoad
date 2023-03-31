@@ -1,5 +1,5 @@
 #*
- * Copyright 2013–2021 Michael Osipov
+ * Copyright 2013–2023 Michael Osipov
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,7 @@
 
 User Guide
 
-  To make use of this library you must run at least Java $context.get("maven.compiler.target") and
-  Apache Tomcat $context.get("tomcat.version") or newer.
+  To make use of this library you must run at least Java $javaVersion and Apache Tomcat $tomcatMainVersion.
 
     [Prerequisites] Make sure that the machine running the Tomcat instance (a) has joined a domain,
                     (b) has an appropriate {{{https://docs.microsoft.com/en-us/windows/win32/ad/service-principal-names}SPN}}

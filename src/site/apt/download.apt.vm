@@ -42,6 +42,6 @@ Download ${project.name}
 
   After you have obtained the source code, navigate to the source code directory
   and type <<<mvn install>>>. Prior to that, make sure that you have at least Maven
-  $context.get("maven.version") and Java $context.get("maven.compiler.target") installed.
+  $requiredMavenVersion and Java $javaVersion installed.
   After successful execution the artifact will be installed to your local repository.
-  
+

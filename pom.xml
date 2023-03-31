@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-   Copyright 2012–2021 Michael Osipov
+   Copyright 2012–2023 Michael Osipov
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -20,12 +20,12 @@
 	<parent>
 		<groupId>net.sf.michael-o</groupId>
 		<artifactId>michael-o-parent</artifactId>
-		<version>15</version>
+		<version>16</version>
 	</parent>
 
 	<groupId>net.sf.michael-o.tomcat</groupId>
 	<artifactId>tomcat-authnz-spnego-ad</artifactId>
-	<version>3.8.1-SNAPSHOT</version>
+	<version>3.9.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>SPNEGO/Kerberos Authenticator and Active Directory Realm for Apache Tomcat</name>
@@ -67,7 +67,15 @@
 	</distributionManagement>
 
 	<properties>
-		<tomcat.version>8.5.78</tomcat.version>
+		<javaVersion>1.7</javaVersion>
+		<maven.compiler.source>${javaVersion}</maven.compiler.source>
+		<maven.compiler.target>${javaVersion}</maven.compiler.target>
+
+		<tomcatMainVersion>8.5</tomcatMainVersion>
+		<tomcatPatchVersion>87</tomcatPatchVersion>
+		<tomcatVersion>${tomcatMainVersion}.${tomcatPatchVersion}</tomcatVersion>
+
+		<project.build.outputTimestamp>2023-04-06T00:00:00Z</project.build.outputTimestamp>
 	</properties>
 
 	<dependencies>
@@ -79,25 +87,25 @@
 		<dependency>
 			<groupId>org.apache.tomcat</groupId>
 			<artifactId>tomcat-catalina</artifactId>
-			<version>${tomcat.version}</version>
+			<version>${tomcatVersion}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.tomcat</groupId>
 			<artifactId>tomcat-juli</artifactId>
-			<version>${tomcat.version}</version>
+			<version>${tomcatVersion}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.tomcat</groupId>
 			<artifactId>tomcat-util</artifactId>
-			<version>${tomcat.version}</version>
+			<version>${tomcatVersion}</version>
 			<scope>provided</scope>
 		</dependency>
  		<dependency>
 			<groupId>org.apache.tomcat</groupId>
 			<artifactId>tomcat-servlet-api</artifactId>
-			<version>${tomcat.version}</version>
+			<version>${tomcatVersion}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -203,7 +211,7 @@
 				<configuration>
 					<locale>en</locale>
 					<links>
-						<link>https://tomcat.apache.org/tomcat-8.5-doc/api</link>
+						<link>https://tomcat.apache.org/tomcat-${tomcatMainVersion}-doc/api</link>
 						<link>https://michael-o.github.io/dirctxsrc/apidocs/</link>
 					</links>
 				</configuration>
@@ -218,7 +226,7 @@
 				<configuration>
 					<locale>en</locale>
 					<links>
-						<link>https://tomcat.apache.org/tomcat-8.5-doc/api</link>
+						<link>https://tomcat.apache.org/tomcat-${tomcatMainVersion}-doc/api</link>
 						<link>https://michael-o.github.io/dirctxsrc/apidocs/</link>
 					</links>
 				</configuration>
