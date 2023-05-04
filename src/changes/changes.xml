@@ -4,7 +4,7 @@
 						https://maven.apache.org/xsd/changes-1.0.0.xsd">
 
 	<body>
-		<release version="3.9.0-SNAPSHOT" date="TBD" description="Mostly non-functional changes">
+		<release version="3.9.0" date="2023-05-04" description="Mostly non-functional changes">
 			<action type="add" dev="michael-o" issue="5">Upgrade parent to 16</action>
 			<action type="update" dev="michael-o">Upgrade parent to 16</action>
 			<action type="update" dev="michael-o">Upgrade to Tomcat 8.5.87</action>
