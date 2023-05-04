@@ -1,5 +1,5 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="" lang="">
 <head><meta http-equiv="content-type" content="text/html; charset=UTF-8" />
 <title>SpnegoAuthenticator xref</title>
 <link type="text/css" rel="stylesheet" href="../../../../../stylesheet.css" />
@@ -222,13 +222,20 @@
 <a class="jxr_linenumber" name="L214" href="#L214">214</a> 	}
 <a class="jxr_linenumber" name="L215" href="#L215">215</a> 
 <a class="jxr_linenumber" name="L216" href="#L216">216</a> 	@Override
-<a class="jxr_linenumber" name="L217" href="#L217">217</a> 	<strong class="jxr_keyword">protected</strong> String getAuthMethod() {
-<a class="jxr_linenumber" name="L218" href="#L218">218</a> 		<strong class="jxr_keyword">return</strong> SPNEGO_METHOD;
-<a class="jxr_linenumber" name="L219" href="#L219">219</a> 	}
-<a class="jxr_linenumber" name="L220" href="#L220">220</a> 
-<a class="jxr_linenumber" name="L221" href="#L221">221</a> }
+<a class="jxr_linenumber" name="L217" href="#L217">217</a> 	<strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">boolean</strong> isPreemptiveAuthPossible(Request request) {
+<a class="jxr_linenumber" name="L218" href="#L218">218</a> 		String authorization = request.getHeader(<span class="jxr_string">"Authorization"</span>);
+<a class="jxr_linenumber" name="L219" href="#L219">219</a> 
+<a class="jxr_linenumber" name="L220" href="#L220">220</a> 		<strong class="jxr_keyword">return</strong> StringUtils.startsWithIgnoreCase(authorization, SPNEGO_AUTH_SCHEME);
+<a class="jxr_linenumber" name="L221" href="#L221">221</a> 	}
+<a class="jxr_linenumber" name="L222" href="#L222">222</a> 
+<a class="jxr_linenumber" name="L223" href="#L223">223</a> 	@Override
+<a class="jxr_linenumber" name="L224" href="#L224">224</a> 	<strong class="jxr_keyword">protected</strong> String getAuthMethod() {
+<a class="jxr_linenumber" name="L225" href="#L225">225</a> 		<strong class="jxr_keyword">return</strong> SPNEGO_METHOD;
+<a class="jxr_linenumber" name="L226" href="#L226">226</a> 	}
+<a class="jxr_linenumber" name="L227" href="#L227">227</a> 
+<a class="jxr_linenumber" name="L228" href="#L228">228</a> }
 </pre>
 <hr/>
-<div id="footer">Copyright &#169; 2013&#x2013;2022 <a href="https://github.com/michael-o">Michael Osipov</a>. All rights reserved.</div>
+<div id="footer">Copyright &#169; 2013&#x2013;2023 <a href="https://github.com/michael-o">Michael Osipov</a>. All rights reserved.</div>
 </body>
 </html>
