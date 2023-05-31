@@ -39,88 +39,88 @@ import org.ietf.jgss.GSSName;
  */
 public class CurrentWindowsIdentityAuthenticator extends GSSAuthenticatorBase {
 
-    protected static final String CURRENT_WINDOWS_IDENTITY_METHOD = "CURRENT_WINDOWS_IDENTITY";
-    protected static final String CURRENT_WINDOWS_IDENTITY_AUTH_SCHEME = "CWI";
+	protected static final String CURRENT_WINDOWS_IDENTITY_METHOD = "CURRENT_WINDOWS_IDENTITY";
+	protected static final String CURRENT_WINDOWS_IDENTITY_AUTH_SCHEME = "CWI";
 
-    @Override
-    protected boolean doAuthenticate(Request request, HttpServletResponse response)
-            throws IOException {
+	@Override
+	protected boolean doAuthenticate(Request request, HttpServletResponse response)
+			throws IOException {
 
-        if (checkForCachedAuthentication(request, response, true)) {
-            return true;
-        }
+		if (checkForCachedAuthentication(request, response, true)) {
+			return true;
+		}
 
-        LoginContext lc = null;
+		LoginContext lc = null;
 
-        try {
-            try {
-                lc = new LoginContext(getLoginEntryName());
-                lc.login();
-            } catch (LoginException e) {
-                logger.error(sm.getString("cwiAuthenticator.obtainFailed"), e);
+		try {
+			try {
+				lc = new LoginContext(getLoginEntryName());
+				lc.login();
+			} catch (LoginException e) {
+				logger.error(sm.getString("cwiAuthenticator.obtainFailed"), e);
 
-                sendUnauthorized(request, response, CURRENT_WINDOWS_IDENTITY_AUTH_SCHEME,
-                        "cwiAuthenticator.obtainFailed");
-                return false;
-            }
+				sendUnauthorized(request, response, CURRENT_WINDOWS_IDENTITY_AUTH_SCHEME,
+						"cwiAuthenticator.obtainFailed");
+				return false;
+			}
 
-            final GSSManager manager = GSSManager.getInstance();
-            final PrivilegedExceptionAction<GSSCredential> action = new PrivilegedExceptionAction<GSSCredential>() {
-                @Override
-                public GSSCredential run() throws GSSException {
-                    return manager.createCredential(null, GSSCredential.INDEFINITE_LIFETIME,
-                            KRB5_MECHANISM, GSSCredential.INITIATE_ONLY);
-                }
-            };
+			final GSSManager manager = GSSManager.getInstance();
+			final PrivilegedExceptionAction<GSSCredential> action = new PrivilegedExceptionAction<GSSCredential>() {
+				@Override
+				public GSSCredential run() throws GSSException {
+					return manager.createCredential(null, GSSCredential.INDEFINITE_LIFETIME,
+							KRB5_MECHANISM, GSSCredential.INITIATE_ONLY);
+				}
+			};
 
-            GSSCredential gssCredential = null;
+			GSSCredential gssCredential = null;
 
-            try {
-                gssCredential = Subject.doAs(lc.getSubject(), action);
-            } catch (PrivilegedActionException e) {
-                logger.error(sm.getString("cwiAuthenticator.obtainFailed"), e.getException());
+			try {
+				gssCredential = Subject.doAs(lc.getSubject(), action);
+			} catch (PrivilegedActionException e) {
+				logger.error(sm.getString("cwiAuthenticator.obtainFailed"), e.getException());
 
-                sendUnauthorized(request, response, CURRENT_WINDOWS_IDENTITY_AUTH_SCHEME,
-                        "cwiAuthenticator.obtainFailed");
-                return false;
-            }
+				sendUnauthorized(request, response, CURRENT_WINDOWS_IDENTITY_AUTH_SCHEME,
+						"cwiAuthenticator.obtainFailed");
+				return false;
+			}
 
-            try {
-                GSSRealm realm = (GSSRealm) context.getRealm();
-                GSSName gssName = gssCredential.getName();
+			try {
+				GSSRealm realm = (GSSRealm) context.getRealm();
+				GSSName gssName = gssCredential.getName();
 
-                Principal principal = realm.authenticate(gssName,
-                        isStoreDelegatedCredential() ? gssCredential : null);
+				Principal principal = realm.authenticate(gssName,
+						isStoreDelegatedCredential() ? gssCredential : null);
 
-                if (principal != null) {
-                    register(request, response, principal, getAuthMethod(), principal.getName(),
-                            null);
-                    return true;
-                } else {
-                    sendUnauthorized(request, response, CURRENT_WINDOWS_IDENTITY_AUTH_SCHEME,
-                            "gssAuthenticatorBase.userNotFound", gssName);
-                    return false;
-                }
-            } catch (GSSException e) {
-                logger.error(sm.getString("gssAuthenticatorBase.inquireNameFailed"), e);
+				if (principal != null) {
+					register(request, response, principal, getAuthMethod(), principal.getName(),
+							null);
+					return true;
+				} else {
+					sendUnauthorized(request, response, CURRENT_WINDOWS_IDENTITY_AUTH_SCHEME,
+							"gssAuthenticatorBase.userNotFound", gssName);
+					return false;
+				}
+			} catch (GSSException e) {
+				logger.error(sm.getString("gssAuthenticatorBase.inquireNameFailed"), e);
 
-                sendInternalServerError(request, response, "gssAuthenticatorBase.inquireNameFailed");
-                return false;
-            }
-        } finally {
-            if (lc != null) {
-                try {
-                    lc.logout();
-                } catch (LoginException e) {
-                    ; // Ignore
-                }
-            }
-        }
-    }
+				sendInternalServerError(request, response, "gssAuthenticatorBase.inquireNameFailed");
+				return false;
+			}
+		} finally {
+			if (lc != null) {
+				try {
+					lc.logout();
+				} catch (LoginException e) {
+					; // Ignore
+				}
+			}
+		}
+	}
 
-    @Override
-    protected String getAuthMethod() {
-        return CURRENT_WINDOWS_IDENTITY_METHOD;
-    }
+	@Override
+	protected String getAuthMethod() {
+		return CURRENT_WINDOWS_IDENTITY_METHOD;
+	}
 
 }
