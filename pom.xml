@@ -49,6 +49,7 @@
 
 	<modules>
 		<module>tomcat85</module>
+		<module>tomcat90</module>
 	</modules>
 
 	<scm>
