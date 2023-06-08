@@ -33,7 +33,7 @@ Choosing and Using Authenticators
 
 * SPNEGO Authenticator
 
-  The {{{./apidocs/net/sf/michaelo/tomcat/authenticator/SpnegoAuthenticator.html}<<<SpnegoAuthenticator>>>}}
+  The {{{./tomcat90-authnz-spnego-ad/apidocs/net/sf/michaelo/tomcat/authenticator/SpnegoAuthenticator.html}<<<SpnegoAuthenticator>>>}}
   challenges the client to perform {{{https://tools.ietf.org/html/rfc4559}SPNEGO}} authentication. In
   turn the server accepts a GSS context by validating an authentication token and responds with a
   proper token to the client.
@@ -62,8 +62,8 @@ Choosing and Using Authenticators
 
 * SSL Authenticator
 
-  The {{{https://tomcat.apache.org/tomcat-${tomcatMainVersion}-doc/api/org/apache/catalina/authenticator/SSLAuthenticator.html}<<<SSLAuthenticator>>>}}
-  comes bundled with Tomcat and extracts user certificates from the TLS context.
+  The {{{https://tomcat.apache.org/tomcat-9.0-doc/api/org/apache/catalina/authenticator/SSLAuthenticator.html}<<<SSLAuthenticator>>>}}
+  is bundled with Tomcat and extracts user certificates from the TLS context.
 
   Open or create your app's <<<context.xml>>> and add:
 
@@ -84,7 +84,7 @@ Choosing and Using Authenticators
 * Using an Authenticator During Development
 
   After examining the authenticators above and probably ask yourself: How do I use that on my local
-  development machine? {{{./apidocs/net/sf/michaelo/tomcat/authenticator/CurrentWindowsIdentityAuthenticator.html}<<<CurrentWindowsIdentityAuthenticator>>>}}
+  development machine? {{{./tomcat90-authnz-spnego-ad/apidocs/net/sf/michaelo/tomcat/authenticator/CurrentWindowsIdentityAuthenticator.html}<<<CurrentWindowsIdentityAuthenticator>>>}}
   to the rescue. It will automatically obtain the GSS credential of the currently logged in domain
   user and auto-login you in the application. This is very handy when you are running your Tomcat
   instance inside an IDE.

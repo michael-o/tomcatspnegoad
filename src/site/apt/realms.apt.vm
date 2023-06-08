@@ -36,8 +36,8 @@ Choosing and Using Realms
 
 * Active Directory Realm
 
-  The {{{./apidocs/net/sf/michaelo/tomcat/realm/ActiveDirectoryRealm.html}<<<ActiveDirectoryRealm>>>}}
-  will query your Active Directory domain for a user by the {{{./apidocs/net/sf/michaelo/tomcat/realm/ActiveDirectoryRealm.html#on-usernames}string name type of the supplied username}}
+  The {{{./tomcat90-authnz-spnego-ad/apidocs/net/sf/michaelo/tomcat/realm/ActiveDirectoryRealm.html}<<<ActiveDirectoryRealm>>>}}
+  will query your Active Directory domain for a user by the {{{./tomcat90-authnz-spnego-ad/apidocs/net/sf/michaelo/tomcat/realm/ActiveDirectoryRealm.html#on-usernames}string name type of the supplied username}}
   and retrieve all the necessary information, e.g., his/her security groups.
 
   It requires a two-step setup: First, you will need to configure a <<<DirContextSourceFactory>>>
@@ -67,7 +67,7 @@ Choosing and Using Realms
 
   In general, you should pick LDAP URLs which avoid any referral chasing because it amplifies
   execution in space and time. You are highly recommended using the Global Catalog (port 3268) only.
-  More details on how this realm deals with referrals can be found in the {{{./apidocs/net/sf/michaelo/tomcat/realm/ActiveDirectoryRealm.html#referral-handling}Javadoc}}.
+  More details on how this realm deals with referrals can be found in the {{{./tomcat90-authnz-spnego-ad/apidocs/net/sf/michaelo/tomcat/realm/ActiveDirectoryRealm.html#referral-handling}Javadoc}}.
 
 ** Configuring the Realm
 
@@ -93,7 +93,7 @@ Choosing and Using Realms
 ** Authenticated Principal
 
   After successful authentication and retrieval, this realm will create an <<<ActiveDirectoryPrincipal>>>
-  with several attributes. Refer to the {{{./apidocs/net/sf/michaelo/tomcat/realm/ActiveDirectoryPrincipal.html}Javadoc}}
+  with several attributes. Refer to the {{{./tomcat90-authnz-spnego-ad/apidocs/net/sf/michaelo/tomcat/realm/ActiveDirectoryPrincipal.html}Javadoc}}
   for details.
 
 ** Using Security Groups from Active Directory
@@ -104,12 +104,12 @@ Choosing and Using Realms
   to work even with the old SID. If you would like to map SIDs to developer-friendly role names,
   checkout the {{{http://mo-tomcat-ext.sourceforge.net/user-guide.html#PropertiesRoleMappingListener}<<<PropertiesRoleMappingListener>>>}}
   or use other role formats, but the SID see extended capabilities of this realm in the
-  {{{./apidocs/net/sf/michaelo/tomcat/realm/ActiveDirectoryRealm.html#configuration}Javadoc}}.
+  {{{./tomcat90-authnz-spnego-ad/apidocs/net/sf/michaelo/tomcat/realm/ActiveDirectoryRealm.html#configuration}Javadoc}}.
 
 * Using a Realm for Testing Purposes
 
   In most cases you are not able to modify Active Directory entries easily (usually admins can), e.g.,
-  adding and removing groups or their members. Therefore, you can use the {{{https://tomcat.apache.org/tomcat-${tomcatMainVersion}-doc/realm-howto.html#UserDatabaseRealm}<<<UserDatabaseRealm>>>}},
+  adding and removing groups or their members. Therefore, you can use the {{{https://tomcat.apache.org/tomcat-9.0-doc/realm-howto.html#UserDatabaseRealm}<<<UserDatabaseRealm>>>}},
   fiddle quickly with users and roles to test your application.
 
   Follow the Tomcat documentation and configure a <<<tomcat-users.xml>>> file with the according resource
@@ -133,12 +133,12 @@ Choosing and Using Realms
 
   If you are not using Active Directory as a user repository (e.g. database or another directory
   server) and can still make use of this library. Extend Tomcat's
-  {{{https://tomcat.apache.org/tomcat-${tomcatMainVersion}-doc/api/org/apache/catalina/realm/RealmBase.html}<<<RealmBase>>>}}
+  {{{https://tomcat.apache.org/tomcat-9.0-doc/api/org/apache/catalina/realm/RealmBase.html}<<<RealmBase>>>}}
   class and override any of these methods:
 
-    * {{{https://tomcat.apache.org/tomcat-${tomcatMainVersion}-doc/api/org/apache/catalina/realm/RealmBase.html${esc.hash}getPrincipal(org.ietf.jgss.GSSName,org.ietf.jgss.GSSCredential)}<<<protected Principal getPrincipal(GSSName, GSSCredential)>>>}},
+    * {{{https://tomcat.apache.org/tomcat-9.0-doc/api/org/apache/catalina/realm/RealmBase.html${esc.hash}getPrincipal(org.ietf.jgss.GSSName,org.ietf.jgss.GSSCredential)}<<<protected Principal getPrincipal(GSSName, GSSCredential)>>>}},
 
-    * {{{https://tomcat.apache.org/tomcat-${tomcatMainVersion}-doc/api/org/apache/catalina/realm/RealmBase.html${esc.hash}getPrincipal(java.security.cert.X509Certificate)}<<<protected Principal getPrincipal(X509Certificate userCert)>>>}}.
+    * {{{https://tomcat.apache.org/tomcat-9.0-doc/api/org/apache/catalina/realm/RealmBase.html${esc.hash}getPrincipal(java.security.cert.X509Certificate)}<<<protected Principal getPrincipal(X509Certificate userCert)>>>}}.
 
 Next Step
 

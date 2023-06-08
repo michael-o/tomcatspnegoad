@@ -1,4 +1,4 @@
-#set( $targetUrl = "https://michael-o.github.io/tomcatspnegoad/apidocs/net/sf/michaelo/tomcat/realm/ActiveDirectoryRealm.html#referral-handling" )
+#set( $targetUrl = "https://michael-o.github.io/tomcatspnegoad/tomcat90-authnz-spnego-ad/apidocs/net/sf/michaelo/tomcat/realm/ActiveDirectoryRealm.html#referral-handling" )
 <!DOCTYPE html>
 <html>
 <head>

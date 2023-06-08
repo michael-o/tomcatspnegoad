@@ -1,5 +1,5 @@
 #*
- * Copyright 2013–2021 Michael Osipov
+ * Copyright 2013–2023 Michael Osipov
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,12 @@
 
 About ${project.name}
 
-  ${project.description} It integrates your Java webapp in your Active Directory environment with ease.
+  ${project.description} It integrates your Java webapp into your Active Directory environment with ease
+  and provides modules for Tomcat 8.5.x, 9.0.x, and 10.1.x.
 
 * Getting Started
 
-  {{{./download.html}Download}} the artifact and read the {{{./user-guide.html}user guide}}
+  {{{./download.html}Download}} the artifacts and read the {{{./user-guide.html}user guide}}
   to get started. Make sure to read the {{{https://github.com/michael-o/tomcatspnegoad/releases/tag/${project.version}}release notes}} as well.
 
 * Origin of this Project
@@ -40,5 +41,5 @@ About ${project.name}
   custom components to fill that gap. Portions of this project have been {{{https://bz.apache.org/bugzilla/show_bug.cgi?id=48685}integrated}}
   into Apache Tomcat 7 and onwards. Though, this project covers much more than an authenticator.
 
-  This library has served me very well for many years and still does a great job in a complex
+  This library has served me very well for 10+ years and still does a great job in a complex
   multi-realm environment, hopefully it will do for you too.

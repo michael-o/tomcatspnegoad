@@ -24,7 +24,15 @@
 
 User Guide
 
-  To make use of this library you must run at least Java $javaVersion and Apache Tomcat $tomcatMainVersion.
+  To make use of this library you must run any of these:
+
+    * Tomcat 8.5.x and Java 7 (use artifact {{{./tomcat85-authnz-spnego-ad/}<<<tomcat85-authnz-spnego-ad>>>}})
+
+    * Tomcat 9.0.x and Java 8 (use artifact {{{./tomcat90-authnz-spnego-ad/}<<<tomcat90-authnz-spnego-ad>>>}})
+
+    * Tomcat 10.1.x and Java 11 (use artifact {{{./tomcat101-authnz-spnego-ad/}<<<tomcat101-authnz-spnego-ad>>>}})
+
+  They are all <identical> function-wise and documentation as well as linked Javadoc apply to all of them, unless stated otherwise.
 
     [Prerequisites] Make sure that the machine running the Tomcat instance (a) has joined a domain,
                     (b) has an appropriate {{{https://docs.microsoft.com/en-us/windows/win32/ad/service-principal-names}SPN}}
