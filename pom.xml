@@ -25,8 +25,8 @@
 
 	<groupId>net.sf.michael-o.tomcat</groupId>
 	<artifactId>tomcat-authnz-spnego-ad</artifactId>
-	<version>3.9.1-SNAPSHOT</version>
-	<packaging>jar</packaging>
+	<version>4.0.0-SNAPSHOT</version>
+	<packaging>pom</packaging>
 
 	<name>SPNEGO/Kerberos Authenticator and Active Directory Realm for Apache Tomcat</name>
 	<description>A fully featured, first-class SPNEGO/Kerberos Authenticator and Active Directory Realm for the Apache Tomcat servlet container.</description>
@@ -47,12 +47,16 @@
 		</developer>
 	</developers>
 
+	<modules>
+		<module>tomcat85</module>
+	</modules>
+
 	<scm>
 		<connection>scm:git:https://github.com/michael-o/tomcatspnegoad.git</connection>
 		<developerConnection>scm:git:https://github.com/michael-o/tomcatspnegoad.git</developerConnection>
 		<url>https://github.com/michael-o/tomcatspnegoad</url>
-	  <tag>HEAD</tag>
-  </scm>
+		<tag>HEAD</tag>
+	</scm>
 	<issueManagement>
 		<system>GitHub</system>
 		<url>https://github.com/michael-o/tomcatspnegoad/issues/</url>
@@ -67,170 +71,57 @@
 	</distributionManagement>
 
 	<properties>
-		<javaVersion>1.7</javaVersion>
-		<maven.compiler.source>${javaVersion}</maven.compiler.source>
-		<maven.compiler.target>${javaVersion}</maven.compiler.target>
-
-		<tomcatMainVersion>8.5</tomcatMainVersion>
-		<tomcatPatchVersion>87</tomcatPatchVersion>
-		<tomcatVersion>${tomcatMainVersion}.${tomcatPatchVersion}</tomcatVersion>
+		<requiredJavaVersion>11</requiredJavaVersion>
 
 		<project.build.outputTimestamp>2023-05-04T11:52:17Z</project.build.outputTimestamp>
 	</properties>
 
-	<dependencies>
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-lang3</artifactId>
-			<version>3.8.1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.tomcat</groupId>
-			<artifactId>tomcat-catalina</artifactId>
-			<version>${tomcatVersion}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.tomcat</groupId>
-			<artifactId>tomcat-juli</artifactId>
-			<version>${tomcatVersion}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.tomcat</groupId>
-			<artifactId>tomcat-util</artifactId>
-			<version>${tomcatVersion}</version>
-			<scope>provided</scope>
-		</dependency>
- 		<dependency>
-			<groupId>org.apache.tomcat</groupId>
-			<artifactId>tomcat-servlet-api</artifactId>
-			<version>${tomcatVersion}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>net.sf.michael-o.dirctxsrc</groupId>
-			<artifactId>dircontextsource</artifactId>
-			<version>2.3.1</version>
-		</dependency>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.13.2</version>
-			<scope>test</scope>
-		</dependency>
-	</dependencies>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>net.sf.michael-o.dirctxsrc</groupId>
+				<artifactId>dircontextsource</artifactId>
+				<version>2.3.1</version>
+			</dependency>
+			<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>4.13.2</version>
+				<scope>test</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
 	<build>
 		<defaultGoal>package</defaultGoal>
-		<plugins>
-			<plugin>
-				<artifactId>maven-clean-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>delete-dependency-reduced-pom</id>
-						<phase>clean</phase>
-						<goals>
-							<goal>clean</goal>
-						</goals>
-						<configuration>
-							<filesets>
-								<filesets>
-									<directory>${basedir}</directory>
-									<includes>
-										<include>dependency-reduced-pom.xml</include>
-									</includes>
-								</filesets>
-							</filesets>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<artifactId>maven-shade-plugin</artifactId>
-				<executions>
-					<execution>
-						<phase>package</phase>
-						<goals>
-							<goal>shade</goal>
-						</goals>
-						<configuration>
-							<artifactSet>
-								<includes>
-									<include>org.apache.commons:commons-lang3</include>
-								</includes>
-							</artifactSet>
-							<filters>
-								<filter>
-									<artifact>org.apache.commons:commons-lang3</artifact>
-									<includes>
-										<include>org/apache/commons/lang3/StringUtils.class</include>
-										<include>org/apache/commons/lang3/CharSequenceUtils.class</include>
-									</includes>
-								</filter>
-							</filters>
-							<relocations>
-								<relocation>
-									<pattern>org.apache.commons.lang3</pattern>
-									<shadedPattern>net.sf.michaelo.tomcat.internal.org.apache.commons.lang3</shadedPattern>
-								</relocation>
-							</relocations>
-							<!-- This is necessary due to a bug in maven-shade-plugin -->
-							<promoteTransitiveDependencies>true</promoteTransitiveDependencies>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<artifactId>maven-dependency-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>unpack-site-resources</id>
-						<phase>pre-site</phase>
-						<goals>
-							<goal>unpack</goal>
-						</goals>
-						<configuration>
-							<artifactItems>
-								<artifactItem>
-									<groupId>${project.parent.groupId}</groupId>
-									<artifactId>${project.parent.artifactId}</artifactId>
-									<version>${project.parent.version}</version>
-									<classifier>site-resources</classifier>
-									<type>zip</type>
-									<overWrite>true</overWrite>
-									<outputDirectory>${project.build.directory}/site</outputDirectory>
-								</artifactItem>
-							</artifactItems>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<configuration>
-					<locale>en</locale>
-					<links>
-						<link>https://tomcat.apache.org/tomcat-${tomcatMainVersion}-doc/api</link>
-						<link>https://michael-o.github.io/dirctxsrc/apidocs/</link>
-					</links>
-				</configuration>
-			</plugin>
-		</plugins>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<artifactId>maven-dependency-plugin</artifactId>
+					<executions>
+						<execution>
+							<id>unpack-site-resources</id>
+							<phase>pre-site</phase>
+							<goals>
+								<goal>unpack</goal>
+							</goals>
+							<configuration>
+								<artifactItems>
+									<artifactItem>
+										<groupId>${project.parent.groupId}</groupId>
+										<artifactId>${project.parent.artifactId}</artifactId>
+										<version>${project.parent.version}</version>
+										<classifier>site-resources</classifier>
+										<type>zip</type>
+										<overWrite>true</overWrite>
+										<outputDirectory>${project.build.directory}/site</outputDirectory>
+									</artifactItem>
+								</artifactItems>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 	</build>
-
-	<reporting>
-		<plugins>
-			<plugin>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<configuration>
-					<locale>en</locale>
-					<links>
-						<link>https://tomcat.apache.org/tomcat-${tomcatMainVersion}-doc/api</link>
-						<link>https://michael-o.github.io/dirctxsrc/apidocs/</link>
-					</links>
-				</configuration>
-			</plugin>
-		</plugins>
-	</reporting>
 </project>

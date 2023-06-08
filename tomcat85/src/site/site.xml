@@ -21,18 +21,12 @@
 	name="${project.name}">
 
 	<body>
+		<menu ref="parent" />
+
 		<menu name="${project.name}">
 			<item name="About" href="index.html" />
-			<item name="Download" href="download.html" />
-			<item name="User Guide" collapse="true" href="user-guide.html">
-				<item name="Authenticators" href="authenticators.html" />
-				<item name="Realms" href="realms.html" />
-				<item name="Sample Webapp" href="sample-webapp.html" />
-				<item name="Spring Security" href="spring-security.html" />
-			</item>
 		</menu>
 
-		<menu ref="modules" />
 		<menu ref="reports" />
 	</body>
 
