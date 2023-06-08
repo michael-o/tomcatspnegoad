@@ -29,7 +29,7 @@ About ${project.name}
 * Getting Started
 
   {{{./download.html}Download}} the artifact and read the {{{./user-guide.html}user guide}}
-  to get started. Make sure to read the {{{./changes-report.html}changes}} also.
+  to get started. Make sure to read the {{{https://github.com/michael-o/tomcatspnegoad/releases/tag/${project.version}}release notes}} as well.
 
 * Origin of this Project
 
