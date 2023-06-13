@@ -1,1 +1,0 @@
-typeSearchIndex = [{"l":"All Classes","url":"allclasses-index.html"},{"p":"net.sf.michaelo.tomcat.asn1","l":"OtherNameAsn1ParserTest"}]
