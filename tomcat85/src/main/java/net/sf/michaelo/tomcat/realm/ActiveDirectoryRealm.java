@@ -542,6 +542,9 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 	}
 
 	protected void release(DirContextConnection connection) {
+		if (connection == null)
+			return;
+
 		if (connection.context == null)
 			return;
 
