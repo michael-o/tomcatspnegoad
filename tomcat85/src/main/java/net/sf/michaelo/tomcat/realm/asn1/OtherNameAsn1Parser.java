@@ -40,7 +40,7 @@ public class OtherNameAsn1Parser {
 	private static byte UTF8STRING_TAG = 0x0C;
 
 	private OtherNameAsn1Parser() {
-	};
+	}
 
 	/**
 	 * Parses the DER-encoded ASN.1 {@code SAN:otherName} field into its components:
