@@ -534,8 +534,6 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 				return true;
 		} catch (NamingException e) {
 			logger.error(sm.getString("activeDirectoryRealm.validate.namingException", connection.id), e);
-
-			return false;
 		} finally {
 			close(results);
 		}
