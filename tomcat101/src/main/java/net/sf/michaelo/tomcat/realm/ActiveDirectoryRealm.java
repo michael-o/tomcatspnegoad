@@ -396,7 +396,7 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 							return getPrincipal(gssName, null, true);
 						}
 					} catch (CertificateParsingException e) {
-						logger.warn(sm.getString("sanOtherNameParsingFailed"), e);
+						logger.warn(sm.getString("activeDirectoryRealm.sanOtherNameParsingFailed"), e);
 					}
 				}
 			}
