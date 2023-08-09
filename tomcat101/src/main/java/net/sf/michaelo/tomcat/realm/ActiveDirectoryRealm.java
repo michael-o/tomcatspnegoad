@@ -372,7 +372,7 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 	protected Principal getPrincipal(X509Certificate userCert) {
 		try {
 			Collection<List<?>> san = userCert.getSubjectAlternativeNames();
-			if (san == null)
+			if (san == null || san.isEmpty())
 				return null;
 
 			String dn = userCert.getSubjectX500Principal().getName(X500Principal.RFC2253, X500_PRINCIPAL_OID_MAP);

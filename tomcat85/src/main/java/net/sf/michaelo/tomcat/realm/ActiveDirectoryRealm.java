@@ -1,5 +1,5 @@
 /*
- * Copyright 2013–2021 Michael Osipov
+ * Copyright 2013–2023 Michael Osipov
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -382,7 +382,7 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 	protected Principal getPrincipal(X509Certificate userCert) {
 		try {
 			Collection<List<?>> san = userCert.getSubjectAlternativeNames();
-			if (san == null)
+			if (san == null || san.isEmpty())
 				return null;
 
 			String dn = userCert.getSubjectX500Principal().getName(X500Principal.RFC2253, X500_PRINCIPAL_OID_MAP);
