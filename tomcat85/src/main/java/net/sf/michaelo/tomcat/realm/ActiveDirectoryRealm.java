@@ -388,6 +388,7 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 			String dn = userCert.getSubjectX500Principal().getName(X500Principal.RFC2253, X500_PRINCIPAL_OID_MAP);
 			for (List<?> sanField : san) {
 				Integer nameType = (Integer) sanField.get(0);
+				// SAN's OtherName, see X509Certificate#getSubjectAlternativeNames() Javadoc
 				if (nameType == 0) {
 					byte[] otherName = (byte[]) sanField.get(1);
 					if (logger.isDebugEnabled())
