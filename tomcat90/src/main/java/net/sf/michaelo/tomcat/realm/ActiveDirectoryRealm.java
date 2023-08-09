@@ -402,8 +402,6 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 			}
 		} catch (CertificateParsingException e) {
 			logger.warn(sm.getString("activeDirectoryRealm.sanParsingFailed"), e);
-
-			return null;
 		}
 
 		return null;
