@@ -380,169 +380,169 @@
 <a class="jxr_linenumber" name="L372" href="#L372">372</a> 	<strong class="jxr_keyword">protected</strong> Principal getPrincipal(X509Certificate userCert) {
 <a class="jxr_linenumber" name="L373" href="#L373">373</a> 		<strong class="jxr_keyword">try</strong> {
 <a class="jxr_linenumber" name="L374" href="#L374">374</a> 			Collection&lt;List&lt;?&gt;&gt; san = userCert.getSubjectAlternativeNames();
-<a class="jxr_linenumber" name="L375" href="#L375">375</a> 			<strong class="jxr_keyword">if</strong> (san == <strong class="jxr_keyword">null</strong>)
+<a class="jxr_linenumber" name="L375" href="#L375">375</a> 			<strong class="jxr_keyword">if</strong> (san == <strong class="jxr_keyword">null</strong> || san.isEmpty())
 <a class="jxr_linenumber" name="L376" href="#L376">376</a> 				<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
 <a class="jxr_linenumber" name="L377" href="#L377">377</a> 
 <a class="jxr_linenumber" name="L378" href="#L378">378</a> 			String dn = userCert.getSubjectX500Principal().getName(X500Principal.RFC2253, X500_PRINCIPAL_OID_MAP);
 <a class="jxr_linenumber" name="L379" href="#L379">379</a> 			<strong class="jxr_keyword">for</strong> (List&lt;?&gt; sanField : san) {
 <a class="jxr_linenumber" name="L380" href="#L380">380</a> 				Integer nameType = (Integer) sanField.get(0);
-<a class="jxr_linenumber" name="L381" href="#L381">381</a> 				<strong class="jxr_keyword">if</strong> (nameType == 0) {
-<a class="jxr_linenumber" name="L382" href="#L382">382</a> 					byte[] otherName = (byte[]) sanField.get(1);
-<a class="jxr_linenumber" name="L383" href="#L383">383</a> 					<strong class="jxr_keyword">if</strong> (logger.isDebugEnabled())
-<a class="jxr_linenumber" name="L384" href="#L384">384</a> 						logger.debug(sm.getString(<span class="jxr_string">"activeDirectoryRealm.processingSanOtherName"</span>,
-<a class="jxr_linenumber" name="L385" href="#L385">385</a> 								Base64.encodeBase64String(otherName), dn));
-<a class="jxr_linenumber" name="L386" href="#L386">386</a> 					<strong class="jxr_keyword">try</strong> {
-<a class="jxr_linenumber" name="L387" href="#L387">387</a> 						OtherNameParseResult result = OtherNameAsn1Parser.parse(otherName);
-<a class="jxr_linenumber" name="L388" href="#L388">388</a> 						<strong class="jxr_keyword">if</strong> (Arrays.equals(result.getTypeId(), MS_UPN_OID_BYTES)) {
-<a class="jxr_linenumber" name="L389" href="#L389">389</a> 							String upn = OtherNameAsn1Parser.parseUtf8String(result.getValue());
-<a class="jxr_linenumber" name="L390" href="#L390">390</a> 							<strong class="jxr_keyword">if</strong> (logger.isDebugEnabled())
-<a class="jxr_linenumber" name="L391" href="#L391">391</a> 								logger.debug(sm.getString(<span class="jxr_string">"activeDirectoryRealm.msUpnExtracted"</span>, upn, dn));
-<a class="jxr_linenumber" name="L392" href="#L392">392</a> 
-<a class="jxr_linenumber" name="L393" href="#L393">393</a> 							GSSName gssName = <strong class="jxr_keyword">new</strong> <a name="StubGSSName" href="../../../../../net/sf/michaelo/tomcat/realm/StubGSSName.html#StubGSSName">StubGSSName</a>(upn, MS_UPN);
-<a class="jxr_linenumber" name="L394" href="#L394">394</a> 
-<a class="jxr_linenumber" name="L395" href="#L395">395</a> 							<strong class="jxr_keyword">return</strong> getPrincipal(gssName, <strong class="jxr_keyword">null</strong>, <strong class="jxr_keyword">true</strong>);
-<a class="jxr_linenumber" name="L396" href="#L396">396</a> 						}
-<a class="jxr_linenumber" name="L397" href="#L397">397</a> 					} <strong class="jxr_keyword">catch</strong> (CertificateParsingException e) {
-<a class="jxr_linenumber" name="L398" href="#L398">398</a> 						logger.warn(sm.getString(<span class="jxr_string">"sanOtherNameParsingFailed"</span>), e);
-<a class="jxr_linenumber" name="L399" href="#L399">399</a> 					}
-<a class="jxr_linenumber" name="L400" href="#L400">400</a> 				}
-<a class="jxr_linenumber" name="L401" href="#L401">401</a> 			}
-<a class="jxr_linenumber" name="L402" href="#L402">402</a> 		} <strong class="jxr_keyword">catch</strong> (CertificateParsingException e) {
-<a class="jxr_linenumber" name="L403" href="#L403">403</a> 			logger.warn(sm.getString(<span class="jxr_string">"activeDirectoryRealm.sanParsingFailed"</span>), e);
-<a class="jxr_linenumber" name="L404" href="#L404">404</a> 
-<a class="jxr_linenumber" name="L405" href="#L405">405</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L406" href="#L406">406</a> 		}
-<a class="jxr_linenumber" name="L407" href="#L407">407</a> 
-<a class="jxr_linenumber" name="L408" href="#L408">408</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L409" href="#L409">409</a> 	}
-<a class="jxr_linenumber" name="L410" href="#L410">410</a> 
-<a class="jxr_linenumber" name="L411" href="#L411">411</a> 	@Override
-<a class="jxr_linenumber" name="L412" href="#L412">412</a> 	<strong class="jxr_keyword">protected</strong> Principal getPrincipal(GSSName gssName, GSSCredential gssCredential) {
-<a class="jxr_linenumber" name="L413" href="#L413">413</a> 		<strong class="jxr_keyword">if</strong> (gssName.isAnonymous())
-<a class="jxr_linenumber" name="L414" href="#L414">414</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a name="ActiveDirectoryPrincipal" href="../../../../../net/sf/michaelo/tomcat/realm/ActiveDirectoryPrincipal.html#ActiveDirectoryPrincipal">ActiveDirectoryPrincipal</a>(gssName, Sid.ANONYMOUS_SID, gssCredential);
-<a class="jxr_linenumber" name="L415" href="#L415">415</a> 
-<a class="jxr_linenumber" name="L416" href="#L416">416</a> 		<strong class="jxr_keyword">return</strong> getPrincipal(gssName, gssCredential, <strong class="jxr_keyword">true</strong>);
-<a class="jxr_linenumber" name="L417" href="#L417">417</a> 	}
-<a class="jxr_linenumber" name="L418" href="#L418">418</a> 
-<a class="jxr_linenumber" name="L419" href="#L419">419</a> 	<strong class="jxr_keyword">protected</strong> Principal getPrincipal(GSSName gssName, GSSCredential gssCredential, <strong class="jxr_keyword">boolean</strong> retry) {
-<a class="jxr_linenumber" name="L420" href="#L420">420</a> 		DirContextConnection connection = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L421" href="#L421">421</a> 		<strong class="jxr_keyword">try</strong> {
-<a class="jxr_linenumber" name="L422" href="#L422">422</a> 			connection = acquire();
-<a class="jxr_linenumber" name="L423" href="#L423">423</a> 
-<a class="jxr_linenumber" name="L424" href="#L424">424</a> 			<strong class="jxr_keyword">try</strong> {
-<a class="jxr_linenumber" name="L425" href="#L425">425</a> 				User user = getUser(connection.context, gssName);
-<a class="jxr_linenumber" name="L426" href="#L426">426</a> 
-<a class="jxr_linenumber" name="L427" href="#L427">427</a> 				<strong class="jxr_keyword">if</strong> (user != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L428" href="#L428">428</a> 					List&lt;String&gt; roles = getRoles(connection.context, user);
-<a class="jxr_linenumber" name="L429" href="#L429">429</a> 
-<a class="jxr_linenumber" name="L430" href="#L430">430</a> 					<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a name="ActiveDirectoryPrincipal" href="../../../../../net/sf/michaelo/tomcat/realm/ActiveDirectoryPrincipal.html#ActiveDirectoryPrincipal">ActiveDirectoryPrincipal</a>(user.getGssName(), user.getSid(), roles, gssCredential,
-<a class="jxr_linenumber" name="L431" href="#L431">431</a> 							user.getAdditionalAttributes());
-<a class="jxr_linenumber" name="L432" href="#L432">432</a> 				}
-<a class="jxr_linenumber" name="L433" href="#L433">433</a> 			} <strong class="jxr_keyword">catch</strong> (NamingException e) {
-<a class="jxr_linenumber" name="L434" href="#L434">434</a> 				<em class="jxr_comment">// This construct is an ugly hack for</em>
-<a class="jxr_linenumber" name="L435" href="#L435">435</a> 				<em class="jxr_comment">// https://bugs.openjdk.java.net/browse/JDK-8273402</em>
-<a class="jxr_linenumber" name="L436" href="#L436">436</a> 				<strong class="jxr_keyword">boolean</strong> canRetry = false;
-<a class="jxr_linenumber" name="L437" href="#L437">437</a> 				<strong class="jxr_keyword">if</strong> (e instanceof CommunicationException || e instanceof ServiceUnavailableException)
-<a class="jxr_linenumber" name="L438" href="#L438">438</a> 					canRetry = <strong class="jxr_keyword">true</strong>;
-<a class="jxr_linenumber" name="L439" href="#L439">439</a> 				<strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L440" href="#L440">440</a> 					String explanation = e.getExplanation();
-<a class="jxr_linenumber" name="L441" href="#L441">441</a> 					<strong class="jxr_keyword">if</strong> (explanation.equals(<span class="jxr_string">"LDAP connection has been closed"</span>)
-<a class="jxr_linenumber" name="L442" href="#L442">442</a> 							|| explanation.startsWith(<span class="jxr_string">"LDAP response read timed out, timeout used:"</span>))
-<a class="jxr_linenumber" name="L443" href="#L443">443</a> 						canRetry = <strong class="jxr_keyword">true</strong>;
-<a class="jxr_linenumber" name="L444" href="#L444">444</a> 				}
-<a class="jxr_linenumber" name="L445" href="#L445">445</a> 
-<a class="jxr_linenumber" name="L446" href="#L446">446</a> 				<strong class="jxr_keyword">if</strong> (retry &amp;&amp; canRetry) {
-<a class="jxr_linenumber" name="L447" href="#L447">447</a> 					logger.error(sm.getString(<span class="jxr_string">"activeDirectoryRealm.principalSearchFailed.retry"</span>, gssName), e);
-<a class="jxr_linenumber" name="L448" href="#L448">448</a> 
-<a class="jxr_linenumber" name="L449" href="#L449">449</a> 					close(connection);
-<a class="jxr_linenumber" name="L450" href="#L450">450</a> 
-<a class="jxr_linenumber" name="L451" href="#L451">451</a> 					<strong class="jxr_keyword">return</strong> getPrincipal(gssName, gssCredential, false);
-<a class="jxr_linenumber" name="L452" href="#L452">452</a> 				}
-<a class="jxr_linenumber" name="L453" href="#L453">453</a> 
-<a class="jxr_linenumber" name="L454" href="#L454">454</a> 				logger.error(sm.getString(<span class="jxr_string">"activeDirectoryRealm.principalSearchFailed"</span>, gssName), e);
-<a class="jxr_linenumber" name="L455" href="#L455">455</a> 
-<a class="jxr_linenumber" name="L456" href="#L456">456</a> 				close(connection);
-<a class="jxr_linenumber" name="L457" href="#L457">457</a> 			}
-<a class="jxr_linenumber" name="L458" href="#L458">458</a> 		} <strong class="jxr_keyword">catch</strong> (NamingException e) {
-<a class="jxr_linenumber" name="L459" href="#L459">459</a> 			logger.error(sm.getString(<span class="jxr_string">"activeDirectoryRealm.acquire.namingException"</span>), e);
-<a class="jxr_linenumber" name="L460" href="#L460">460</a> 		} <strong class="jxr_keyword">finally</strong> {
-<a class="jxr_linenumber" name="L461" href="#L461">461</a> 			release(connection);
-<a class="jxr_linenumber" name="L462" href="#L462">462</a> 		}
-<a class="jxr_linenumber" name="L463" href="#L463">463</a> 
-<a class="jxr_linenumber" name="L464" href="#L464">464</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L465" href="#L465">465</a> 	}
-<a class="jxr_linenumber" name="L466" href="#L466">466</a> 
-<a class="jxr_linenumber" name="L467" href="#L467">467</a> 	<strong class="jxr_keyword">protected</strong> DirContextConnection acquire() <strong class="jxr_keyword">throws</strong> NamingException {
-<a class="jxr_linenumber" name="L468" href="#L468">468</a> 		<strong class="jxr_keyword">if</strong> (logger.isDebugEnabled())
-<a class="jxr_linenumber" name="L469" href="#L469">469</a> 			logger.debug(sm.getString(<span class="jxr_string">"activeDirectoryRealm.acquire"</span>));
-<a class="jxr_linenumber" name="L470" href="#L470">470</a> 
-<a class="jxr_linenumber" name="L471" href="#L471">471</a> 		DirContextConnection connection = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L472" href="#L472">472</a> 
-<a class="jxr_linenumber" name="L473" href="#L473">473</a> 		<strong class="jxr_keyword">while</strong> (connection == <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L474" href="#L474">474</a> 			connection = connectionPool.pop();
-<a class="jxr_linenumber" name="L475" href="#L475">475</a> 
-<a class="jxr_linenumber" name="L476" href="#L476">476</a> 			<strong class="jxr_keyword">if</strong> (connection != <strong class="jxr_keyword">null</strong>) {
-<a class="jxr_linenumber" name="L477" href="#L477">477</a> 				<strong class="jxr_keyword">long</strong> idleTime = System.currentTimeMillis() - connection.lastBorrowTime;
-<a class="jxr_linenumber" name="L478" href="#L478">478</a> 				<em class="jxr_comment">// TODO support maxIdleTime = -1 (no expiry)</em>
-<a class="jxr_linenumber" name="L479" href="#L479">479</a> 				<strong class="jxr_keyword">if</strong> (idleTime &gt; maxIdleTime) {
-<a class="jxr_linenumber" name="L480" href="#L480">480</a> 					<strong class="jxr_keyword">if</strong> (logger.isDebugEnabled())
-<a class="jxr_linenumber" name="L481" href="#L481">481</a> 						logger.debug(sm.getString(<span class="jxr_string">"activeDirectoryRealm.exceedMaxIdleTime"</span>, connection.id));
-<a class="jxr_linenumber" name="L482" href="#L482">482</a> 					close(connection);
-<a class="jxr_linenumber" name="L483" href="#L483">483</a> 					connection = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L484" href="#L484">484</a> 				} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L485" href="#L485">485</a> 					<strong class="jxr_keyword">boolean</strong> valid = validate(connection);
-<a class="jxr_linenumber" name="L486" href="#L486">486</a> 					<strong class="jxr_keyword">if</strong> (valid) {
-<a class="jxr_linenumber" name="L487" href="#L487">487</a> 						<strong class="jxr_keyword">if</strong> (logger.isDebugEnabled())
-<a class="jxr_linenumber" name="L488" href="#L488">488</a> 							logger.debug(sm.getString(<span class="jxr_string">"activeDirectoryRealm.reuse"</span>, connection.id));
-<a class="jxr_linenumber" name="L489" href="#L489">489</a> 					} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L490" href="#L490">490</a> 						close(connection);
-<a class="jxr_linenumber" name="L491" href="#L491">491</a> 						connection = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L492" href="#L492">492</a> 					}
-<a class="jxr_linenumber" name="L493" href="#L493">493</a> 				}
-<a class="jxr_linenumber" name="L494" href="#L494">494</a> 			} <strong class="jxr_keyword">else</strong> {
-<a class="jxr_linenumber" name="L495" href="#L495">495</a> 				connection = <strong class="jxr_keyword">new</strong> DirContextConnection();
-<a class="jxr_linenumber" name="L496" href="#L496">496</a> 				open(connection);
-<a class="jxr_linenumber" name="L497" href="#L497">497</a> 			}
-<a class="jxr_linenumber" name="L498" href="#L498">498</a> 		}
-<a class="jxr_linenumber" name="L499" href="#L499">499</a> 
-<a class="jxr_linenumber" name="L500" href="#L500">500</a> 		connection.lastBorrowTime = System.currentTimeMillis();
-<a class="jxr_linenumber" name="L501" href="#L501">501</a> 
-<a class="jxr_linenumber" name="L502" href="#L502">502</a> 		<strong class="jxr_keyword">if</strong> (logger.isDebugEnabled())
-<a class="jxr_linenumber" name="L503" href="#L503">503</a> 			logger.debug(sm.getString(<span class="jxr_string">"activeDirectoryRealm.acquired"</span>, connection.id));
-<a class="jxr_linenumber" name="L504" href="#L504">504</a> 
-<a class="jxr_linenumber" name="L505" href="#L505">505</a> 		<strong class="jxr_keyword">return</strong> connection;
-<a class="jxr_linenumber" name="L506" href="#L506">506</a> 	}
-<a class="jxr_linenumber" name="L507" href="#L507">507</a> 
-<a class="jxr_linenumber" name="L508" href="#L508">508</a> 	<strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">boolean</strong> validate(DirContextConnection connection) {
-<a class="jxr_linenumber" name="L509" href="#L509">509</a> 		<strong class="jxr_keyword">if</strong> (logger.isDebugEnabled())
-<a class="jxr_linenumber" name="L510" href="#L510">510</a> 			logger.debug(sm.getString(<span class="jxr_string">"activeDirectoryRealm.validate"</span>, connection.id));
-<a class="jxr_linenumber" name="L511" href="#L511">511</a> 
-<a class="jxr_linenumber" name="L512" href="#L512">512</a> 		SearchControls controls = <strong class="jxr_keyword">new</strong> SearchControls();
-<a class="jxr_linenumber" name="L513" href="#L513">513</a> 		controls.setSearchScope(SearchControls.OBJECT_SCOPE);
-<a class="jxr_linenumber" name="L514" href="#L514">514</a> 		controls.setCountLimit(1);
-<a class="jxr_linenumber" name="L515" href="#L515">515</a> 		controls.setReturningAttributes(<strong class="jxr_keyword">new</strong> String[] { <span class="jxr_string">"objectClass"</span> });
-<a class="jxr_linenumber" name="L516" href="#L516">516</a> 		<em class="jxr_comment">// This applies to a server-side time limit which is actually translated to a second resolution and</em>
-<a class="jxr_linenumber" name="L517" href="#L517">517</a> 		<em class="jxr_comment">// does not apply to a socket read timeout</em>
-<a class="jxr_linenumber" name="L518" href="#L518">518</a> 		controls.setTimeLimit(500);
-<a class="jxr_linenumber" name="L519" href="#L519">519</a> 
-<a class="jxr_linenumber" name="L520" href="#L520">520</a> 		NamingEnumeration&lt;SearchResult&gt; results = <strong class="jxr_keyword">null</strong>;
-<a class="jxr_linenumber" name="L521" href="#L521">521</a> 		<strong class="jxr_keyword">try</strong> {
-<a class="jxr_linenumber" name="L522" href="#L522">522</a> 			results = connection.context.search(<span class="jxr_string">""</span>, <span class="jxr_string">"objectclass=*"</span>, controls);
-<a class="jxr_linenumber" name="L523" href="#L523">523</a> 
-<a class="jxr_linenumber" name="L524" href="#L524">524</a> 			<strong class="jxr_keyword">if</strong> (results.hasMore())
-<a class="jxr_linenumber" name="L525" href="#L525">525</a> 				<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
-<a class="jxr_linenumber" name="L526" href="#L526">526</a> 		} <strong class="jxr_keyword">catch</strong> (NamingException e) {
-<a class="jxr_linenumber" name="L527" href="#L527">527</a> 			logger.error(sm.getString(<span class="jxr_string">"activeDirectoryRealm.validate.namingException"</span>, connection.id), e);
-<a class="jxr_linenumber" name="L528" href="#L528">528</a> 
-<a class="jxr_linenumber" name="L529" href="#L529">529</a> 			<strong class="jxr_keyword">return</strong> false;
-<a class="jxr_linenumber" name="L530" href="#L530">530</a> 		} <strong class="jxr_keyword">finally</strong> {
-<a class="jxr_linenumber" name="L531" href="#L531">531</a> 			close(results);
-<a class="jxr_linenumber" name="L532" href="#L532">532</a> 		}
+<a class="jxr_linenumber" name="L381" href="#L381">381</a> 				<em class="jxr_comment">// SAN's OtherName, see X509Certificate#getSubjectAlternativeNames() Javadoc</em>
+<a class="jxr_linenumber" name="L382" href="#L382">382</a> 				<strong class="jxr_keyword">if</strong> (nameType == 0) {
+<a class="jxr_linenumber" name="L383" href="#L383">383</a> 					byte[] otherName = (byte[]) sanField.get(1);
+<a class="jxr_linenumber" name="L384" href="#L384">384</a> 					<strong class="jxr_keyword">if</strong> (logger.isDebugEnabled())
+<a class="jxr_linenumber" name="L385" href="#L385">385</a> 						logger.debug(sm.getString(<span class="jxr_string">"activeDirectoryRealm.processingSanOtherName"</span>,
+<a class="jxr_linenumber" name="L386" href="#L386">386</a> 								Base64.encodeBase64String(otherName), dn));
+<a class="jxr_linenumber" name="L387" href="#L387">387</a> 					<strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L388" href="#L388">388</a> 						OtherNameParseResult result = OtherNameAsn1Parser.parse(otherName);
+<a class="jxr_linenumber" name="L389" href="#L389">389</a> 						<strong class="jxr_keyword">if</strong> (Arrays.equals(result.getTypeId(), MS_UPN_OID_BYTES)) {
+<a class="jxr_linenumber" name="L390" href="#L390">390</a> 							String upn = OtherNameAsn1Parser.parseUtf8String(result.getValue());
+<a class="jxr_linenumber" name="L391" href="#L391">391</a> 							<strong class="jxr_keyword">if</strong> (logger.isDebugEnabled())
+<a class="jxr_linenumber" name="L392" href="#L392">392</a> 								logger.debug(sm.getString(<span class="jxr_string">"activeDirectoryRealm.msUpnExtracted"</span>, upn, dn));
+<a class="jxr_linenumber" name="L393" href="#L393">393</a> 
+<a class="jxr_linenumber" name="L394" href="#L394">394</a> 							GSSName gssName = <strong class="jxr_keyword">new</strong> <a name="StubGSSName" href="../../../../../net/sf/michaelo/tomcat/realm/StubGSSName.html#StubGSSName">StubGSSName</a>(upn, MS_UPN);
+<a class="jxr_linenumber" name="L395" href="#L395">395</a> 
+<a class="jxr_linenumber" name="L396" href="#L396">396</a> 							<strong class="jxr_keyword">return</strong> getPrincipal(gssName, <strong class="jxr_keyword">null</strong>, <strong class="jxr_keyword">true</strong>);
+<a class="jxr_linenumber" name="L397" href="#L397">397</a> 						}
+<a class="jxr_linenumber" name="L398" href="#L398">398</a> 					} <strong class="jxr_keyword">catch</strong> (CertificateParsingException e) {
+<a class="jxr_linenumber" name="L399" href="#L399">399</a> 						logger.warn(sm.getString(<span class="jxr_string">"activeDirectoryRealm.sanOtherNameParsingFailed"</span>), e);
+<a class="jxr_linenumber" name="L400" href="#L400">400</a> 					}
+<a class="jxr_linenumber" name="L401" href="#L401">401</a> 				}
+<a class="jxr_linenumber" name="L402" href="#L402">402</a> 			}
+<a class="jxr_linenumber" name="L403" href="#L403">403</a> 		} <strong class="jxr_keyword">catch</strong> (CertificateParsingException e) {
+<a class="jxr_linenumber" name="L404" href="#L404">404</a> 			logger.warn(sm.getString(<span class="jxr_string">"activeDirectoryRealm.sanParsingFailed"</span>), e);
+<a class="jxr_linenumber" name="L405" href="#L405">405</a> 		}
+<a class="jxr_linenumber" name="L406" href="#L406">406</a> 
+<a class="jxr_linenumber" name="L407" href="#L407">407</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L408" href="#L408">408</a> 	}
+<a class="jxr_linenumber" name="L409" href="#L409">409</a> 
+<a class="jxr_linenumber" name="L410" href="#L410">410</a> 	@Override
+<a class="jxr_linenumber" name="L411" href="#L411">411</a> 	<strong class="jxr_keyword">protected</strong> Principal getPrincipal(GSSName gssName, GSSCredential gssCredential) {
+<a class="jxr_linenumber" name="L412" href="#L412">412</a> 		<strong class="jxr_keyword">if</strong> (gssName.isAnonymous())
+<a class="jxr_linenumber" name="L413" href="#L413">413</a> 			<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a name="ActiveDirectoryPrincipal" href="../../../../../net/sf/michaelo/tomcat/realm/ActiveDirectoryPrincipal.html#ActiveDirectoryPrincipal">ActiveDirectoryPrincipal</a>(gssName, Sid.ANONYMOUS_SID, gssCredential);
+<a class="jxr_linenumber" name="L414" href="#L414">414</a> 
+<a class="jxr_linenumber" name="L415" href="#L415">415</a> 		<strong class="jxr_keyword">return</strong> getPrincipal(gssName, gssCredential, <strong class="jxr_keyword">true</strong>);
+<a class="jxr_linenumber" name="L416" href="#L416">416</a> 	}
+<a class="jxr_linenumber" name="L417" href="#L417">417</a> 
+<a class="jxr_linenumber" name="L418" href="#L418">418</a> 	<strong class="jxr_keyword">protected</strong> Principal getPrincipal(GSSName gssName, GSSCredential gssCredential, <strong class="jxr_keyword">boolean</strong> retry) {
+<a class="jxr_linenumber" name="L419" href="#L419">419</a> 		DirContextConnection connection = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L420" href="#L420">420</a> 		<strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L421" href="#L421">421</a> 			connection = acquire();
+<a class="jxr_linenumber" name="L422" href="#L422">422</a> 
+<a class="jxr_linenumber" name="L423" href="#L423">423</a> 			<strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L424" href="#L424">424</a> 				User user = getUser(connection.context, gssName);
+<a class="jxr_linenumber" name="L425" href="#L425">425</a> 
+<a class="jxr_linenumber" name="L426" href="#L426">426</a> 				<strong class="jxr_keyword">if</strong> (user != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L427" href="#L427">427</a> 					List&lt;String&gt; roles = getRoles(connection.context, user);
+<a class="jxr_linenumber" name="L428" href="#L428">428</a> 
+<a class="jxr_linenumber" name="L429" href="#L429">429</a> 					<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> <a name="ActiveDirectoryPrincipal" href="../../../../../net/sf/michaelo/tomcat/realm/ActiveDirectoryPrincipal.html#ActiveDirectoryPrincipal">ActiveDirectoryPrincipal</a>(user.getGssName(), user.getSid(), roles, gssCredential,
+<a class="jxr_linenumber" name="L430" href="#L430">430</a> 							user.getAdditionalAttributes());
+<a class="jxr_linenumber" name="L431" href="#L431">431</a> 				}
+<a class="jxr_linenumber" name="L432" href="#L432">432</a> 			} <strong class="jxr_keyword">catch</strong> (NamingException e) {
+<a class="jxr_linenumber" name="L433" href="#L433">433</a> 				<em class="jxr_comment">// This construct is an ugly hack for</em>
+<a class="jxr_linenumber" name="L434" href="#L434">434</a> 				<em class="jxr_comment">// https://bugs.openjdk.java.net/browse/JDK-8273402</em>
+<a class="jxr_linenumber" name="L435" href="#L435">435</a> 				<strong class="jxr_keyword">boolean</strong> canRetry = false;
+<a class="jxr_linenumber" name="L436" href="#L436">436</a> 				<strong class="jxr_keyword">if</strong> (e instanceof CommunicationException || e instanceof ServiceUnavailableException)
+<a class="jxr_linenumber" name="L437" href="#L437">437</a> 					canRetry = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L438" href="#L438">438</a> 				<strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L439" href="#L439">439</a> 					String explanation = e.getExplanation();
+<a class="jxr_linenumber" name="L440" href="#L440">440</a> 					<strong class="jxr_keyword">if</strong> (explanation.equals(<span class="jxr_string">"LDAP connection has been closed"</span>)
+<a class="jxr_linenumber" name="L441" href="#L441">441</a> 							|| explanation.startsWith(<span class="jxr_string">"LDAP response read timed out, timeout used:"</span>))
+<a class="jxr_linenumber" name="L442" href="#L442">442</a> 						canRetry = <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L443" href="#L443">443</a> 				}
+<a class="jxr_linenumber" name="L444" href="#L444">444</a> 
+<a class="jxr_linenumber" name="L445" href="#L445">445</a> 				<strong class="jxr_keyword">if</strong> (retry &amp;&amp; canRetry) {
+<a class="jxr_linenumber" name="L446" href="#L446">446</a> 					logger.error(sm.getString(<span class="jxr_string">"activeDirectoryRealm.principalSearchFailed.retry"</span>, gssName), e);
+<a class="jxr_linenumber" name="L447" href="#L447">447</a> 
+<a class="jxr_linenumber" name="L448" href="#L448">448</a> 					close(connection);
+<a class="jxr_linenumber" name="L449" href="#L449">449</a> 
+<a class="jxr_linenumber" name="L450" href="#L450">450</a> 					<strong class="jxr_keyword">return</strong> getPrincipal(gssName, gssCredential, false);
+<a class="jxr_linenumber" name="L451" href="#L451">451</a> 				}
+<a class="jxr_linenumber" name="L452" href="#L452">452</a> 
+<a class="jxr_linenumber" name="L453" href="#L453">453</a> 				logger.error(sm.getString(<span class="jxr_string">"activeDirectoryRealm.principalSearchFailed"</span>, gssName), e);
+<a class="jxr_linenumber" name="L454" href="#L454">454</a> 
+<a class="jxr_linenumber" name="L455" href="#L455">455</a> 				close(connection);
+<a class="jxr_linenumber" name="L456" href="#L456">456</a> 			}
+<a class="jxr_linenumber" name="L457" href="#L457">457</a> 		} <strong class="jxr_keyword">catch</strong> (NamingException e) {
+<a class="jxr_linenumber" name="L458" href="#L458">458</a> 			logger.error(sm.getString(<span class="jxr_string">"activeDirectoryRealm.acquire.namingException"</span>), e);
+<a class="jxr_linenumber" name="L459" href="#L459">459</a> 		} <strong class="jxr_keyword">finally</strong> {
+<a class="jxr_linenumber" name="L460" href="#L460">460</a> 			release(connection);
+<a class="jxr_linenumber" name="L461" href="#L461">461</a> 		}
+<a class="jxr_linenumber" name="L462" href="#L462">462</a> 
+<a class="jxr_linenumber" name="L463" href="#L463">463</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L464" href="#L464">464</a> 	}
+<a class="jxr_linenumber" name="L465" href="#L465">465</a> 
+<a class="jxr_linenumber" name="L466" href="#L466">466</a> 	<strong class="jxr_keyword">protected</strong> DirContextConnection acquire() <strong class="jxr_keyword">throws</strong> NamingException {
+<a class="jxr_linenumber" name="L467" href="#L467">467</a> 		<strong class="jxr_keyword">if</strong> (logger.isDebugEnabled())
+<a class="jxr_linenumber" name="L468" href="#L468">468</a> 			logger.debug(sm.getString(<span class="jxr_string">"activeDirectoryRealm.acquire"</span>));
+<a class="jxr_linenumber" name="L469" href="#L469">469</a> 
+<a class="jxr_linenumber" name="L470" href="#L470">470</a> 		DirContextConnection connection = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L471" href="#L471">471</a> 
+<a class="jxr_linenumber" name="L472" href="#L472">472</a> 		<strong class="jxr_keyword">while</strong> (connection == <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L473" href="#L473">473</a> 			connection = connectionPool.pop();
+<a class="jxr_linenumber" name="L474" href="#L474">474</a> 
+<a class="jxr_linenumber" name="L475" href="#L475">475</a> 			<strong class="jxr_keyword">if</strong> (connection != <strong class="jxr_keyword">null</strong>) {
+<a class="jxr_linenumber" name="L476" href="#L476">476</a> 				<strong class="jxr_keyword">long</strong> idleTime = System.currentTimeMillis() - connection.lastBorrowTime;
+<a class="jxr_linenumber" name="L477" href="#L477">477</a> 				<em class="jxr_comment">// TODO support maxIdleTime = -1 (no expiry)</em>
+<a class="jxr_linenumber" name="L478" href="#L478">478</a> 				<strong class="jxr_keyword">if</strong> (idleTime &gt; maxIdleTime) {
+<a class="jxr_linenumber" name="L479" href="#L479">479</a> 					<strong class="jxr_keyword">if</strong> (logger.isDebugEnabled())
+<a class="jxr_linenumber" name="L480" href="#L480">480</a> 						logger.debug(sm.getString(<span class="jxr_string">"activeDirectoryRealm.exceedMaxIdleTime"</span>, connection.id));
+<a class="jxr_linenumber" name="L481" href="#L481">481</a> 					close(connection);
+<a class="jxr_linenumber" name="L482" href="#L482">482</a> 					connection = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L483" href="#L483">483</a> 				} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L484" href="#L484">484</a> 					<strong class="jxr_keyword">boolean</strong> valid = validate(connection);
+<a class="jxr_linenumber" name="L485" href="#L485">485</a> 					<strong class="jxr_keyword">if</strong> (valid) {
+<a class="jxr_linenumber" name="L486" href="#L486">486</a> 						<strong class="jxr_keyword">if</strong> (logger.isDebugEnabled())
+<a class="jxr_linenumber" name="L487" href="#L487">487</a> 							logger.debug(sm.getString(<span class="jxr_string">"activeDirectoryRealm.reuse"</span>, connection.id));
+<a class="jxr_linenumber" name="L488" href="#L488">488</a> 					} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L489" href="#L489">489</a> 						close(connection);
+<a class="jxr_linenumber" name="L490" href="#L490">490</a> 						connection = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L491" href="#L491">491</a> 					}
+<a class="jxr_linenumber" name="L492" href="#L492">492</a> 				}
+<a class="jxr_linenumber" name="L493" href="#L493">493</a> 			} <strong class="jxr_keyword">else</strong> {
+<a class="jxr_linenumber" name="L494" href="#L494">494</a> 				connection = <strong class="jxr_keyword">new</strong> DirContextConnection();
+<a class="jxr_linenumber" name="L495" href="#L495">495</a> 				open(connection);
+<a class="jxr_linenumber" name="L496" href="#L496">496</a> 			}
+<a class="jxr_linenumber" name="L497" href="#L497">497</a> 		}
+<a class="jxr_linenumber" name="L498" href="#L498">498</a> 
+<a class="jxr_linenumber" name="L499" href="#L499">499</a> 		connection.lastBorrowTime = System.currentTimeMillis();
+<a class="jxr_linenumber" name="L500" href="#L500">500</a> 
+<a class="jxr_linenumber" name="L501" href="#L501">501</a> 		<strong class="jxr_keyword">if</strong> (logger.isDebugEnabled())
+<a class="jxr_linenumber" name="L502" href="#L502">502</a> 			logger.debug(sm.getString(<span class="jxr_string">"activeDirectoryRealm.acquired"</span>, connection.id));
+<a class="jxr_linenumber" name="L503" href="#L503">503</a> 
+<a class="jxr_linenumber" name="L504" href="#L504">504</a> 		<strong class="jxr_keyword">return</strong> connection;
+<a class="jxr_linenumber" name="L505" href="#L505">505</a> 	}
+<a class="jxr_linenumber" name="L506" href="#L506">506</a> 
+<a class="jxr_linenumber" name="L507" href="#L507">507</a> 	<strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">boolean</strong> validate(DirContextConnection connection) {
+<a class="jxr_linenumber" name="L508" href="#L508">508</a> 		<strong class="jxr_keyword">if</strong> (logger.isDebugEnabled())
+<a class="jxr_linenumber" name="L509" href="#L509">509</a> 			logger.debug(sm.getString(<span class="jxr_string">"activeDirectoryRealm.validate"</span>, connection.id));
+<a class="jxr_linenumber" name="L510" href="#L510">510</a> 
+<a class="jxr_linenumber" name="L511" href="#L511">511</a> 		SearchControls controls = <strong class="jxr_keyword">new</strong> SearchControls();
+<a class="jxr_linenumber" name="L512" href="#L512">512</a> 		controls.setSearchScope(SearchControls.OBJECT_SCOPE);
+<a class="jxr_linenumber" name="L513" href="#L513">513</a> 		controls.setCountLimit(1);
+<a class="jxr_linenumber" name="L514" href="#L514">514</a> 		controls.setReturningAttributes(<strong class="jxr_keyword">new</strong> String[] { <span class="jxr_string">"objectClass"</span> });
+<a class="jxr_linenumber" name="L515" href="#L515">515</a> 		<em class="jxr_comment">// This applies to a server-side time limit which is actually translated to a second resolution and</em>
+<a class="jxr_linenumber" name="L516" href="#L516">516</a> 		<em class="jxr_comment">// does not apply to a socket read timeout</em>
+<a class="jxr_linenumber" name="L517" href="#L517">517</a> 		controls.setTimeLimit(500);
+<a class="jxr_linenumber" name="L518" href="#L518">518</a> 
+<a class="jxr_linenumber" name="L519" href="#L519">519</a> 		NamingEnumeration&lt;SearchResult&gt; results = <strong class="jxr_keyword">null</strong>;
+<a class="jxr_linenumber" name="L520" href="#L520">520</a> 		<strong class="jxr_keyword">try</strong> {
+<a class="jxr_linenumber" name="L521" href="#L521">521</a> 			results = connection.context.search(<span class="jxr_string">""</span>, <span class="jxr_string">"objectclass=*"</span>, controls);
+<a class="jxr_linenumber" name="L522" href="#L522">522</a> 
+<a class="jxr_linenumber" name="L523" href="#L523">523</a> 			<strong class="jxr_keyword">if</strong> (results.hasMore())
+<a class="jxr_linenumber" name="L524" href="#L524">524</a> 				<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">true</strong>;
+<a class="jxr_linenumber" name="L525" href="#L525">525</a> 		} <strong class="jxr_keyword">catch</strong> (NamingException e) {
+<a class="jxr_linenumber" name="L526" href="#L526">526</a> 			logger.error(sm.getString(<span class="jxr_string">"activeDirectoryRealm.validate.namingException"</span>, connection.id), e);
+<a class="jxr_linenumber" name="L527" href="#L527">527</a> 		} <strong class="jxr_keyword">finally</strong> {
+<a class="jxr_linenumber" name="L528" href="#L528">528</a> 			close(results);
+<a class="jxr_linenumber" name="L529" href="#L529">529</a> 		}
+<a class="jxr_linenumber" name="L530" href="#L530">530</a> 
+<a class="jxr_linenumber" name="L531" href="#L531">531</a> 		<strong class="jxr_keyword">return</strong> false;
+<a class="jxr_linenumber" name="L532" href="#L532">532</a> 	}
 <a class="jxr_linenumber" name="L533" href="#L533">533</a> 
-<a class="jxr_linenumber" name="L534" href="#L534">534</a> 		<strong class="jxr_keyword">return</strong> false;
-<a class="jxr_linenumber" name="L535" href="#L535">535</a> 	}
-<a class="jxr_linenumber" name="L536" href="#L536">536</a> 
-<a class="jxr_linenumber" name="L537" href="#L537">537</a> 	<strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">void</strong> release(DirContextConnection connection) {
+<a class="jxr_linenumber" name="L534" href="#L534">534</a> 	<strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">void</strong> release(DirContextConnection connection) {
+<a class="jxr_linenumber" name="L535" href="#L535">535</a> 		<strong class="jxr_keyword">if</strong> (connection == <strong class="jxr_keyword">null</strong>)
+<a class="jxr_linenumber" name="L536" href="#L536">536</a> 			<strong class="jxr_keyword">return</strong>;
+<a class="jxr_linenumber" name="L537" href="#L537">537</a> 
 <a class="jxr_linenumber" name="L538" href="#L538">538</a> 		<strong class="jxr_keyword">if</strong> (connection.context == <strong class="jxr_keyword">null</strong>)
 <a class="jxr_linenumber" name="L539" href="#L539">539</a> 			<strong class="jxr_keyword">return</strong>;
 <a class="jxr_linenumber" name="L540" href="#L540">540</a> 
