@@ -20,7 +20,7 @@
 	<parent>
 		<groupId>net.sf.michael-o.tomcat</groupId>
 		<artifactId>tomcat-authnz-spnego-ad</artifactId>
-		<version>4.0.1-SNAPSHOT</version>
+		<version>4.0.1</version>
 	</parent>
 
 	<artifactId>tomcat101-authnz-spnego-ad</artifactId>
