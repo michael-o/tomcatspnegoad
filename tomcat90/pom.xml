@@ -26,17 +26,14 @@
 	<artifactId>tomcat90-authnz-spnego-ad</artifactId>
 	<packaging>jar</packaging>
 
-	<name>SPNEGO/Kerberos Authenticator and Active Directory Realm for Apache Tomcat ${tomcatMainVersion}</name>
+	<name>SPNEGO/Kerberos Authenticator and Active Directory Realm for Apache Tomcat 9.0</name>
 
 	<properties>
 		<javaVersion>8</javaVersion>
 		<maven.compiler.source>${javaVersion}</maven.compiler.source>
 		<maven.compiler.target>${javaVersion}</maven.compiler.target>
 		<maven.compiler.release>${javaVersion}</maven.compiler.release>
-
-		<tomcatMainVersion>9.0</tomcatMainVersion>
-		<tomcatPatchVersion>75</tomcatPatchVersion>
-		<tomcatVersion>${tomcatMainVersion}.${tomcatPatchVersion}</tomcatVersion>
+		<tomcatVersion>9.0.75</tomcatVersion>
 	</properties>
 
 	<dependencies>
@@ -144,9 +141,9 @@
 				<configuration>
 					<locale>en</locale>
 					<links>
-						<link>https://tomcat.apache.org/tomcat-${tomcatMainVersion}-doc/api</link>
-						<link>https://tomcat.apache.org/tomcat-${tomcatMainVersion}-doc/servletapi</link>
-						<link>https://tomcat.apache.org/tomcat-${tomcatMainVersion}-doc/jaspicapi</link>
+						<link>https://tomcat.apache.org/tomcat-9.0-doc/api</link>
+						<link>https://tomcat.apache.org/tomcat-9.0-doc/servletapi</link>
+						<link>https://tomcat.apache.org/tomcat-9.0-doc/jaspicapi</link>
 						<link>https://michael-o.github.io/dirctxsrc/apidocs/</link>
 					</links>
 				</configuration>
@@ -161,9 +158,9 @@
 				<configuration>
 					<locale>en</locale>
 					<links>
-						<link>https://tomcat.apache.org/tomcat-${tomcatMainVersion}-doc/api</link>
-						<link>https://tomcat.apache.org/tomcat-${tomcatMainVersion}-doc/servletapi</link>
-						<link>https://tomcat.apache.org/tomcat-${tomcatMainVersion}-doc/jaspicapi</link>
+						<link>https://tomcat.apache.org/tomcat-9.0-doc/api</link>
+						<link>https://tomcat.apache.org/tomcat-9.0-doc/servletapi</link>
+						<link>https://tomcat.apache.org/tomcat-9.0-doc/jaspicapi</link>
 						<link>https://michael-o.github.io/dirctxsrc/apidocs/</link>
 					</links>
 				</configuration>
