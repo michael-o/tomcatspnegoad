@@ -33,14 +33,14 @@
 		<maven.compiler.source>${javaVersion}</maven.compiler.source>
 		<maven.compiler.target>${javaVersion}</maven.compiler.target>
 		<maven.compiler.release>${javaVersion}</maven.compiler.release>
-		<tomcatVersion>9.0.80</tomcatVersion>
+		<tomcatVersion>9.0.87</tomcatVersion>
 	</properties>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
-			<version>3.13.0</version>
+			<version>3.14.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.tomcat</groupId>
