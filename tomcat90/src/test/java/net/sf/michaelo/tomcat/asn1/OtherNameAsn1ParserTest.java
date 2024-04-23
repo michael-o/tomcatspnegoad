@@ -15,8 +15,6 @@
  */
 package net.sf.michaelo.tomcat.asn1;
 
-import java.security.cert.CertificateParsingException;
-
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
 import org.junit.Assert;
@@ -32,15 +30,9 @@ public class OtherNameAsn1ParserTest {
 		OtherNameAsn1Parser.parseUtf8String(null);
 	}
 
-	@Test
+	@Test(expected = IllegalArgumentException.class)
 	public void testEmptyUtf8String() {
-		try {
-			OtherNameAsn1Parser.parseUtf8String(new byte[0]);
-			Assert.fail("Exception expected");
-		} catch (CertificateParsingException e) {
-			MatcherAssert.assertThat(e.getMessage(),
-					CoreMatchers.equalTo("string type tag not available, buffer is empty"));
-		}
+		OtherNameAsn1Parser.parseUtf8String(new byte[0]);
 	}
 
 	@Test
@@ -50,23 +42,17 @@ public class OtherNameAsn1ParserTest {
 		try {
 			OtherNameAsn1Parser.parseUtf8String(otherName);
 			Assert.fail("Exception expected");
-		} catch (CertificateParsingException e) {
+		} catch (IllegalArgumentException e) {
 			MatcherAssert.assertThat(e.getMessage(),
-					CoreMatchers.startsWith("string must start with a UTF8String tag, but starts with"));
+					CoreMatchers.equalTo("Expected to find value [12] but found value [19]"));
 		}
 	}
 
-	@Test
+	@Test(expected = ArrayIndexOutOfBoundsException.class)
 	public void testTwoByteLengthUtf8String() {
 		byte[] otherName = { (byte) 0x0C, (byte) 0x81, (byte) 0x80 };
 
-		try {
-			OtherNameAsn1Parser.parseUtf8String(otherName);
-			Assert.fail("Exception expected");
-		} catch (CertificateParsingException e) {
-			MatcherAssert.assertThat(e.getMessage(),
-					CoreMatchers.startsWith("UTF8String length (128 B) is larger than the buffer offers"));
-		}
+		OtherNameAsn1Parser.parseUtf8String(otherName);
 	}
 
 	@Test
@@ -91,15 +77,9 @@ public class OtherNameAsn1ParserTest {
 		OtherNameAsn1Parser.parse(null);
 	}
 
-	@Test
+	@Test(expected = IllegalArgumentException.class)
 	public void testEmptyOtherName() {
-		try {
-			OtherNameAsn1Parser.parse(new byte[0]);
-			Assert.fail("Exception expected");
-		} catch (CertificateParsingException e) {
-			MatcherAssert.assertThat(e.getMessage(),
-					CoreMatchers.equalTo("otherName type tag not available, buffer is empty"));
-		}
+		OtherNameAsn1Parser.parse(new byte[0]);
 	}
 
 	@Test
@@ -109,61 +89,44 @@ public class OtherNameAsn1ParserTest {
 		try {
 			OtherNameAsn1Parser.parse(otherName);
 			Assert.fail("Exception expected");
-		} catch (CertificateParsingException e) {
+		} catch (IllegalArgumentException e) {
 			MatcherAssert.assertThat(e.getMessage(),
-					CoreMatchers.startsWith("otherName must start with a SEQUENCE tag, but starts with "));
+					CoreMatchers.equalTo("Expected to find value [48] but found value [49]"));
 		}
 	}
 
-	@Test
+	@Test(expected = ArrayIndexOutOfBoundsException.class)
 	public void testNullLength() {
 		byte[] otherName = { (byte) 0x30 };
 
-		try {
-			OtherNameAsn1Parser.parse(otherName);
-			Assert.fail("Exception expected");
-		} catch (CertificateParsingException e) {
-			MatcherAssert.assertThat(e.getMessage(),
-					CoreMatchers.equalTo("Type length not available, buffer is empty"));
-		}
+		OtherNameAsn1Parser.parse(otherName);
 	}
 
-	@Test
+	@Test(expected = ArrayIndexOutOfBoundsException.class)
 	public void testIndefiniteLength() {
 		byte[] otherName = { (byte) 0x30, (byte) 0x80 };
 
-		try {
-			OtherNameAsn1Parser.parse(otherName);
-			Assert.fail("Exception expected");
-		} catch (CertificateParsingException e) {
-			MatcherAssert.assertThat(e.getMessage(), CoreMatchers.equalTo("Indefinite type length is not supported"));
-		}
+		OtherNameAsn1Parser.parse(otherName);
 	}
 
-	@Test
+	@Test(expected = ArrayIndexOutOfBoundsException.class)
 	public void testMoreThanTwoByteLength() {
 		byte[] otherName = { (byte) 0x30, (byte) 0x83 };
 
 		try {
 			OtherNameAsn1Parser.parse(otherName);
 			Assert.fail("Exception expected");
-		} catch (CertificateParsingException e) {
+		} catch (IllegalArgumentException e) {
 			MatcherAssert.assertThat(e.getMessage(),
 					CoreMatchers.equalTo("Type length above 64 KiB ist not supported"));
 		}
 	}
 
-	@Test
+	@Test(expected = ArrayIndexOutOfBoundsException.class)
 	public void testTwoByteLength1() {
 		byte[] otherName = { (byte) 0x30, (byte) 0x82 };
 
-		try {
-			OtherNameAsn1Parser.parse(otherName);
-			Assert.fail("Exception expected");
-		} catch (CertificateParsingException e) {
-			MatcherAssert.assertThat(e.getMessage(),
-					CoreMatchers.startsWith("Type length bytes (2 B) are larger than the buffer offers"));
-		}
+		OtherNameAsn1Parser.parse(otherName);
 	}
 
 	@Test
@@ -173,9 +136,9 @@ public class OtherNameAsn1ParserTest {
 		try {
 			OtherNameAsn1Parser.parse(otherName);
 			Assert.fail("Exception expected");
-		} catch (CertificateParsingException e) {
-			MatcherAssert.assertThat(e.getMessage(),
-					CoreMatchers.startsWith("SEQUENCE length (128 B) is larger than the buffer offers"));
+		} catch (IllegalArgumentException e) {
+			MatcherAssert.assertThat(e.getMessage(), CoreMatchers
+					.equalTo("Invalid length [128] bytes reported when the input data length is [0] bytes"));
 		}
 	}
 
@@ -186,9 +149,9 @@ public class OtherNameAsn1ParserTest {
 		try {
 			OtherNameAsn1Parser.parse(otherName);
 			Assert.fail("Exception expected");
-		} catch (CertificateParsingException e) {
-			MatcherAssert.assertThat(e.getMessage(),
-					CoreMatchers.startsWith("SEQUENCE length (127 B) is larger than the buffer offers"));
+		} catch (IllegalArgumentException e) {
+			MatcherAssert.assertThat(e.getMessage(), CoreMatchers
+					.equalTo("Invalid length [127] bytes reported when the input data length is [0] bytes"));
 		}
 	}
 
@@ -199,9 +162,9 @@ public class OtherNameAsn1ParserTest {
 		try {
 			OtherNameAsn1Parser.parse(otherName);
 			Assert.fail("Exception expected");
-		} catch (CertificateParsingException e) {
-			MatcherAssert.assertThat(e.getMessage(),
-					CoreMatchers.startsWith("SEQUENCE length (65407 B) is larger than the buffer offers"));
+		} catch (IllegalArgumentException e) {
+			MatcherAssert.assertThat(e.getMessage(), CoreMatchers
+					.equalTo("Invalid length [65,407] bytes reported when the input data length is [0] bytes"));
 		}
 	}
 
@@ -212,35 +175,24 @@ public class OtherNameAsn1ParserTest {
 		try {
 			OtherNameAsn1Parser.parse(otherName);
 			Assert.fail("Exception expected");
-		} catch (CertificateParsingException e) {
-			MatcherAssert.assertThat(e.getMessage(),
-					CoreMatchers.startsWith("SEQUENCE length (65535 B) is larger than the buffer offers"));
+		} catch (IllegalArgumentException e) {
+			MatcherAssert.assertThat(e.getMessage(), CoreMatchers
+					.startsWith("Invalid length [65,535] bytes reported when the input data length is [0] bytes"));
 		}
 	}
 
-	@Test
-	public void testParseNullOid() {
+	@Test(expected = ArrayIndexOutOfBoundsException.class)
+	public void testParseZeroLengthSequence() {
 		byte[] otherName = { (byte) 0x30, (byte) 0x00 };
 
-		try {
-			OtherNameAsn1Parser.parse(otherName);
-			Assert.fail("Exception expected");
-		} catch (CertificateParsingException e) {
-			MatcherAssert.assertThat(e.getMessage(),
-					CoreMatchers.equalTo("otherName fields not available, buffer is empty"));
-		}
+		OtherNameAsn1Parser.parse(otherName);
 	}
 
-	@Test
+	@Test(expected = ArrayIndexOutOfBoundsException.class)
 	public void testParseZeroLengthOid() {
 		byte[] otherName = { (byte) 0x30, (byte) 0x02, (byte) 0x06, (byte) 0x00 };
 
-		try {
-			OtherNameAsn1Parser.parse(otherName);
-			Assert.fail("Exception expected");
-		} catch (CertificateParsingException e) {
-			MatcherAssert.assertThat(e.getMessage(), CoreMatchers.equalTo("OID value not available, buffer is empty"));
-		}
+		OtherNameAsn1Parser.parse(otherName);
 	}
 
 	@Test
@@ -250,23 +202,17 @@ public class OtherNameAsn1ParserTest {
 		try {
 			OtherNameAsn1Parser.parse(otherName);
 			Assert.fail("Exception expected");
-		} catch (CertificateParsingException e) {
+		} catch (IllegalArgumentException e) {
 			MatcherAssert.assertThat(e.getMessage(),
-					CoreMatchers.startsWith("OID must start with an OBJECT IDENTIFIER tag, but is"));
+					CoreMatchers.equalTo("Expected to find value [6] but found value [5]"));
 		}
 	}
 
-	@Test
+	@Test(expected = ArrayIndexOutOfBoundsException.class)
 	public void testParseInvalidOidLength() {
 		byte[] otherName = { (byte) 0x30, (byte) 0x03, (byte) 0x06, (byte) 0x05, (byte) 0x01 };
 
-		try {
-			OtherNameAsn1Parser.parse(otherName);
-			Assert.fail("Exception expected");
-		} catch (CertificateParsingException e) {
-			MatcherAssert.assertThat(e.getMessage(),
-					CoreMatchers.startsWith("OBJECT IDENTIFIER length (5 B) is larger than the buffer offers"));
-		}
+		OtherNameAsn1Parser.parse(otherName);
 	}
 
 	@Test
@@ -277,23 +223,17 @@ public class OtherNameAsn1ParserTest {
 		try {
 			OtherNameAsn1Parser.parse(otherName);
 			Assert.fail("Exception expected");
-		} catch (CertificateParsingException e) {
+		} catch (IllegalArgumentException e) {
 			MatcherAssert.assertThat(e.getMessage(),
-					CoreMatchers.startsWith("OBJECT IDENTIFIER length (3 B) is larger than the buffer offers"));
+					CoreMatchers.equalTo("Invalid length [4] bytes reported when the input data length is [5] bytes"));
 		}
 	}
 
-	@Test
-	public void testParseNullValue() {
+	@Test(expected = ArrayIndexOutOfBoundsException.class)
+	public void testParseNoValue() {
 		byte[] otherName = { (byte) 0x30, (byte) 0x03, (byte) 0x06, (byte) 0x01, (byte) 0x01 };
 
-		try {
-			OtherNameAsn1Parser.parse(otherName);
-			Assert.fail("Exception expected");
-		} catch (CertificateParsingException e) {
-			MatcherAssert.assertThat(e.getMessage(),
-					CoreMatchers.equalTo("Value type tag not available, buffer is empty"));
-		}
+		OtherNameAsn1Parser.parse(otherName);
 	}
 
 	@Test
@@ -303,20 +243,9 @@ public class OtherNameAsn1ParserTest {
 		try {
 			OtherNameAsn1Parser.parse(otherName);
 			Assert.fail("Exception expected");
-		} catch (CertificateParsingException e) {
-			MatcherAssert.assertThat(e.getMessage(), CoreMatchers.equalTo("Value must be explicitly encoded"));
-		}
-	}
-
-	@Test
-	public void testParseConstructedTagValue() {
-		byte[] otherName = { (byte) 0x30, (byte) 0x04, (byte) 0x06, (byte) 0x01, (byte) 0x01, (byte) (0x0C | 0x10) };
-
-		try {
-			OtherNameAsn1Parser.parse(otherName);
-			Assert.fail("Exception expected");
-		} catch (CertificateParsingException e) {
-			MatcherAssert.assertThat(e.getMessage(), CoreMatchers.equalTo("Value must be explicitly encoded"));
+		} catch (IllegalArgumentException e) {
+			MatcherAssert.assertThat(e.getMessage(),
+					CoreMatchers.equalTo("Expected to find value [160] but found value [12]"));
 		}
 	}
 
@@ -327,8 +256,9 @@ public class OtherNameAsn1ParserTest {
 		try {
 			OtherNameAsn1Parser.parse(otherName);
 			Assert.fail("Exception expected");
-		} catch (CertificateParsingException e) {
-			MatcherAssert.assertThat(e.getMessage(), CoreMatchers.equalTo("Value must be explicitly encoded"));
+		} catch (IllegalArgumentException e) {
+			MatcherAssert.assertThat(e.getMessage(),
+					CoreMatchers.equalTo("Expected to find value [160] but found value [140]"));
 		}
 	}
 
@@ -339,23 +269,18 @@ public class OtherNameAsn1ParserTest {
 		try {
 			OtherNameAsn1Parser.parse(otherName);
 			Assert.fail("Exception expected");
-		} catch (CertificateParsingException e) {
-			MatcherAssert.assertThat(e.getMessage(), CoreMatchers.startsWith("Value tag number must be 0, but is"));
+		} catch (IllegalArgumentException e) {
+			MatcherAssert.assertThat(e.getMessage(),
+					CoreMatchers.equalTo("Expected to find value [160] but found value [161]"));
 		}
 	}
 
-	@Test
-	public void testParseInvalidConstructedValue() {
+	@Test(expected = ArrayIndexOutOfBoundsException.class)
+	public void testParseInvalidConstructedValue1() {
 		byte[] otherName = { (byte) 0x30, (byte) 0x05, (byte) 0x06, (byte) 0x01, (byte) 0x01, (byte) 0xA0,
 				(byte) 0x02 };
 
-		try {
-			OtherNameAsn1Parser.parse(otherName);
-			Assert.fail("Exception expected");
-		} catch (CertificateParsingException e) {
-			MatcherAssert.assertThat(e.getMessage(),
-					CoreMatchers.startsWith("Value length (2 B) is larger than the buffer offers"));
-		}
+		OtherNameAsn1Parser.parse(otherName);
 	}
 
 	@Test
@@ -366,23 +291,18 @@ public class OtherNameAsn1ParserTest {
 		try {
 			OtherNameAsn1Parser.parse(otherName);
 			Assert.fail("Exception expected");
-		} catch (CertificateParsingException e) {
-			MatcherAssert.assertThat(e.getMessage(), CoreMatchers.equalTo("Value not available, buffer is empty"));
+		} catch (IllegalArgumentException e) {
+			MatcherAssert.assertThat(e.getMessage(),
+					CoreMatchers.equalTo("Invalid length [5] bytes reported when the input data length is [10] bytes"));
 		}
 	}
 
-	@Test
+	@Test(expected = ArrayIndexOutOfBoundsException.class)
 	public void testParseInvalidConstructedValue3() {
 		byte[] otherName = { (byte) 0x30, (byte) 0x0C, (byte) 0x06, (byte) 0x01, (byte) 0x01, (byte) 0xA0, (byte) 0x06,
 				(byte) 0xA0, (byte) 0x05, (byte) 0x0C, (byte) 0x03, (byte) 'Y', (byte) 'E', (byte) 'S' };
 
-		try {
-			OtherNameAsn1Parser.parse(otherName);
-			Assert.fail("Exception expected");
-		} catch (CertificateParsingException e) {
-			MatcherAssert.assertThat(e.getMessage(),
-					CoreMatchers.startsWith("Value length (5 B) is larger than the buffer offers"));
-		}
+		OtherNameAsn1Parser.parse(otherName);
 	}
 
 	@Test
@@ -400,12 +320,9 @@ public class OtherNameAsn1ParserTest {
 		byte[] otherName = { (byte) 0x30, (byte) 0x0C, (byte) 0x06, (byte) 0x01, (byte) 0x01, (byte) 0xA0, (byte) 0x07,
 				(byte) 0xA0, (byte) 0x00, (byte) 0x0C, (byte) 0x03, (byte) 'Y', (byte) 'E', (byte) 'S' };
 
-		try {
-			OtherNameAsn1Parser.parse(otherName);
-			Assert.fail("Exception expected");
-		} catch (CertificateParsingException e) {
-			MatcherAssert.assertThat(e.getMessage(), CoreMatchers.equalTo("Value not available, buffer is empty"));
-		}
+		OtherNameParseResult result = OtherNameAsn1Parser.parse(otherName);
+		Assert.assertArrayEquals(new byte[] { 0x01 }, result.getTypeId());
+		Assert.assertArrayEquals(new byte[0], result.getValue());
 	}
 
 	@Test
@@ -453,18 +370,12 @@ public class OtherNameAsn1ParserTest {
 				result.getValue());
 	}
 
-	@Test
+	@Test(expected = ArrayIndexOutOfBoundsException.class)
 	public void testParseInvalidConstructedValueJDK6776681() {
 		byte[] otherName = { (byte) 0x30, (byte) 0x07, (byte) 0x06, (byte) 0x01, (byte) 0x01, (byte) 0xA0, (byte) 0x02,
 				(byte) 0xA0, (byte) 0x02 };
 
-		try {
-			OtherNameAsn1Parser.parse(otherName);
-			Assert.fail("Exception expected");
-		} catch (CertificateParsingException e) {
-			MatcherAssert.assertThat(e.getMessage(),
-					CoreMatchers.startsWith("Value length (2 B) is larger than the buffer offers"));
-		}
+		OtherNameAsn1Parser.parse(otherName);
 	}
 
 	@Test
