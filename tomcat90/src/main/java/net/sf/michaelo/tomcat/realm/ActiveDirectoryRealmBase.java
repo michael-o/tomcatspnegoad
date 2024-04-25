@@ -1,5 +1,5 @@
 /*
- * Copyright 2013–2021 Michael Osipov
+ * Copyright 2013–2024 Michael Osipov
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,8 +26,8 @@ import org.ietf.jgss.GSSContext;
 import org.ietf.jgss.GSSName;
 
 /**
- * Base realm which is able to retrieve principals from {@link GSSName GSS names}, fully
- * established {@link GSSContext GSS contexts} or {@link X509Certificate TLS client certificates}.
+ * Base Active Directory realm which is able to retrieve principals for {@link GSSName GSS names},
+ * fully established {@link GSSContext security contexts} or {@link X509Certificate TLS client certificates}.
  */
 public abstract class ActiveDirectoryRealmBase extends RealmBase {
 
