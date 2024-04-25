@@ -146,6 +146,12 @@
 						<link>https://tomcat.apache.org/tomcat-9.0-doc/jaspicapi</link>
 						<link>https://michael-o.github.io/dirctxsrc/apidocs/</link>
 					</links>
+					<offlineLinks>
+						<offlineLink>
+							<url>https://docs.oracle.com/javase/8/docs/jre/api/security/jgss/spec/</url>
+							<location>${project.basedir}/src/apidocs/api.security.jgss</location>
+						</offlineLink>
+					</offlineLinks>
 				</configuration>
 			</plugin>
 		</plugins>
@@ -163,6 +169,12 @@
 						<link>https://tomcat.apache.org/tomcat-9.0-doc/jaspicapi</link>
 						<link>https://michael-o.github.io/dirctxsrc/apidocs/</link>
 					</links>
+					<offlineLinks>
+						<offlineLink>
+							<url>https://docs.oracle.com/javase/8/docs/jre/api/security/jgss/spec/</url>
+							<location>${project.basedir}/src/apidocs/api.security.jgss</location>
+						</offlineLink>
+					</offlineLinks>
 				</configuration>
 			</plugin>
 		</plugins>
