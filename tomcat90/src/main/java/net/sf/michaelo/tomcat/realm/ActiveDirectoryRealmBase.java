@@ -1,5 +1,5 @@
 /*
- * Copyright 2013–2021 Michael Osipov
+ * Copyright 2013–2024 Michael Osipov
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,16 +23,58 @@ import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 import org.apache.tomcat.util.res.StringManager;
 import org.ietf.jgss.GSSContext;
+import org.ietf.jgss.GSSCredential;
+import org.ietf.jgss.GSSException;
 import org.ietf.jgss.GSSName;
 
 /**
- * Base realm which is able to retrieve principals from {@link GSSName GSS names}, fully
- * established {@link GSSContext GSS contexts} or {@link X509Certificate TLS client certificates}.
+ * Base Active Directory realm which is able to retrieve principals for {@link GSSName GSS names},
+ * fully established {@link GSSContext security contexts} or {@link X509Certificate TLS client certificates}.
  */
 public abstract class ActiveDirectoryRealmBase extends RealmBase {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 	protected final StringManager sm = StringManager.getManager(getClass());
+
+	@Override
+	public Principal authenticate(GSSContext gssContext, boolean storeCred) {
+		if (gssContext.isEstablished()) {
+			GSSName gssName = null;
+			try {
+				gssName = gssContext.getSrcName();
+			} catch (GSSException e) {
+				logger.warn(RealmBase.sm.getString("realmBase.gssNameFail"), e);
+			}
+
+			if (gssName != null) {
+				GSSCredential gssCredential = null;
+				if (storeCred) {
+					if (gssContext.getCredDelegState()) {
+						try {
+							gssCredential = gssContext.getDelegCred();
+						} catch (GSSException e) {
+							logger.warn(RealmBase.sm.getString("realmBase.delegatedCredentialFail", gssName), e);
+						}
+					} else {
+						if (logger.isTraceEnabled()) {
+							logger.trace(RealmBase.sm.getString("realmBase.credentialNotDelegated", gssName));
+						}
+					}
+				}
+
+				return getPrincipal(gssName, gssCredential, gssContext);
+			}
+		} else {
+			logger.error(RealmBase.sm.getString("realmBase.gssContextNotEstablished"));
+		}
+
+		// Fail in all other cases
+		return null;
+	}
+
+	protected Principal getPrincipal(GSSName gssName, GSSCredential gssCredential, GSSContext gssContext) {
+		return getPrincipal(gssName, gssCredential);
+	}
 
 	/**
 	 * @return Always {@code null} as this realm has no way of obtaining this
