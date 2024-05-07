@@ -32,7 +32,8 @@
 		<javaVersion>8</javaVersion>
 		<maven.compiler.source>${javaVersion}</maven.compiler.source>
 		<maven.compiler.target>${javaVersion}</maven.compiler.target>
-		<maven.compiler.release>${javaVersion}</maven.compiler.release>
+		<!-- We cannot set release flag because compilation with private classes will fail. -->
+		<!-- <maven.compiler.release>${javaVersion}</maven.compiler.release> -->
 		<tomcatVersion>9.0.89</tomcatVersion>
 	</properties>
 
@@ -145,6 +146,7 @@
 						<link>https://tomcat.apache.org/tomcat-9.0-doc/servletapi</link>
 						<link>https://tomcat.apache.org/tomcat-9.0-doc/jaspicapi</link>
 						<link>https://michael-o.github.io/dirctxsrc/apidocs/</link>
+						<link>https://docs.oracle.com/javase/8/docs/jre/api/security/jgss/spec/</link>
 					</links>
 				</configuration>
 			</plugin>
@@ -162,6 +164,7 @@
 						<link>https://tomcat.apache.org/tomcat-9.0-doc/servletapi</link>
 						<link>https://tomcat.apache.org/tomcat-9.0-doc/jaspicapi</link>
 						<link>https://michael-o.github.io/dirctxsrc/apidocs/</link>
+						<link>https://docs.oracle.com/javase/8/docs/jre/api/security/jgss/spec/</link>
 					</links>
 				</configuration>
 			</plugin>
