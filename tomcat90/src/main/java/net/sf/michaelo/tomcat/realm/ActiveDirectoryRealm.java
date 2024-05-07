@@ -53,6 +53,7 @@ import javax.naming.ldap.Rdn;
 import javax.security.auth.x500.X500Principal;
 
 import net.sf.michaelo.dirctxsrc.DirContextSource;
+import net.sf.michaelo.tomcat.authenticator.SpnegoAuthenticator;
 import net.sf.michaelo.tomcat.realm.asn1.OtherNameAsn1Parser;
 import net.sf.michaelo.tomcat.realm.asn1.OtherNameParseResult;
 import net.sf.michaelo.tomcat.realm.mapper.SamAccountNameRfc2247Mapper;
@@ -62,6 +63,7 @@ import net.sf.michaelo.tomcat.realm.mapper.UsernameSearchMapper.MappedValues;
 
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.Server;
+import org.apache.catalina.authenticator.SSLAuthenticator;
 import org.apache.catalina.realm.CombinedRealm;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.naming.ContextBindings;
@@ -74,7 +76,7 @@ import org.ietf.jgss.GSSName;
 import org.ietf.jgss.Oid;
 
 /**
- * A realm which retrieves <em>already authenticated</em> users from Active Directory.
+ * A realm which retrieves <em>already authenticated</em> users from Active Directory via LDAP.
  *
  * <h2 id="configuration">Configuration</h2> Following options can be configured:
  * <ul>
@@ -202,6 +204,11 @@ import org.ietf.jgss.Oid;
  * <p>
  * <strong>Note:</strong> Always remember, referrals incur an amplification in time and space and
  * make the entire process slower.
+ * <br>
+ * <strong>Tip:</strong> Consider using the {@link PacDataActiveDirectoryRealm} if you don't need
+ * all features and use {@link SpnegoAuthenticator SPNEGO authentication} only since it is orders of
+ * magnitude faster, but remember though that {@link SSLAuthenticator X.509 authentication} still
+ * requires this realm.
  *
  * @see ActiveDirectoryPrincipal
  */
@@ -794,7 +801,6 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 				canonGssName = GSSManager.getInstance().createName(krb5Principal, KRB5_NT_PRINCIPAL);
 			} catch (GSSException e) {
 				logger.warn(sm.getString("activeDirectoryRealm.canonicalizeUserFailed", gssName));
-
 				return null;
 			}
 

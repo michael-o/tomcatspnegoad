@@ -40,6 +40,8 @@ import com.sun.security.jgss.AuthorizationDataEntry;
 import com.sun.security.jgss.ExtendedGSSContext;
 import com.sun.security.jgss.InquireType;
 
+import net.sf.michaelo.tomcat.pac.Krb5AuthzDataDumpPrinter;
+
 /**
  * A realm which extracts and dumps Kerberos {@code AuthorizationData}, but delegates the actual
  * work to {@link ActiveDirectoryRealm#getPrincipal(GSSName, GSSCredential)}.
@@ -49,6 +51,9 @@ import com.sun.security.jgss.InquireType;
  * section 5.2.6 from an established security context, dump to
  * <code>{catalina.base}/work/KRB5_AUTHZ_DATA/{gssName}/{yyyyMMdd'T'HHmmss.SSS}{#n?}</code> and
  * continue as described.
+ * <p>
+ * <strong>Note</strong>: Use this realm for testing/analysis purposes only along with the
+ * {@link Krb5AuthzDataDumpPrinter}.
  */
 public class Krb5AuthzDataDumpingActiveDirectoryRealm extends ActiveDirectoryRealm {
 

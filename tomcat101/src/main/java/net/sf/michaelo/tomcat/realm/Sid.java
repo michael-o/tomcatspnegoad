@@ -15,14 +15,15 @@
  */
 package net.sf.michaelo.tomcat.realm;
 
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
 
 /**
- * An immutable class representing a
- * <a href="https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/f992ad60-0fe4-4b87-9fed-beb478836861">security identifier</a>
- * from Active Directory.
+ * A class representing a <a href=
+ * "https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/f992ad60-0fe4-4b87-9fed-beb478836861">{@code SID}
+ * (security identifier)</a> from MS-DTYP.
  */
 public class Sid {
 
@@ -43,12 +44,26 @@ public class Sid {
 
 	private String sidString;
 
+	/**
+	 * Parses a SID object from a byte array.
+	 *
+	 * @param sidBytes
+	 *            SID structure encoded as bytes
+	 * @throws NullPointerException
+	 *             if {@code sidBytes} is null
+	 * @throws IllegalArgumentException
+	 *             if {@code sidBytes} contains less than 12 bytes
+	 * @throws IllegalArgumentException
+	 *             if SID's revision is not 1
+	 * @throws IllegalArgumentException
+	 *             if SID's subauthority count is more than 15
+	 */
 	public Sid(byte[] sidBytes) {
 		if (sidBytes == null)
 			throw new NullPointerException("sidBytes cannot be null");
 		if (sidBytes.length < 12)
 			throw new IllegalArgumentException(
-				"SID must be at least 12 bytes long but is " + sidBytes.length);
+					"SID must be at least 12 bytes long but is " + sidBytes.length);
 
 		ByteBuffer buf = ByteBuffer.wrap(sidBytes);
 		buf.order(ByteOrder.LITTLE_ENDIAN);
@@ -56,8 +71,7 @@ public class Sid {
 		// Always 0x01
 		this.revision = buf.get() & 0xFF;
 		if (this.revision != 0x01)
-			throw new IllegalArgumentException(
-					"SID revision must be 1 but is " + this.revision);
+			throw new IllegalArgumentException("SID revision must be 1 but is " + this.revision);
 
 		// At most 15 subauthorities
 		this.subAuthorityCount = buf.get() & 0xFF;
@@ -73,9 +87,9 @@ public class Sid {
 		sidStringBuilder.append('-').append(this.revision);
 
 		ByteBuffer iaBuf = ByteBuffer.allocate(Long.SIZE / Byte.SIZE);
-		iaBuf.position(2);
+		((Buffer) iaBuf).position(2);
 		iaBuf.put(this.identifierAuthority);
-		iaBuf.flip();
+		((Buffer) iaBuf).flip();
 
 		sidStringBuilder.append('-').append(iaBuf.getLong());
 
@@ -88,6 +102,19 @@ public class Sid {
 
 		this.bytes = Arrays.copyOf(sidBytes, sidBytes.length);
 		this.sidString = sidStringBuilder.toString();
+	}
+
+	public Sid append(long relativeId) {
+		byte[] sidBytes = this.bytes;
+		byte[] appendedSidBytes = new byte[sidBytes.length + 4];
+		System.arraycopy(sidBytes, 0, appendedSidBytes, 0, sidBytes.length);
+		appendedSidBytes[1] = (byte) (this.subAuthorityCount + 1);
+		int signedRelativeId = (int) (relativeId);
+		appendedSidBytes[sidBytes.length + 0] = (byte) (signedRelativeId & 0xFF);
+		appendedSidBytes[sidBytes.length + 1] = (byte) ((signedRelativeId >> 8) & 0xFF);
+		appendedSidBytes[sidBytes.length + 2] = (byte) ((signedRelativeId >> 16) & 0xFF);
+		appendedSidBytes[sidBytes.length + 3] = (byte) ((signedRelativeId >> 24) & 0xFF);
+		return new Sid(appendedSidBytes);
 	}
 
 	public byte[] getBytes() {

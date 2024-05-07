@@ -26,23 +26,24 @@
 
 Choosing and Using Realms
 
-  After the authenticator has established a user's identity, it's time to search for it. Usually,
-  the {{{Active_Directory_Realm}<<<ActiveDirectoryRealm>>>}} will do, but for testing purposes you
-  will find the default {{{Using_a_Realm_for_Testing_Purposes}<<<UserDatabaseRealm>>>}} very handy.
+  After the authenticator has established a user's identity, it's time to retrieve it. Usually,
+  the {{{Active_Directory_Realm}<<<ActiveDirectoryRealm>>>}} and {{{PAC_Data_Active_Directory_Realm}<<<PacDataActiveDirectoryRealm>>>}}
+  will do, but for testing purposes you will find the {{{Using_a_Realm_for_Testing_Purposes}<<<UserDatabaseRealm>>>}}
+  very handy.
 
     [Tip] I strongly recommend to try the {{{Using_a_Realm_for_Testing_Purposes}<<<UserDatabaseRealm>>>}}
-          first, you'll see whether the authenticator works at all. If it does, go on to the
-          {{{The_Active_Directory_Realm}<<<ActiveDirectoryRealm>>>}}.
+          first, you'll see whether the authenticator works at all. If it does, go on with the
+          productive realms.
 
 * Active Directory Realm
 
   The {{{./tomcat90-authnz-spnego-ad/apidocs/net/sf/michaelo/tomcat/realm/ActiveDirectoryRealm.html}<<<ActiveDirectoryRealm>>>}}
-  will query your Active Directory domain for a user by the {{{./tomcat90-authnz-spnego-ad/apidocs/net/sf/michaelo/tomcat/realm/ActiveDirectoryRealm.html#on-usernames}string name type of the supplied username}}
+  will query your Active Directory via LDAP for a user by the {{{./tomcat90-authnz-spnego-ad/apidocs/net/sf/michaelo/tomcat/realm/ActiveDirectoryRealm.html#on-usernames}string name type of the supplied username}}
   and retrieve all the necessary information, e.g., his/her security groups.
 
   It requires a two-step setup: First, you will need to configure a <<<DirContextSourceFactory>>>
-  with the parameters of your Active Directory domain. Second, the realm itself pointing to that Active
-  Directory domain.
+  with the parameters of your Active Directory. Second, the realm itself pointing to that Active
+  Directory.
 
 ** Configuring a Directory Context Source Factory
 
@@ -50,7 +51,7 @@ Choosing and Using Realms
   on how to configure it in detail. Here is a minimal working configuration:
 
     [Tip] Never rely on hard-coded hostnames, use my {{{https://michael-o.github.io/activedirectory-dns-locator/}<<<ActiveDirectoryLdapDnsProvider>>>}}
-          to auto-locate servers for Active Directory domains via DNS.
+          to auto-locate servers for Active Directory via DNS.
 
     []
 
@@ -97,7 +98,7 @@ Choosing and Using Realms
   for details.
 
     [Important] If you intend to authenticate with the <<<SSLAuthenticator>>> your client certificates must contain
-                a subject alternative name type 0 (<<<otherName>>>) with the type OID of 1.3.6.1.4.1.311.20.2.3 (<<<msUPN>>>).
+                a subject alternative name type 0 (<<<otherName>>>) with the type OID 1.3.6.1.4.1.311.20.2.3 (<<<msUPN>>>).
 
 ** Using Security Groups from Active Directory
 
@@ -108,6 +109,49 @@ Choosing and Using Realms
   checkout the {{{https://tomcat.apache.org/tomcat-9.0-doc/config/listeners.html#Properties_Role_Mapping_Listener_-_org.apache.catalina.core.PropertiesRoleMappingListener}<<<PropertiesRoleMappingListener>>>}}
   or use other role formats, but the SID see extended capabilities of this realm in the
   {{{./tomcat90-authnz-spnego-ad/apidocs/net/sf/michaelo/tomcat/realm/ActiveDirectoryRealm.html#configuration}Javadoc}}.
+
+* PAC Data Active Directory Realm
+
+  The {{{./tomcat90-authnz-spnego-ad/apidocs/net/sf/michaelo/tomcat/realm/PacDataActiveDirectoryRealm.html}<<<PacDataActiveDirectoryRealm>>>}}
+  will process {{{https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-pac/166d8064-c863-41e1-9c23-edaaa5f36962}MS-PAC}}
+  data from your Active Directory for a user and retrieve all the necessary information, e.g., his/her security groups.
+
+  It requires a single-step setup.
+
+    [Note] Unsure about this realm? Use the {{{./tomcat90-authnz-spnego-ad/apidocs/net/sf/michaelo/tomcat/realm/Krb5AuthzDataDumpingActiveDirectoryRealm.html}<<<Krb5AuthzDataDumpingActiveDirectoryRealm>>>}}
+           (which wraps the <<<ActiveDirectoryRealm>>>) to collect authorization data and analyze it with the {{{./tomcat90-authnz-spnego-ad/apidocs/net/sf/michaelo/tomcat/pac/Krb5AuthzDataDumpPrinter.html}<<<Krb5AuthzDataDumpPrinter>>>}}.
+
+** Configuring the Realm
+
+  Open or create your app's <<<context.xml>>> and add:
+
++----------------------------
+<Context>
+[$ellipsis]
+  <!-- Add this -->
+  <Realm className="net.sf.michaelo.tomcat.realm.PacDataActiveDirectoryRealm"
+    loginEntryName="a-login-entry" />
+[$ellipsis]
+</Context>
++----------------------------
+
+  Provide the <<<loginEntryName>>> you have configured for the <<<SpnegoAuthenticator>>> before.
+
+  You have successfully configured the <<<PacDataActiveDirectoryRealm>>> in your webapp. It is now ready to use.
+
+** Authenticated Principal
+
+  After successful authentication and retrieval, this realm will create an <<<ActiveDirectoryPrincipal>>>
+  with several attributes. Refer to the {{{./tomcat90-authnz-spnego-ad/apidocs/net/sf/michaelo/tomcat/realm/ActiveDirectoryPrincipal.html}Javadoc}}
+  for details.
+
+** Using Security Groups from Active Directory
+
+  The <<<PacDataActiveDirectoryRealm>>> will populate all roles as SID strings for the given principal by default.
+  While it might not look convenient in the first place, it adds benefit when security groups are moved
+  from/to other domains, the SID history is completely retained. I.e., your application will continue
+  to work even with the old SID. If you would like to map SIDs to developer-friendly role names,
+  checkout the {{{https://tomcat.apache.org/tomcat-9.0-doc/config/listeners.html#Properties_Role_Mapping_Listener_-_org.apache.catalina.core.PropertiesRoleMappingListener}<<<PropertiesRoleMappingListener>>>}}.
 
 * Using a Realm for Testing Purposes
 

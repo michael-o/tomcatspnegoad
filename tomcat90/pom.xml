@@ -32,7 +32,8 @@
 		<javaVersion>8</javaVersion>
 		<maven.compiler.source>${javaVersion}</maven.compiler.source>
 		<maven.compiler.target>${javaVersion}</maven.compiler.target>
-		<maven.compiler.release>${javaVersion}</maven.compiler.release>
+		<!-- We cannot set release flag because compilation with private classes will fail. -->
+		<!-- <maven.compiler.release>${javaVersion}</maven.compiler.release> -->
 		<tomcatVersion>9.0.90</tomcatVersion>
 	</properties>
 
