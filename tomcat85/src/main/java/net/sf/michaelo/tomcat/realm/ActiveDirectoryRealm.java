@@ -405,7 +405,7 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 
 							return getPrincipal(gssName, null, true);
 						}
-					} catch (IllegalArgumentException e) {
+					} catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {
 						logger.warn(sm.getString("activeDirectoryRealm.sanOtherNameParsingFailed"), e);
 					}
 				}
