@@ -43,52 +43,50 @@ public class Sid {
 
 	private String sidString;
 
-	public Sid(byte[] sid) {
-		if (sid == null)
-			throw new NullPointerException("SID cannot be null");
-
-		if (sid.length < 12)
+	public Sid(byte[] sidBytes) {
+		if (sidBytes == null)
+			throw new NullPointerException("sidBytes cannot be null");
+		if (sidBytes.length < 12)
 			throw new IllegalArgumentException(
-					"SID must be at least 12 bytes long but is " + sid.length);
+				"SID must be at least 12 bytes long but is " + sidBytes.length);
 
-		this.bytes = Arrays.copyOf(sid, sid.length);
-
-		ByteBuffer bb = ByteBuffer.wrap(this.bytes);
-		bb.order(ByteOrder.LITTLE_ENDIAN);
+		ByteBuffer buf = ByteBuffer.wrap(sidBytes);
+		buf.order(ByteOrder.LITTLE_ENDIAN);
 
 		// Always 0x01
-		this.revision = bb.get() & 0xFF;
+		this.revision = buf.get() & 0xFF;
 		if (this.revision != 0x01)
 			throw new IllegalArgumentException(
 					"SID revision must be 1 but is " + this.revision);
 
 		// At most 15 subauthorities
-		this.subAuthorityCount = bb.get() & 0xFF;
+		this.subAuthorityCount = buf.get() & 0xFF;
 		if (this.subAuthorityCount > 15)
 			throw new IllegalArgumentException(
 					"SID sub authority count must be at most 15 but is " + this.subAuthorityCount);
 
 		this.identifierAuthority = new byte[6];
-		bb.get(this.identifierAuthority);
+		buf.get(this.identifierAuthority);
 
 		StringBuilder sidStringBuilder = new StringBuilder("S");
 
 		sidStringBuilder.append('-').append(this.revision);
 
-		ByteBuffer iaBb = ByteBuffer.allocate(Long.SIZE / Byte.SIZE);
-		iaBb.position(2);
-		iaBb.put(this.identifierAuthority);
-		iaBb.flip();
+		ByteBuffer iaBuf = ByteBuffer.allocate(Long.SIZE / Byte.SIZE);
+		iaBuf.position(2);
+		iaBuf.put(this.identifierAuthority);
+		iaBuf.flip();
 
-		sidStringBuilder.append('-').append(iaBb.getLong());
+		sidStringBuilder.append('-').append(iaBuf.getLong());
 
 		this.subAuthorities = new long[this.subAuthorityCount];
 		for (byte b = 0; b < this.subAuthorityCount; b++) {
-			this.subAuthorities[b] = bb.getInt() & 0xffffffffL;
+			this.subAuthorities[b] = buf.getInt() & 0xffffffffL;
 
 			sidStringBuilder.append('-').append(this.subAuthorities[b]);
 		}
 
+		this.bytes = Arrays.copyOf(sidBytes, sidBytes.length);
 		this.sidString = sidStringBuilder.toString();
 	}
 
