@@ -219,6 +219,10 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 	private static final byte[] MS_UPN_OID_BYTES = { (byte) 0x2B, (byte) 0x06, (byte) 0x01, (byte) 0x04, (byte) 0x01,
 			(byte) 0x82, (byte) 0x37, (byte) 0x14, (byte) 0x02, (byte) 0x03 };
 
+	private static final long UF_ACCOUNT_DISABLE = 0x00000002L;
+	private static final long UF_NORMAL_ACCOUNT = 0x00000200L;
+	private static final long UF_WORKSTATION_TRUST_ACCOUNT = 0x00001000L;
+
 	private final static Oid MS_UPN;
 	private final static Oid KRB5_NT_PRINCIPAL;
 
@@ -669,9 +673,6 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 		searchCtls.setSearchScope(SearchControls.SUBTREE_SCOPE);
 		searchCtls.setReturningAttributes(attributes);
 
-		// Query for user and machine accounts only
-		String searchFilterPattern = "(&(|(sAMAccountType=805306368)(sAMAccountType=805306369))(%s={0}))";
-
 		String searchFilter;
 		Name searchBase = null;
 		String searchAttributeName;
@@ -696,7 +697,7 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 			searchAttributeName = mappedValues.getSearchAttributeName();
 			searchAttributeValue = mappedValues.getSearchUsername();
 
-			searchFilter = String.format(searchFilterPattern, searchAttributeName);
+			searchFilter = String.format("(%s={0})", searchAttributeName);
 
 			if (logger.isDebugEnabled())
 				logger.debug(sm.getString("activeDirectoryRealm.usernameSearch",
@@ -757,12 +758,16 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 
 		Attributes userAttributes = result.getAttributes();
 
-		int userAccountControl = Integer
-				.parseInt((String) userAttributes.get("userAccountControl").get());
+		long userAccountControl = Long
+				.parseLong((String) userAttributes.get("userAccountControl").get());
 
-		// Do not allow disabled accounts (UF_ACCOUNT_DISABLE)
-		if ((userAccountControl & 0x02) != 0) {
+		if ((userAccountControl & UF_ACCOUNT_DISABLE) != 0L) {
 			logger.warn(sm.getString("activeDirectoryRealm.userFoundButDisabled", gssName));
+			return null;
+		}
+
+		if ((userAccountControl & UF_NORMAL_ACCOUNT) == 0L && (userAccountControl & UF_WORKSTATION_TRUST_ACCOUNT) == 0L) {
+			logger.warn(sm.getString("activeDirectoryRealm.userFoundButNotSupported", gssName));
 			return null;
 		}
 
