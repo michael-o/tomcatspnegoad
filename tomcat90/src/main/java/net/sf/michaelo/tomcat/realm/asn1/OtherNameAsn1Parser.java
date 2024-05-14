@@ -15,7 +15,6 @@
  */
 package net.sf.michaelo.tomcat.realm.asn1;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 import org.apache.tomcat.util.buf.Asn1Parser;
