@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.security.Principal;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
+import java.util.Base64;
 
 import javax.security.auth.Subject;
 import javax.security.auth.login.LoginContext;
@@ -28,7 +29,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.catalina.Realm;
 import org.apache.catalina.connector.Request;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.tomcat.util.codec.binary.Base64;
 import org.ietf.jgss.GSSContext;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
@@ -77,7 +77,7 @@ public class SpnegoAuthenticator extends GSSAuthenticatorBase {
 			logger.debug(sm.getString("spnegoAuthenticator.processingToken", authorizationValue));
 
 		try {
-			inToken = Base64.decodeBase64(authorizationValue);
+			inToken = Base64.getDecoder().decode(authorizationValue);
 		} catch (Exception e) {
 			logger.warn(sm.getString("spnegoAuthenticator.incorrectlyEncodedToken",
 					authorizationValue), e);
@@ -198,7 +198,7 @@ public class SpnegoAuthenticator extends GSSAuthenticatorBase {
 		register(request, response, principal, SPNEGO_METHOD, principal.getName(), null);
 
 		if (outToken != null) {
-			String authenticationValue = Base64.encodeBase64String(outToken);
+			String authenticationValue = Base64.getEncoder().encodeToString(outToken);
 			if (logger.isDebugEnabled())
 				logger.debug(sm.getString("spnegoAuthenticator.respondingWithToken", authenticationValue));
 

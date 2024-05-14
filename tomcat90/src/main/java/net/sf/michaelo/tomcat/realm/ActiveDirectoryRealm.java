@@ -22,6 +22,7 @@ import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -65,7 +66,6 @@ import org.apache.catalina.realm.CombinedRealm;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.naming.ContextBindings;
 import org.apache.tomcat.util.buf.Asn1Parser;
-import org.apache.tomcat.util.codec.binary.Base64;
 import org.apache.tomcat.util.collections.SynchronizedStack;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
@@ -388,7 +388,7 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 					byte[] otherName = (byte[]) sanField.get(1);
 					if (logger.isDebugEnabled())
 						logger.debug(sm.getString("activeDirectoryRealm.processingSanOtherName",
-								Base64.encodeBase64String(otherName), dn));
+								Base64.getEncoder().encodeToString(otherName), dn));
 					try {
 						OtherNameParseResult result = OtherNameAsn1Parser.parse(otherName);
 						if (Arrays.equals(result.getTypeId(), MS_UPN_OID_BYTES)) {
