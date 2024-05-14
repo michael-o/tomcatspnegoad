@@ -39,9 +39,8 @@ Choosing and Using Authenticators
   proper token to the client.
 
     [Attention] Though SPNEGO is intended to negotiate a mechanism, OpenJDK currently supports
-                Kerberos 5 only and not NTLM additionally due to its proprietary nature. Anyway, it
-                is {{{https://serverfault.com/a/384721/116898}discouraged by Microsoft}}
-                to rely on NTLM anymore.
+                Kerberos 5 only and not NTLM additionally due to its proprietary nature.
+                Anyway, it is finally {{{https://techcommunity.microsoft.com/t5/windows-it-pro-blog/the-evolution-of-windows-authentication/ba-p/3926848}deprecated by Microsoft}}.
 
   Open or create your app's <<<context.xml>>> and add:
 
