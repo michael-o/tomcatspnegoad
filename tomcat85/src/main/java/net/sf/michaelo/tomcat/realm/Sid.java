@@ -63,7 +63,7 @@ public class Sid {
 		this.subAuthorityCount = buf.get() & 0xFF;
 		if (this.subAuthorityCount > 15)
 			throw new IllegalArgumentException(
-					"SID sub authority count must be at most 15 but is " + this.subAuthorityCount);
+					"SID subauthority count must be at most 15 but is " + this.subAuthorityCount);
 
 		this.identifierAuthority = new byte[6];
 		buf.get(this.identifierAuthority);
