@@ -64,6 +64,7 @@ import org.apache.catalina.Server;
 import org.apache.catalina.realm.CombinedRealm;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.naming.ContextBindings;
+import org.apache.tomcat.util.buf.Asn1Parser;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.apache.tomcat.util.collections.SynchronizedStack;
 import org.ietf.jgss.GSSCredential;
@@ -391,7 +392,8 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 					try {
 						OtherNameParseResult result = OtherNameAsn1Parser.parse(otherName);
 						if (Arrays.equals(result.getTypeId(), MS_UPN_OID_BYTES)) {
-							String upn = OtherNameAsn1Parser.parseUtf8String(result.getValue());
+							Asn1Parser parser = new Asn1Parser(result.getValue());
+							String upn = parser.parseUTF8String();
 							if (logger.isDebugEnabled())
 								logger.debug(sm.getString("activeDirectoryRealm.msUpnExtracted", upn, dn));
 

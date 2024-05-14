@@ -15,6 +15,7 @@
  */
 package net.sf.michaelo.tomcat.asn1;
 
+import org.apache.tomcat.util.buf.Asn1Parser;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
 import org.junit.Assert;
@@ -24,53 +25,6 @@ import net.sf.michaelo.tomcat.realm.asn1.OtherNameAsn1Parser;
 import net.sf.michaelo.tomcat.realm.asn1.OtherNameParseResult;
 
 public class OtherNameAsn1ParserTest {
-
-	@Test(expected = NullPointerException.class)
-	public void testNullUtf8String() throws Exception {
-		OtherNameAsn1Parser.parseUtf8String(null);
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void testEmptyUtf8String() {
-		OtherNameAsn1Parser.parseUtf8String(new byte[0]);
-	}
-
-	@Test
-	public void testNotStartingUtf8String() {
-		byte[] otherName = { (byte) 0x13 };
-
-		try {
-			OtherNameAsn1Parser.parseUtf8String(otherName);
-			Assert.fail("Exception expected");
-		} catch (IllegalArgumentException e) {
-			MatcherAssert.assertThat(e.getMessage(),
-					CoreMatchers.equalTo("Expected to find value [12] but found value [19]"));
-		}
-	}
-
-	@Test(expected = ArrayIndexOutOfBoundsException.class)
-	public void testTwoByteLengthUtf8String() {
-		byte[] otherName = { (byte) 0x0C, (byte) 0x81, (byte) 0x80 };
-
-		OtherNameAsn1Parser.parseUtf8String(otherName);
-	}
-
-	@Test
-	public void testZeroLengthUtf8String() throws Exception {
-		byte[] otherName = { (byte) 0x0C, (byte) 0x00 };
-
-		String utf8String = OtherNameAsn1Parser.parseUtf8String(otherName);
-		MatcherAssert.assertThat(utf8String, CoreMatchers.equalTo(""));
-	}
-
-	@Test
-	public void testUtf8String() throws Exception {
-		byte[] otherName = { (byte) 0x0C, (byte) 0x0A, (byte) 0xD0, (byte) 0x94, (byte) 0xD0, (byte) 0xB6, (byte) 0xD0,
-				(byte) 0xB0, (byte) 0xD0, (byte) 0xB2, (byte) 0xD0, (byte) 0xB0 };
-
-		String utf8String = OtherNameAsn1Parser.parseUtf8String(otherName);
-		MatcherAssert.assertThat(utf8String, CoreMatchers.equalTo("Джава"));
-	}
 
 	@Test(expected = NullPointerException.class)
 	public void testNullOtherName() throws Exception {
@@ -432,7 +386,8 @@ public class OtherNameAsn1ParserTest {
 		Assert.assertEquals(2, typeId[typeId.length - 1]);
 		byte[] value = result.getValue();
 		Assert.assertEquals(149, value.length);
-		String str = OtherNameAsn1Parser.parseUtf8String(value);
+		Asn1Parser parser = new Asn1Parser(value);
+		String str = parser.parseUTF8String();
 		Assert.assertEquals(
 				"YEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEES",
 				str);
@@ -481,7 +436,8 @@ public class OtherNameAsn1ParserTest {
 		Assert.assertEquals(2, typeId[typeId.length - 1]);
 		byte[] value = result.getValue();
 		Assert.assertEquals(149, value.length);
-		String str = OtherNameAsn1Parser.parseUtf8String(value);
+		Asn1Parser parser = new Asn1Parser(value);
+		String str = parser.parseUTF8String();
 		Assert.assertEquals(
 				"YEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEES",
 				str);

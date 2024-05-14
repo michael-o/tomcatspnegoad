@@ -31,8 +31,6 @@ import org.apache.tomcat.util.buf.Asn1Parser;
  */
 public class OtherNameAsn1Parser {
 
-	private static byte UTF8STRING_TAG = 0x0C;
-
 	private OtherNameAsn1Parser() {
 	}
 
@@ -65,31 +63,6 @@ public class OtherNameAsn1Parser {
 			value = parser.parseAttributeAsBytes(0);
 
 		return new OtherNameParseResult(typeId, value);
-	}
-
-	/**
-	 * Parses a DER-encoded ASN.1 {@code UTF8String} to a Java string:
-	 *
-	 * @param str a DER-encoded byte array
-	 * @return the converted Java string
-	 * @throws NullPointerException     if {@code str} is {@code null}
-	 * @throws IllegalArgumentException if {@code str} is empty or if the
-	 *                                  DER-encoded byte array does not comply with
-	 *                                  ASN.1 DER encoding rules
-	 */
-	public static String parseUtf8String(byte[] str) {
-		Objects.requireNonNull(str, "str cannot be null");
-		if (str.length == 0)
-			throw new IllegalArgumentException("str cannot be empty");
-
-		Asn1Parser parser = new Asn1Parser(str);
-
-		parser.parseTag(UTF8STRING_TAG);
-		int len = parser.parseLength();
-		byte[] value = new byte[len];
-		parser.parseBytes(value);
-
-		return new String(value, StandardCharsets.UTF_8);
 	}
 
 }
