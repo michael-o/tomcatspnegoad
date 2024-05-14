@@ -26,7 +26,7 @@
 	<artifactId>tomcat85-authnz-spnego-ad</artifactId>
 	<packaging>jar</packaging>
 
-	<name>SPNEGO/Kerberos Authenticator and Active Directory Realm for Apache Tomcat 8.5</name>
+	<name>SPNEGO/Kerberos Authenticator and Active Directory Realm for Apache Tomcat 8.5 (retired)</name>
 
 	<properties>
 		<javaVersion>7</javaVersion>

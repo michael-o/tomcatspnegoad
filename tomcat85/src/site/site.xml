@@ -30,4 +30,10 @@
 		<menu ref="reports" />
 	</body>
 
+	<custom>
+		<fluidoSkin>
+			<profile>retired</profile>
+		</fluidoSkin>
+	</custom>
+
 </project>
