@@ -1,5 +1,5 @@
 /*
- * Copyright 2013–2023 Michael Osipov
+ * Copyright 2013–2024 Michael Osipov
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -175,14 +175,12 @@ public class SpnegoAuthenticator extends GSSAuthenticatorBase {
 							"spnegoAuthenticator.continueContextNotSupported.responseMessage");
 					return false;
 				}
-
 			} catch (GSSException e) {
 				logger.error(sm.getString("gssAuthenticatorBase.inquireNameFailed"), e);
 
 				sendInternalServerError(request, response, "gssAuthenticatorBase.inquireNameFailed");
 				return false;
 			}
-
 		} finally {
 			if (gssContext != null) {
 				try {

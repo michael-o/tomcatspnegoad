@@ -171,14 +171,12 @@ public class SpnegoAuthenticator extends GSSAuthenticatorBase {
 							"spnegoAuthenticator.continueContextNotSupported.responseMessage");
 					return false;
 				}
-
 			} catch (GSSException e) {
 				logger.error(sm.getString("gssAuthenticatorBase.inquireNameFailed"), e);
 
 				sendInternalServerError(request, response, "gssAuthenticatorBase.inquireNameFailed");
 				return false;
 			}
-
 		} finally {
 			if (gssContext != null) {
 				try {
