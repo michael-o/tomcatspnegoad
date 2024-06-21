@@ -32,7 +32,8 @@
 		<javaVersion>11</javaVersion>
 		<maven.compiler.source>${javaVersion}</maven.compiler.source>
 		<maven.compiler.target>${javaVersion}</maven.compiler.target>
-		<maven.compiler.release>${javaVersion}</maven.compiler.release>
+		<!-- We cannot set release flag because compilation with private classes will fail. -->
+		<!-- <maven.compiler.release>${javaVersion}</maven.compiler.release> -->
 		<tomcatVersion>10.1.25</tomcatVersion>
 	</properties>
 
@@ -101,6 +102,15 @@
 				</executions>
 			</plugin>
 			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<compilerArgs>
+						<arg>--add-exports</arg>
+						<arg>java.security.jgss/sun.security.krb5=ALL-UNNAMED</arg>
+					</compilerArgs>
+				</configuration>
+			</plugin>
+			<plugin>
 				<artifactId>maven-shade-plugin</artifactId>
 				<executions>
 					<execution>
@@ -146,6 +156,10 @@
 						<link>https://tomcat.apache.org/tomcat-10.1-doc/jaspicapi</link>
 						<link>https://michael-o.github.io/dirctxsrc/apidocs/</link>
 					</links>
+					<additionalJOptions>
+						<additionalJOption>--add-exports</additionalJOption>
+						<additionalOption>java.security.jgss/sun.security.krb5=ALL-UNNAMED</additionalOption>
+					</additionalJOptions>
 				</configuration>
 			</plugin>
 		</plugins>
@@ -163,6 +177,10 @@
 						<link>https://tomcat.apache.org/tomcat-10.1-doc/jaspicapi</link>
 						<link>https://michael-o.github.io/dirctxsrc/apidocs/</link>
 					</links>
+					<additionalJOptions>
+						<additionalJOption>--add-exports</additionalJOption>
+						<additionalOption>java.security.jgss/sun.security.krb5=ALL-UNNAMED</additionalOption>
+					</additionalJOptions>
 				</configuration>
 			</plugin>
 		</plugins>
