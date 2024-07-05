@@ -1,0 +1,142 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="" lang="">
+<head><meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>UpnDnsInfo xref</title>
+<link type="text/css" rel="stylesheet" href="../../../../../stylesheet.css" />
+</head>
+<body>
+<div id="overview"><a href="../../../../../../apidocs/net/sf/michaelo/tomcat/pac/UpnDnsInfo.html">View Javadoc</a></div><pre>
+<a class="jxr_linenumber" name="L1" href="#L1">1</a>   <em class="jxr_comment">/*</em>
+<a class="jxr_linenumber" name="L2" href="#L2">2</a>   <em class="jxr_comment"> * Copyright 2024 Michael Osipov</em>
+<a class="jxr_linenumber" name="L3" href="#L3">3</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <em class="jxr_comment"> * Licensed under the Apache License, Version 2.0 (the "License");</em>
+<a class="jxr_linenumber" name="L5" href="#L5">5</a>   <em class="jxr_comment"> * you may not use this file except in compliance with the License.</em>
+<a class="jxr_linenumber" name="L6" href="#L6">6</a>   <em class="jxr_comment"> * You may obtain a copy of the License at</em>
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <em class="jxr_comment"> *     <a href="http://www.apache.org/licenses/LICENSE-2.0" target="alexandria_uri">http://www.apache.org/licenses/LICENSE-2.0</a></em>
+<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <em class="jxr_comment"> *</em>
+<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <em class="jxr_comment"> * Unless required by applicable law or agreed to in writing, software</em>
+<a class="jxr_linenumber" name="L11" href="#L11">11</a>  <em class="jxr_comment"> * distributed under the License is distributed on an "AS IS" BASIS,</em>
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <em class="jxr_comment"> * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</em>
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <em class="jxr_comment"> * See the License for the specific language governing permissions and</em>
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  <em class="jxr_comment"> * limitations under the License.</em>
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <em class="jxr_comment"> */</em>
+<a class="jxr_linenumber" name="L16" href="#L16">16</a>  <strong class="jxr_keyword">package</strong> net.sf.michaelo.tomcat.pac;
+<a class="jxr_linenumber" name="L17" href="#L17">17</a>  
+<a class="jxr_linenumber" name="L18" href="#L18">18</a>  <strong class="jxr_keyword">import</strong> java.nio.charset.StandardCharsets;
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>  <strong class="jxr_keyword">import</strong> java.util.Objects;
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>  
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>  <strong class="jxr_keyword">import</strong> net.sf.michaelo.tomcat.realm.Sid;
+<a class="jxr_linenumber" name="L22" href="#L22">22</a>  
+<a class="jxr_linenumber" name="L23" href="#L23">23</a>  <em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <em class="jxr_javadoccomment"> * A class representing the &lt;a href=</em>
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>  <em class="jxr_javadoccomment"> * "<a href="https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-pac/1c0d6e11-6443-4846-b744-f9f810a504eb" target="alexandria_uri">https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-pac/1c0d6e11-6443-4846-b744-f9f810a504eb</a>"&gt;{@code UPN_DNS_INFO}&lt;/a&gt;</em>
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>  <em class="jxr_javadoccomment"> * structure from MS-PAC.</em>
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>  <em class="jxr_javadoccomment"> */</em>
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a name="UpnDnsInfo" href="../../../../../net/sf/michaelo/tomcat/pac/UpnDnsInfo.html#UpnDnsInfo">UpnDnsInfo</a> {
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">long</strong> UPN_CONSTRUCTED_FLAG = 0x00000001L;
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>  	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">static</strong> <strong class="jxr_keyword">long</strong> SAM_NAME_AND_SID_FLAG = 0x00000002L;
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>  
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> String upn;
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> String dnsDomainName;
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>  
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>  	<strong class="jxr_keyword">private</strong> <strong class="jxr_keyword">final</strong> <strong class="jxr_keyword">long</strong> flags;
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>  
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>  	<strong class="jxr_keyword">private</strong> String samName;
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>  	<strong class="jxr_keyword">private</strong> <a name="Sid" href="../../../../../net/sf/michaelo/tomcat/realm/Sid.html#Sid">Sid</a> sid;
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>  
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>  	<em class="jxr_javadoccomment">/**</em>
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>  <em class="jxr_javadoccomment">	 * Parses a UPN DNS info object from a byte array.</em>
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>  <em class="jxr_javadoccomment">	 *</em>
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>  <em class="jxr_javadoccomment">	 * @param infoBytes</em>
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>  <em class="jxr_javadoccomment">	 *            UPN DNS info structure encoded as bytes</em>
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>  <em class="jxr_javadoccomment">	 * @throws NullPointerException</em>
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>  <em class="jxr_javadoccomment">	 *             if {@code infoBytes} is null</em>
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>  <em class="jxr_javadoccomment">	 * @throws IllegalArgumentException</em>
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>  <em class="jxr_javadoccomment">	 *             if {@code infoBytes} is empty</em>
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>  <em class="jxr_javadoccomment">	 */</em>
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>  	<strong class="jxr_keyword">public</strong> <a name="UpnDnsInfo" href="../../../../../net/sf/michaelo/tomcat/pac/UpnDnsInfo.html#UpnDnsInfo">UpnDnsInfo</a>(byte[] infoBytes) {
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>  		Objects.requireNonNull(infoBytes, <span class="jxr_string">"infoBytes cannot be null"</span>);
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>  		<strong class="jxr_keyword">if</strong> (infoBytes.length == 0)
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>  			<strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> IllegalArgumentException(<span class="jxr_string">"infoBytes cannot be empty"</span>);
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>  
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>  		PacDataBuffer buf = <strong class="jxr_keyword">new</strong> <a name="PacDataBuffer" href="../../../../../net/sf/michaelo/tomcat/pac/PacDataBuffer.html#PacDataBuffer">PacDataBuffer</a>(infoBytes);
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>  
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>  		<em class="jxr_comment">// UpnLength</em>
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>  		<strong class="jxr_keyword">int</strong> upnLength = buf.getUnsignedShort();
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>  		<em class="jxr_comment">// UpnOffset</em>
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>  		<strong class="jxr_keyword">int</strong> upnOffset = buf.getUnsignedShort();
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>  		<em class="jxr_comment">// DnsDomainNameLength</em>
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>  		<strong class="jxr_keyword">int</strong> dnsDomainNameLength = buf.getUnsignedShort();
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>  		<em class="jxr_comment">// DnsDomainNameOffset</em>
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>  		<strong class="jxr_keyword">int</strong> dnsDomainNameOffset = buf.getUnsignedShort();
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>  		<em class="jxr_comment">// Flags</em>
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>  		<em class="jxr_comment">/* Something isn't right, it appears to be that the bits are in reverse order</em>
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>  <em class="jxr_comment">		 * or the documentation is wrong:</em>
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>  <em class="jxr_comment">		 * - flag U should be at bit 31, but is at bit 0</em>
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>  <em class="jxr_comment">		 * - flag S should be at bit 30, but is at bit 1</em>
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>  <em class="jxr_comment">		 *</em>
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>  <em class="jxr_comment">		 * Samba has the same reversed order: <a href="https://github.com/samba-team/samba/blob/9844ac289be3430fd3f72c5e57fa00e012c5d417/librpc/idl/krb5pac.idl" target="alexandria_uri">https://github.com/samba-team/samba/blob/9844ac289be3430fd3f72c5e57fa00e012c5d417/librpc/idl/krb5pac.idl</a>#L93-L96</em>
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>  <em class="jxr_comment">		 */</em>
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>  		<strong class="jxr_keyword">this</strong>.flags = buf.getUnsignedInt();
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>  
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>  		<strong class="jxr_keyword">int</strong> pos = buf.position();
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>  		buf.position(upnOffset);
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>  		<strong class="jxr_keyword">this</strong>.upn = getUnicodeString(buf, upnLength);
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>  		buf.position(dnsDomainNameOffset);
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>  		<strong class="jxr_keyword">this</strong>.dnsDomainName = getUnicodeString(buf, dnsDomainNameLength);
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>  		buf.position(pos);
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>  
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>  		<strong class="jxr_keyword">if</strong> ((flags &amp; SAM_NAME_AND_SID_FLAG) != 0L) {
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>  			<em class="jxr_comment">// SamNameLength</em>
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>  			<strong class="jxr_keyword">int</strong> samNameLength = buf.getUnsignedShort();
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>  			<em class="jxr_comment">// SamNameOffset</em>
+<a class="jxr_linenumber" name="L87" href="#L87">87</a>  			<strong class="jxr_keyword">int</strong> samNameOffset = buf.getUnsignedShort();
+<a class="jxr_linenumber" name="L88" href="#L88">88</a>  			<em class="jxr_comment">// SidLength</em>
+<a class="jxr_linenumber" name="L89" href="#L89">89</a>  			<strong class="jxr_keyword">int</strong> sidLength = buf.getUnsignedShort();
+<a class="jxr_linenumber" name="L90" href="#L90">90</a>  			<em class="jxr_comment">// SidOffset</em>
+<a class="jxr_linenumber" name="L91" href="#L91">91</a>  			<strong class="jxr_keyword">int</strong> sidOffset = buf.getUnsignedShort();
+<a class="jxr_linenumber" name="L92" href="#L92">92</a>  
+<a class="jxr_linenumber" name="L93" href="#L93">93</a>  			pos = buf.position();
+<a class="jxr_linenumber" name="L94" href="#L94">94</a>  			buf.position(samNameOffset);
+<a class="jxr_linenumber" name="L95" href="#L95">95</a>  			<strong class="jxr_keyword">this</strong>.samName = getUnicodeString(buf, samNameLength);
+<a class="jxr_linenumber" name="L96" href="#L96">96</a>  			byte[] dst = <strong class="jxr_keyword">new</strong> byte[sidLength];
+<a class="jxr_linenumber" name="L97" href="#L97">97</a>  			buf.position(sidOffset);
+<a class="jxr_linenumber" name="L98" href="#L98">98</a>  			buf.get(dst);
+<a class="jxr_linenumber" name="L99" href="#L99">99</a>  			<strong class="jxr_keyword">this</strong>.sid = <strong class="jxr_keyword">new</strong> <a name="Sid" href="../../../../../net/sf/michaelo/tomcat/realm/Sid.html#Sid">Sid</a>(dst);
+<a class="jxr_linenumber" name="L100" href="#L100">100</a> 		}
+<a class="jxr_linenumber" name="L101" href="#L101">101</a> 	}
+<a class="jxr_linenumber" name="L102" href="#L102">102</a> 
+<a class="jxr_linenumber" name="L103" href="#L103">103</a> 	<strong class="jxr_keyword">public</strong> String getUpn() {
+<a class="jxr_linenumber" name="L104" href="#L104">104</a> 		<strong class="jxr_keyword">return</strong> upn;
+<a class="jxr_linenumber" name="L105" href="#L105">105</a> 	}
+<a class="jxr_linenumber" name="L106" href="#L106">106</a> 
+<a class="jxr_linenumber" name="L107" href="#L107">107</a> 	<strong class="jxr_keyword">public</strong> String getDnsDomainName() {
+<a class="jxr_linenumber" name="L108" href="#L108">108</a> 		<strong class="jxr_keyword">return</strong> dnsDomainName;
+<a class="jxr_linenumber" name="L109" href="#L109">109</a> 	}
+<a class="jxr_linenumber" name="L110" href="#L110">110</a> 
+<a class="jxr_linenumber" name="L111" href="#L111">111</a> 	<strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">long</strong> getFlags() {
+<a class="jxr_linenumber" name="L112" href="#L112">112</a> 		<strong class="jxr_keyword">return</strong> flags;
+<a class="jxr_linenumber" name="L113" href="#L113">113</a> 	}
+<a class="jxr_linenumber" name="L114" href="#L114">114</a> 
+<a class="jxr_linenumber" name="L115" href="#L115">115</a> 	<strong class="jxr_keyword">public</strong> String getSamName() {
+<a class="jxr_linenumber" name="L116" href="#L116">116</a> 		<strong class="jxr_keyword">return</strong> samName;
+<a class="jxr_linenumber" name="L117" href="#L117">117</a> 	}
+<a class="jxr_linenumber" name="L118" href="#L118">118</a> 
+<a class="jxr_linenumber" name="L119" href="#L119">119</a> 	<strong class="jxr_keyword">public</strong> <a name="Sid" href="../../../../../net/sf/michaelo/tomcat/realm/Sid.html#Sid">Sid</a> getSid() {
+<a class="jxr_linenumber" name="L120" href="#L120">120</a> 		<strong class="jxr_keyword">return</strong> sid;
+<a class="jxr_linenumber" name="L121" href="#L121">121</a> 	}
+<a class="jxr_linenumber" name="L122" href="#L122">122</a> 
+<a class="jxr_linenumber" name="L123" href="#L123">123</a> 	<strong class="jxr_keyword">private</strong> String getUnicodeString(<a name="PacDataBuffer" href="../../../../../net/sf/michaelo/tomcat/pac/PacDataBuffer.html#PacDataBuffer">PacDataBuffer</a> buf, <strong class="jxr_keyword">int</strong> length) {
+<a class="jxr_linenumber" name="L124" href="#L124">124</a> 		byte[] dst = <strong class="jxr_keyword">new</strong> byte[length];
+<a class="jxr_linenumber" name="L125" href="#L125">125</a> 		buf.get(dst);
+<a class="jxr_linenumber" name="L126" href="#L126">126</a> 		<strong class="jxr_keyword">return</strong> <strong class="jxr_keyword">new</strong> String(dst, StandardCharsets.UTF_16LE);
+<a class="jxr_linenumber" name="L127" href="#L127">127</a> 	}
+<a class="jxr_linenumber" name="L128" href="#L128">128</a> 
+<a class="jxr_linenumber" name="L129" href="#L129">129</a> }
+</pre>
+<hr/>
+<div id="footer">Copyright &#169; 2013&#x2013;2024 <a href="https://github.com/michael-o">Michael Osipov</a>. All rights reserved.</div>
+</body>
+</html>
