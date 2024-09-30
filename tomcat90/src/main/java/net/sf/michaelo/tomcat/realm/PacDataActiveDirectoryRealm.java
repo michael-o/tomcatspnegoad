@@ -19,6 +19,7 @@ import java.security.Key;
 import java.security.Principal;
 import java.security.SignatureException;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -146,16 +147,35 @@ public class PacDataActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 				return null;
 			}
 
-			Optional<AuthorizationDataEntry> pacDataEntry = Arrays.stream(adEntries)
-					.filter(adEntry -> adEntry.getType() == AdIfRelevantAsn1Parser.AD_IF_RELEVANT)
-					.map(adEntry -> AdIfRelevantAsn1Parser.parse(adEntry.getData()))
-					.flatMap(List::stream)
-					.filter(adEntry -> adEntry.getType() == AdIfRelevantAsn1Parser.AD_WIN2K_PAC)
-					.findFirst();
+			Optional<AuthorizationDataEntry> pacDataEntry = Optional.empty();
+			try {
+				pacDataEntry = Arrays.stream(adEntries)
+				.filter(adEntry -> adEntry.getType() == AdIfRelevantAsn1Parser.AD_IF_RELEVANT)
+				.map(adEntry -> AdIfRelevantAsn1Parser.parse(adEntry.getData()))
+				.flatMap(List::stream)
+				.filter(adEntry -> adEntry.getType() == AdIfRelevantAsn1Parser.AD_WIN2K_PAC)
+				.findFirst();
+			} catch (Exception e) {
+				String adEntriesStr = Arrays.stream(adEntries)
+						.map(adEntry -> adEntry.getType() + " " + Base64.getEncoder().encodeToString(adEntry.getData()))
+						.collect(Collectors.joining(",", "[", "]"));
+				logger.warn(sm.getString("pacDataActiveDirectoryRealm.incorrectlyEncodedData", adEntriesStr), e);
+
+				return null;
+			}
 
 			if (pacDataEntry.isPresent()) {
-				Pac pac = new Pac(pacDataEntry.get().getData(),
-						new PrivateSunPacSignatureVerifier());
+				byte[] pacData = pacDataEntry.get().getData();
+
+				Pac pac = null;
+				try {
+					pac = new Pac(pacData, new PrivateSunPacSignatureVerifier());
+				} catch (Exception e) {
+					logger.warn(sm.getString("pacDataActiveDirectoryRealm.incorrectlyEncodedData",
+							Base64.getEncoder().encodeToString(pacData)), e);
+
+					return null;
+				}
 
 				Key[] keys = getKeys();
 				try {
