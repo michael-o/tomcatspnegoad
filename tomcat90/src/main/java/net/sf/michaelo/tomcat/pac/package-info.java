@@ -17,6 +17,6 @@
 /**
  * Implementation to parse and process structures from <a href=
  * "https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-pac/166d8064-c863-41e1-9c23-edaaa5f36962">MS-PAC</a>
- * according to protocol revision 25.0.
+ * according to protocol revision 26.0.
  */
 package net.sf.michaelo.tomcat.pac;
