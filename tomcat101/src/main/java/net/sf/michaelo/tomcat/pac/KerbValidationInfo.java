@@ -163,8 +163,7 @@ public class KerbValidationInfo {
 		// UserAccountControl
 		/*
 		 * This is NOT userAccountControl from LDAP, see
-		 * https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-samr/b10cfda1-f24f-441b-
-		 * 8f43-80cb93e786ec
+		 * https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-samr/b10cfda1-f24f-441b-8f43-80cb93e786ec
 		 */
 		this.userAccountControl = buf.getUnsignedInt();
 		// SubAuthStatus
