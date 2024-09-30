@@ -75,14 +75,19 @@ public class KerbValidationInfo {
 	 * @throws IllegalArgumentException
 	 *             if {@code GroupCount} is not equal to the actually marshaled group count
 	 * @throws IllegalArgumentException
-	 *             if {@code SidCount} is bigger than 0, but flag D is not set in {@code UserFlags}
+	 *             if {@code SidCount} is not zero, but flag D is not set in {@code UserFlags}
+	 * @throws IllegalArgumentException
+	 *             if {@code ExtraSids} is not {@code null}, but flag D is not set in {@code UserFlags}
 	 * @throws IllegalArgumentException
 	 *             if {@code SidCount} is not equal to the actually marshaled SID count
 	 * @throws IllegalArgumentException
 	 *             if {@code ResourceGroupDomainSid} is not {@code null}, but flag H is not set in
 	 *             {@code UserFlags}
 	 * @throws IllegalArgumentException
-	 *             if {@code ResourceGroupCount} is bigger than 0, but flag H is not set in
+	 *             if {@code ResourceGroupCount} is not zero, but flag H is not set in
+	 *             {@code UserFlags}
+	 * @throws IllegalArgumentException
+	 *             if {@code ResourceGroupIds} is not {@code null}, but flag H is not set in
 	 *             {@code UserFlags}
 	 * @throws IllegalArgumentException
 	 *             if {@code ResourceGroupCount} is not equal to the actually marshaled resource
@@ -224,7 +229,14 @@ public class KerbValidationInfo {
 			throw new IllegalArgumentException("SidCount is " + sidCount
 					+ ", but flag D is not set in UserFlags (" + toHexString(userFlags) + ")");
 
-		if ((userFlags & EXTRA_SIDS_USER_FLAG) != 0L) {
+		if (extraSidsPointer != 0L && (userFlags & EXTRA_SIDS_USER_FLAG) == 0L)
+			throw new IllegalArgumentException("ExtraSids is not null ("
+					+ toHexString(extraSidsPointer)
+					+ "), but flag D is not set in UserFlags (" + toHexString(userFlags) + ")");
+
+
+		// No need to check for UserFlags because the above tests make sure that flag D is set
+		if (extraSidsPointer != 0L) {
 			logPointer("extraSids", extraSidsPointer);
 			extraSids = new ArrayList<>();
 			long actualSidCount = buf.getUnsignedInt();
@@ -253,7 +265,13 @@ public class KerbValidationInfo {
 			throw new IllegalArgumentException("ResourceGroupCount is " + sidCount
 					+ ", but flag H is not set in UserFlags (" + toHexString(userFlags) + ")");
 
-		if ((userFlags & RESOURCE_GROUP_IDS_USER_FLAG) != 0L) {
+		if (resourceGroupIdsPointer != 0L && (userFlags & RESOURCE_GROUP_IDS_USER_FLAG) == 0L)
+			throw new IllegalArgumentException("ResourceGroupIds is not null ("
+					+ toHexString(resourceGroupIdsPointer)
+					+ "), but flag H is not set in UserFlags (" + toHexString(userFlags) + ")");
+
+		// No need to check for UserFlags because the above tests make sure that flag H is set
+		if (resourceGroupDomainSidPointer != 0L) {
 			logPointer("resourceGroupDomainSid", resourceGroupDomainSidPointer);
 			resourceGroupDomainSid = getRpcSid(buf);
 			long actualResourceGroupCount = buf.getUnsignedInt();
@@ -261,12 +279,15 @@ public class KerbValidationInfo {
 				throw new IllegalArgumentException("ResourceGroupCount is " + resourceGroupCount
 						+ ", but actual ResourceGroupCount is " + actualResourceGroupCount);
 
-			logPointer("resourceGroupIds", resourceGroupIdsPointer);
-			resourceGroupIds = new ArrayList<>();
-			for (long l = 0L; l < resourceGroupCount; l++) {
-				long relativeId = buf.getUnsignedInt();
-				long attributes = buf.getUnsignedInt();
-				resourceGroupIds.add(new GroupMembership(relativeId, attributes));
+			// No need to check for UserFlags because the above tests make sure that flag H is set
+			if (resourceGroupIdsPointer != 0L) {
+				logPointer("resourceGroupIds", resourceGroupIdsPointer);
+				resourceGroupIds = new ArrayList<>();
+				for (long l = 0L; l < resourceGroupCount; l++) {
+					long relativeId = buf.getUnsignedInt();
+					long attributes = buf.getUnsignedInt();
+					resourceGroupIds.add(new GroupMembership(relativeId, attributes));
+				}
 			}
 		}
 	}
