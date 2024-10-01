@@ -25,7 +25,7 @@
 
 	<groupId>net.sf.michael-o.tomcat</groupId>
 	<artifactId>tomcat-authnz-spnego-ad</artifactId>
-	<version>4.2.1</version>
+	<version>4.2.2-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>SPNEGO/Kerberos Authenticator and Active Directory Realm for Apache Tomcat</name>
@@ -75,7 +75,7 @@
 	<properties>
 		<requiredJavaVersion>11</requiredJavaVersion>
 
-		<project.build.outputTimestamp>2024-10-01T07:32:56Z</project.build.outputTimestamp>
+		<project.build.outputTimestamp>2024-10-01T07:33:34Z</project.build.outputTimestamp>
 	</properties>
 
 	<dependencyManagement>
