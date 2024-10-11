@@ -237,7 +237,6 @@ public class KerbValidationInfo {
 					+ toHexString(extraSidsPointer)
 					+ "), but flag D is not set in UserFlags (" + toHexString(userFlags) + ")");
 
-
 		// No need to check for UserFlags because the above tests make sure that flag D is set
 		if (extraSidsPointer != 0L) {
 			this.extraSids = new ArrayList<>();
