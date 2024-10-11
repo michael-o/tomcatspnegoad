@@ -43,8 +43,9 @@ import com.sun.security.jgss.InquireType;
 import net.sf.michaelo.tomcat.pac.Krb5AuthzDataDumpPrinter;
 
 /**
- * A realm which extracts and dumps Kerberos {@code AuthorizationData}, but delegates the actual
- * work to {@link ActiveDirectoryRealm#getPrincipal(GSSName, GSSCredential)}.
+ * A realm which extracts and dumps Kerberos {@code AuthorizationData} and always returns a {@code null}.
+ * Use the {@link CombinedRealm} to authenticate against this one first and then against the actual
+ * one next.
  * <p>
  * This realm requires your JVM to provide an {@link ExtendedGSSContext} implementation. It will use
  * {@link InquireType#KRB5_GET_AUTHZ_DATA} to extract {@code AuthorizationData} according to RFC 4120,
@@ -55,7 +56,7 @@ import net.sf.michaelo.tomcat.pac.Krb5AuthzDataDumpPrinter;
  * <strong>Note</strong>: Use this realm for testing/analysis purposes only along with the
  * {@link Krb5AuthzDataDumpPrinter}.
  */
-public class Krb5AuthzDataDumpingActiveDirectoryRealm extends ActiveDirectoryRealm {
+public class Krb5AuthzDataDumpingActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 
 	private static final DateTimeFormatter TS_FORMAT = DateTimeFormatter
 			.ofPattern("yyyyMMdd'T'HHmmss.SSS").withZone(ZoneId.systemDefault());
@@ -102,7 +103,7 @@ public class Krb5AuthzDataDumpingActiveDirectoryRealm extends ActiveDirectoryRea
 			logger.error(sm.getString("krb5AuthzDataRealmBase.incompatibleSecurityContextType"));
 		}
 
-		return getPrincipal(gssName, gssCredential);
+		return null;
 	}
 
 	private Path createDumpFile(Path dumpDir, Instant id) throws IOException {
