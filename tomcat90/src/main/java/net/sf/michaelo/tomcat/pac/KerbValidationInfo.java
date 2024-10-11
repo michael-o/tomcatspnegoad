@@ -217,16 +217,16 @@ public class KerbValidationInfo {
 			throw new IllegalArgumentException("GroupCount is " + groupCount
 					+ ", but actual GroupCount is " + actualGroupCount);
 
-		groupIds = new ArrayList<GroupMembership>();
+		this.groupIds = new ArrayList<GroupMembership>();
 		for (long l = 0L; l < groupCount; l++) {
 			long relativeId = buf.getUnsignedInt();
 			long attributes = buf.getUnsignedInt();
-			groupIds.add(new GroupMembership(relativeId, attributes));
+			this.groupIds.add(new GroupMembership(relativeId, attributes));
 		}
 
 		this.logonServer = getNdrString(buf, logonServer);
 		this.logonDomainName = getNdrString(buf, logonDomainName);
-		logonDomainId = getRpcSid(buf);
+		this.logonDomainId = getRpcSid(buf);
 
 		if (sidCount != 0L && (userFlags & EXTRA_SIDS_USER_FLAG) == 0L)
 			throw new IllegalArgumentException("SidCount is " + sidCount
@@ -240,7 +240,7 @@ public class KerbValidationInfo {
 
 		// No need to check for UserFlags because the above tests make sure that flag D is set
 		if (extraSidsPointer != 0L) {
-			extraSids = new ArrayList<>();
+			this.extraSids = new ArrayList<>();
 			long actualSidCount = buf.getUnsignedInt();
 			if (sidCount != actualSidCount)
 				throw new IllegalArgumentException(
@@ -254,7 +254,7 @@ public class KerbValidationInfo {
 			}
 			for (long l = 0L; l < sidCount; l++) {
 				Sid extraSid = getRpcSid(buf);
-				extraSids.add(new KerbSidAndAttributes(extraSid, sidAttrs[(int) l]));
+				this.extraSids.add(new KerbSidAndAttributes(extraSid, sidAttrs[(int) l]));
 			}
 		}
 
@@ -274,7 +274,7 @@ public class KerbValidationInfo {
 
 		// No need to check for UserFlags because the above tests make sure that flag H is set
 		if (resourceGroupDomainSidPointer != 0L) {
-			resourceGroupDomainSid = getRpcSid(buf);
+			this.resourceGroupDomainSid = getRpcSid(buf);
 			long actualResourceGroupCount = buf.getUnsignedInt();
 			if (resourceGroupCount != actualResourceGroupCount)
 				throw new IllegalArgumentException("ResourceGroupCount is " + resourceGroupCount
@@ -282,11 +282,11 @@ public class KerbValidationInfo {
 
 			// No need to check for UserFlags because the above tests make sure that flag H is set
 			if (resourceGroupIdsPointer != 0L) {
-				resourceGroupIds = new ArrayList<>();
+				this.resourceGroupIds = new ArrayList<>();
 				for (long l = 0L; l < resourceGroupCount; l++) {
 					long relativeId = buf.getUnsignedInt();
 					long attributes = buf.getUnsignedInt();
-					resourceGroupIds.add(new GroupMembership(relativeId, attributes));
+					this.resourceGroupIds.add(new GroupMembership(relativeId, attributes));
 				}
 			}
 		}
