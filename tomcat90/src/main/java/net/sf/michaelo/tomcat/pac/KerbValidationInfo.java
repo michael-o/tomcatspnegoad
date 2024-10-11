@@ -275,6 +275,7 @@ public class KerbValidationInfo {
 		// No need to check for UserFlags because the above tests make sure that flag H is set
 		if (resourceGroupDomainSidPointer != 0L) {
 			this.resourceGroupDomainSid = getRpcSid(buf);
+
 			long actualResourceGroupCount = buf.getUnsignedInt();
 			if (resourceGroupCount != actualResourceGroupCount)
 				throw new IllegalArgumentException("ResourceGroupCount is " + resourceGroupCount
