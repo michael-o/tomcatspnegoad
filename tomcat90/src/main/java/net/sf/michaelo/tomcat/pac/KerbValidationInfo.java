@@ -124,16 +124,22 @@ public class KerbValidationInfo {
 		buf.skip(8);
 		// EffectiveName
 		RpcUnicodeString effectiveName = getRpcUnicodeString(buf);
+		logPointer("effectiveName", effectiveName.getPointer());
 		// FullName
 		RpcUnicodeString fullName = getRpcUnicodeString(buf);
+		logPointer("fullName", fullName.getPointer());
 		// LogonScript
 		RpcUnicodeString logonScript = getRpcUnicodeString(buf);
+		logPointer("logonScript", logonScript.getPointer());
 		// ProfilePath
 		RpcUnicodeString profilePath = getRpcUnicodeString(buf);
+		logPointer("profilePath", profilePath.getPointer());
 		// HomeDirectory
 		RpcUnicodeString homeDirectory = getRpcUnicodeString(buf);
+		logPointer("homeDirectory", homeDirectory.getPointer());
 		// HomeDirectoryDrive
 		RpcUnicodeString homeDirectoryDrive = getRpcUnicodeString(buf);
+		logPointer("homeDirectoryDrive", homeDirectoryDrive.getPointer());
 		// LogonCount
 		buf.skip(2);
 		// BadPasswordCount
@@ -146,6 +152,7 @@ public class KerbValidationInfo {
 		long groupCount = buf.getUnsignedInt();
 		// GroupIds
 		long groupIdsPointer = buf.getUnsignedInt();
+		logPointer("groupIds", groupIdsPointer);
 		// UserFlags
 		/* Something isn't right, it appears to be that the bits are in reverse order
 		 * or the documentation is wrong:
@@ -159,10 +166,13 @@ public class KerbValidationInfo {
 		buf.skip(16);
 		// LogonServer
 		RpcUnicodeString logonServer = getRpcUnicodeString(buf);
+		logPointer("logonServer", logonServer.getPointer());
 		// LogonDomainName
 		RpcUnicodeString logonDomainName = getRpcUnicodeString(buf);
+		logPointer("logonDomainName", logonDomainName.getPointer());
 		// LogonDomainId
 		long logonDomainIdPointer = buf.getUnsignedInt();
+		logPointer("logonDomainId", logonDomainIdPointer);
 		// Reserved1
 		buf.skip(8);
 		// UserAccountControl
@@ -185,24 +195,21 @@ public class KerbValidationInfo {
 		long sidCount = buf.getUnsignedInt();
 		// ExtraSids
 		long extraSidsPointer = buf.getUnsignedInt();
+		logPointer("extraSids", extraSidsPointer);
 		// ResourceGroupDomainSid
 		long resourceGroupDomainSidPointer = buf.getUnsignedInt();
+		logPointer("resourceGroupDomainSid", resourceGroupDomainSidPointer);
 		// ResourceGroupCount
 		long resourceGroupCount = buf.getUnsignedInt();
 		// ResourceGroupIds
 		long resourceGroupIdsPointer = buf.getUnsignedInt();
+		logPointer("resourceGroupIds", resourceGroupIdsPointer);
 
-		logPointer("effectiveName", effectiveName.getPointer());
 		this.effectiveName = getNdrString(buf, effectiveName);
-		logPointer("fullName", fullName.getPointer());
 		this.fullName = getNdrString(buf, fullName);
-		logPointer("logonScript", logonScript.getPointer());
 		this.logonScript = getNdrString(buf, logonScript);
-		logPointer("profilePath", profilePath.getPointer());
 		this.profilePath = getNdrString(buf, profilePath);
-		logPointer("homeDirectory", homeDirectory.getPointer());
 		this.homeDirectory = getNdrString(buf, homeDirectory);
-		logPointer("homeDirectoryDrive", homeDirectoryDrive.getPointer());
 		this.homeDirectoryDrive = getNdrString(buf, homeDirectoryDrive);
 
 		long actualGroupCount = buf.getUnsignedInt();
@@ -210,7 +217,6 @@ public class KerbValidationInfo {
 			throw new IllegalArgumentException("GroupCount is " + groupCount
 					+ ", but actual GroupCount is " + actualGroupCount);
 
-		logPointer("groupIds", groupIdsPointer);
 		groupIds = new ArrayList<GroupMembership>();
 		for (long l = 0L; l < groupCount; l++) {
 			long relativeId = buf.getUnsignedInt();
@@ -218,11 +224,8 @@ public class KerbValidationInfo {
 			groupIds.add(new GroupMembership(relativeId, attributes));
 		}
 
-		logPointer("logonServer", logonServer.getPointer());
 		this.logonServer = getNdrString(buf, logonServer);
-		logPointer("logonDomainName", logonDomainName.getPointer());
 		this.logonDomainName = getNdrString(buf, logonDomainName);
-		logPointer("logonDomainId", logonDomainIdPointer);
 		logonDomainId = getRpcSid(buf);
 
 		if (sidCount != 0L && (userFlags & EXTRA_SIDS_USER_FLAG) == 0L)
@@ -237,7 +240,6 @@ public class KerbValidationInfo {
 
 		// No need to check for UserFlags because the above tests make sure that flag D is set
 		if (extraSidsPointer != 0L) {
-			logPointer("extraSids", extraSidsPointer);
 			extraSids = new ArrayList<>();
 			long actualSidCount = buf.getUnsignedInt();
 			if (sidCount != actualSidCount)
@@ -248,7 +250,7 @@ public class KerbValidationInfo {
 				long extraSidPointer = buf.getUnsignedInt();
 				long attributes = buf.getUnsignedInt();
 				sidAttrs[(int) l] = attributes;
-				logPointer("extraSid (" + l + ")", extraSidPointer);
+				logPointer("extraSid[" + l + "]", extraSidPointer);
 			}
 			for (long l = 0L; l < sidCount; l++) {
 				Sid extraSid = getRpcSid(buf);
@@ -272,7 +274,6 @@ public class KerbValidationInfo {
 
 		// No need to check for UserFlags because the above tests make sure that flag H is set
 		if (resourceGroupDomainSidPointer != 0L) {
-			logPointer("resourceGroupDomainSid", resourceGroupDomainSidPointer);
 			resourceGroupDomainSid = getRpcSid(buf);
 			long actualResourceGroupCount = buf.getUnsignedInt();
 			if (resourceGroupCount != actualResourceGroupCount)
@@ -281,7 +282,6 @@ public class KerbValidationInfo {
 
 			// No need to check for UserFlags because the above tests make sure that flag H is set
 			if (resourceGroupIdsPointer != 0L) {
-				logPointer("resourceGroupIds", resourceGroupIdsPointer);
 				resourceGroupIds = new ArrayList<>();
 				for (long l = 0L; l < resourceGroupCount; l++) {
 					long relativeId = buf.getUnsignedInt();
