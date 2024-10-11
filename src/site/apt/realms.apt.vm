@@ -119,7 +119,7 @@ Choosing and Using Realms
   It requires a single-step setup.
 
     [Note] Unsure about this realm? Use the {{{./tomcat90-authnz-spnego-ad/apidocs/net/sf/michaelo/tomcat/realm/Krb5AuthzDataDumpingActiveDirectoryRealm.html}<<<Krb5AuthzDataDumpingActiveDirectoryRealm>>>}}
-           (which wraps the <<<ActiveDirectoryRealm>>>) to collect authorization data and analyze it with the {{{./tomcat90-authnz-spnego-ad/apidocs/net/sf/michaelo/tomcat/pac/Krb5AuthzDataDumpPrinter.html}<<<Krb5AuthzDataDumpPrinter>>>}}.
+           to collect authorization data and analyze it with the {{{./tomcat90-authnz-spnego-ad/apidocs/net/sf/michaelo/tomcat/pac/Krb5AuthzDataDumpPrinter.html}<<<Krb5AuthzDataDumpPrinter>>>}}.
 
 ** Configuring the Realm
 
