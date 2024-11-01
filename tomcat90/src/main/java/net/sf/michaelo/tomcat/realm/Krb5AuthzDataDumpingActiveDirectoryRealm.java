@@ -30,6 +30,8 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.ietf.jgss.GSSContext;
 import org.ietf.jgss.GSSCredential;
@@ -61,6 +63,8 @@ public class Krb5AuthzDataDumpingActiveDirectoryRealm extends ActiveDirectoryRea
 	private static final DateTimeFormatter TS_FORMAT = DateTimeFormatter
 			.ofPattern("yyyyMMdd'T'HHmmss.SSS").withZone(ZoneId.systemDefault());
 
+	private static final ConcurrentMap<String, Void> LOCKS = new ConcurrentHashMap<>();
+
 	protected Principal getPrincipal(GSSName gssName, GSSCredential gssCredential,
 			GSSContext gssContext) {
 		if (gssContext instanceof ExtendedGSSContext) {
@@ -86,19 +90,26 @@ public class Krb5AuthzDataDumpingActiveDirectoryRealm extends ActiveDirectoryRea
 			Instant id = Instant.now();
 
 			Path dumpDir = workDir.resolve("KRB5_AUTHZ_DATA").resolve(gssName.toString());
-			try {
-				Path dumpFile = createDumpFile(dumpDir, id);
-				try (PrintWriter w = new PrintWriter(Files.newBufferedWriter(dumpFile))) {
-					for (AuthorizationDataEntry adEntry : adEntries) {
-						w.printf("%d %s%n", adEntry.getType(),
-								Base64.getEncoder().encodeToString(adEntry.getData()));
+
+			String lockKey = gssName + "#" + TS_FORMAT.format(id);
+			final AuthorizationDataEntry[] adEntriesCopy = adEntries;
+			LOCKS.compute(lockKey, (k, v) -> {
+				try {
+					Path dumpFile = createDumpFile(dumpDir, id);
+					try (PrintWriter w = new PrintWriter(Files.newBufferedWriter(dumpFile))) {
+						for (AuthorizationDataEntry adEntry : adEntriesCopy) {
+							w.printf("%d %s%n", adEntry.getType(),
+									Base64.getEncoder().encodeToString(adEntry.getData()));
+						}
 					}
+				} catch (IOException e) {
+					logger.warn(sm.getString(
+							"krb5AuthzDataDumpingActiveDirectoryRealm.dumpingKrb5AuthzDataFailed",
+							gssName), e);
 				}
-			} catch (IOException e) {
-				logger.warn(sm.getString(
-						"krb5AuthzDataDumpingActiveDirectoryRealm.dumpingKrb5AuthzDataFailed",
-						gssName), e);
-			}
+
+				return null;
+			});
 		} else {
 			logger.error(sm.getString("krb5AuthzDataRealmBase.incompatibleSecurityContextType"));
 		}
