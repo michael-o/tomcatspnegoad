@@ -46,8 +46,8 @@ import net.sf.michaelo.tomcat.pac.Krb5AuthzDataDumpPrinter;
 
 /**
  * A realm which extracts and dumps Kerberos {@code AuthorizationData} and always returns a {@code null}.
- * Use the {@link CombinedRealm} to authenticate against this one first and then against the actual
- * one next.
+ * Use the {@link org.apache.catalina.realm.CombinedRealm} to authenticate against this one first and
+ * then against the actual one next.
  * <p>
  * This realm requires your JVM to provide an {@link ExtendedGSSContext} implementation. It will use
  * {@link InquireType#KRB5_GET_AUTHZ_DATA} to extract {@code AuthorizationData} according to RFC 4120,
