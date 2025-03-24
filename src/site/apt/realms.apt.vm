@@ -112,6 +112,9 @@ Choosing and Using Realms
 
 * PAC Data Active Directory Realm
 
+    [Attention] If you are running Java 11+, you must add the following options to your
+                <<<CATALINA_OPTS>>>: <<<--add-exports java.security.jgss/sun.security.krb5=ALL-UNNAMED>>>.
+
   The {{{./tomcat90-authnz-spnego-ad/apidocs/net/sf/michaelo/tomcat/realm/PacDataActiveDirectoryRealm.html}<<<PacDataActiveDirectoryRealm>>>}}
   will process {{{https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-pac/166d8064-c863-41e1-9c23-edaaa5f36962}MS-PAC}}
   data from your Active Directory for a user and retrieve all the necessary information, e.g., his/her security groups.
