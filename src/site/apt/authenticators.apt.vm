@@ -55,7 +55,8 @@ Choosing and Using Authenticators
 +----------------------------
 
   Provide the login entry name from your <<<login.conf>>> configured for the machine or service account
-  capable of accepting GSS contexts with SPNEGO/Kerberos.
+  capable of accepting GSS contexts with SPNEGO/Kerberos. The file is referenced through the JVM property
+  <<<java.security.auth.login.config>>> added to your <<<CATALINA_OPTS>>>.
 
   You have successfully configured the <<<SpnegoAuthenticator>>> in your webapp. It is now ready to use.
 

@@ -112,7 +112,7 @@ Choosing and Using Realms
 
 * PAC Data Active Directory Realm
 
-    [Attention] If you are running Java 11+, you must add the following options to your
+    [Attention] If you are running Java 11+, you must add the following option to your
                 <<<CATALINA_OPTS>>>: <<<--add-exports java.security.jgss/sun.security.krb5=ALL-UNNAMED>>>.
 
   The {{{./tomcat90-authnz-spnego-ad/apidocs/net/sf/michaelo/tomcat/realm/PacDataActiveDirectoryRealm.html}<<<PacDataActiveDirectoryRealm>>>}}
