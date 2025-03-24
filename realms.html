@@ -112,6 +112,9 @@
 <h3>Using Security Groups from Active Directory</h3>
 <p>The <code>ActiveDirectoryRealm</code> will populate all roles as SID strings for the given principal by default. While it might not look convenient in the first place, it adds benefit when security groups are moved from/to other domains, the SID history is completely retained. I.e., your application will continue to work even with the old SID. If you would like to map SIDs to developer-friendly role names, checkout the <a class="externalLink" href="https://tomcat.apache.org/tomcat-9.0-doc/config/listeners.html#Properties_Role_Mapping_Listener_-_org.apache.catalina.core.PropertiesRoleMappingListener"><code>PropertiesRoleMappingListener</code></a> or use other role formats, but the SID see extended capabilities of this realm in the <a href="./tomcat90-authnz-spnego-ad/apidocs/net/sf/michaelo/tomcat/realm/ActiveDirectoryRealm.html#configuration">Javadoc</a>.</p></section></section><section>
 <h2>PAC Data Active Directory Realm</h2>
+<dl>
+<dt>Attention</dt>
+<dd>If you are running Java 11+, you must add the following options to your <code>CATALINA_OPTS</code>: <code>--add-exports java.security.jgss/sun.security.krb5=ALL-UNNAMED</code>.</dd></dl>
 <p>The <a href="./tomcat90-authnz-spnego-ad/apidocs/net/sf/michaelo/tomcat/realm/PacDataActiveDirectoryRealm.html"><code>PacDataActiveDirectoryRealm</code></a> will process <a class="externalLink" href="https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-pac/166d8064-c863-41e1-9c23-edaaa5f36962">MS-PAC</a> data from your Active Directory for a user and retrieve all the necessary information, e.g., his/her security groups.</p>
 <p>It requires a single-step setup.</p>
 <dl>
