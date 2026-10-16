@@ -29,14 +29,12 @@ public class RpcUnicodeString {
 	/**
 	 * Constructs a RPC Unicode string.
 	 *
-	 * @throws IllegalArgumentException
-	 *             if {@code maximumLength} is smaller than {@code length}
+	 * @throws IllegalArgumentException if {@code maximumLength} is smaller than {@code length}
 	 */
 	public RpcUnicodeString(long length, long maximumLength, long pointer) {
 		if (maximumLength < length)
 			throw new IllegalArgumentException(
-					"RPC_UNICODE_STRING maximumLength is smaller than length: " + maximumLength
-							+ " < " + length);
+					"RPC_UNICODE_STRING maximumLength is smaller than length: " + maximumLength + " < " + length);
 
 		this.length = length;
 		this.maximumLength = maximumLength;
@@ -54,5 +52,4 @@ public class RpcUnicodeString {
 	public long getPointer() {
 		return pointer;
 	}
-
 }

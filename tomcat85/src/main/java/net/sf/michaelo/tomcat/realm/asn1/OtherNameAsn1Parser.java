@@ -21,36 +21,29 @@ import java.util.Objects;
 import org.apache.tomcat.util.buf.Asn1Parser;
 
 /**
- * A minimalist ASN.1 parser for X.509 {@code SAN:otherName} according to RFC
- * 5280, section 4.2.1.6.
- * <p>
- * It properly takes
- * <a href="https://bugs.openjdk.java.net/browse/JDK-6776681">JDK-6776681</a>
- * into account and solves
- * <a href="https://bugs.openjdk.java.net/browse/JDK-8277976">JDK-8277976</a>.
+ * A minimalist ASN.1 parser for X.509 {@code SAN:otherName} according to RFC 5280, section 4.2.1.6.
+ *
+ * <p>It properly takes <a href="https://bugs.openjdk.java.net/browse/JDK-6776681">JDK-6776681</a> into account and
+ * solves <a href="https://bugs.openjdk.java.net/browse/JDK-8277976">JDK-8277976</a>.
  */
 public class OtherNameAsn1Parser {
 
 	private static byte UTF8STRING_TAG = 0x0C;
 
-	private OtherNameAsn1Parser() {
-	}
+	private OtherNameAsn1Parser() {}
 
 	/**
-	 * Parses the DER-encoded ASN.1 {@code SAN:otherName} field into its components:
-	 * {@code type-id} and {@code value}.
+	 * Parses the DER-encoded ASN.1 {@code SAN:otherName} field into its components: {@code type-id} and {@code value}.
 	 *
 	 * @param otherName a DER-encoded byte array
 	 * @return the parse result
-	 * @throws NullPointerException     if {@code otherName} is {@code null}
-	 * @throws IllegalArgumentException if {@code otherName} is empty or if the
-	 *                                  DER-encoded byte array does not comply with
-	 *                                  ASN.1 DER encoding rules
+	 * @throws NullPointerException if {@code otherName} is {@code null}
+	 * @throws IllegalArgumentException if {@code otherName} is empty or if the DER-encoded byte array does not comply
+	 *     with ASN.1 DER encoding rules
 	 */
 	public static OtherNameParseResult parse(byte[] otherName) {
 		Objects.requireNonNull(otherName, "otherName cannot be null");
-		if (otherName.length == 0)
-			throw new IllegalArgumentException("otherName cannot be empty");
+		if (otherName.length == 0) throw new IllegalArgumentException("otherName cannot be empty");
 
 		Asn1Parser parser = new Asn1Parser(otherName);
 
@@ -62,7 +55,7 @@ public class OtherNameAsn1Parser {
 		parser = new Asn1Parser(value);
 		// Workaround for https://bugs.openjdk.java.net/browse/JDK-6776681
 		if (parser.peekTag() == 0xA0) // context-specific and constructed + tag number 0
-			value = parser.parseAttributeAsBytes(0);
+		value = parser.parseAttributeAsBytes(0);
 
 		return new OtherNameParseResult(typeId, value);
 	}
@@ -72,15 +65,13 @@ public class OtherNameAsn1Parser {
 	 *
 	 * @param str a DER-encoded byte array
 	 * @return the converted Java string
-	 * @throws NullPointerException     if {@code str} is {@code null}
-	 * @throws IllegalArgumentException if {@code str} is empty or if the
-	 *                                  DER-encoded byte array does not comply with
-	 *                                  ASN.1 DER encoding rules
+	 * @throws NullPointerException if {@code str} is {@code null}
+	 * @throws IllegalArgumentException if {@code str} is empty or if the DER-encoded byte array does not comply with
+	 *     ASN.1 DER encoding rules
 	 */
 	public static String parseUtf8String(byte[] str) {
 		Objects.requireNonNull(str, "str cannot be null");
-		if (str.length == 0)
-			throw new IllegalArgumentException("str cannot be empty");
+		if (str.length == 0) throw new IllegalArgumentException("str cannot be empty");
 
 		Asn1Parser parser = new Asn1Parser(str);
 
@@ -91,5 +82,4 @@ public class OtherNameAsn1Parser {
 
 		return new String(value, StandardCharsets.UTF_8);
 	}
-
 }

@@ -30,17 +30,13 @@ public class PacClientInfo {
 	/**
 	 * Parses a PAC client info object from a byte array.
 	 *
-	 * @param infoBytes
-	 *            PAC client info structure encoded as bytes
-	 * @throws NullPointerException
-	 *             if {@code infoBytes} is null
-	 * @throws IllegalArgumentException
-	 *             if {@code infoBytes} is empty
+	 * @param infoBytes PAC client info structure encoded as bytes
+	 * @throws NullPointerException if {@code infoBytes} is null
+	 * @throws IllegalArgumentException if {@code infoBytes} is empty
 	 */
 	public PacClientInfo(byte[] infoBytes) {
 		Objects.requireNonNull(infoBytes, "infoBytes cannot be null");
-		if (infoBytes.length == 0)
-			throw new IllegalArgumentException("infoBytes cannot be empty");
+		if (infoBytes.length == 0) throw new IllegalArgumentException("infoBytes cannot be empty");
 
 		PacDataBuffer buf = new PacDataBuffer(infoBytes);
 
@@ -57,5 +53,4 @@ public class PacClientInfo {
 	public String getName() {
 		return name;
 	}
-
 }

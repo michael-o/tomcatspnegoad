@@ -15,9 +15,7 @@
  */
 package net.sf.michaelo.tomcat.realm.asn1;
 
-/**
- * This class holds the parsing result of {@link OtherNameAsn1Parser}.
- */
+/** This class holds the parsing result of {@link OtherNameAsn1Parser}. */
 public class OtherNameParseResult {
 
 	private byte[] typeId;
@@ -45,5 +43,4 @@ public class OtherNameParseResult {
 	public byte[] getValue() {
 		return value;
 	}
-
 }

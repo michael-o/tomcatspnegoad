@@ -18,21 +18,15 @@ package net.sf.michaelo.tomcat.realm.mapper;
 import javax.naming.NamingException;
 import javax.naming.directory.DirContext;
 
+import net.sf.michaelo.tomcat.realm.ActiveDirectoryRealm;
+
 import org.ietf.jgss.GSSName;
 import org.ietf.jgss.Oid;
 
-import net.sf.michaelo.tomcat.realm.ActiveDirectoryRealm;
-
-/**
- * A mapper interface (strategy pattern) for translating GSS names to Active Directory search
- * space parameters.
- */
+/** A mapper interface (strategy pattern) for translating GSS names to Active Directory search space parameters. */
 public interface UsernameSearchMapper {
 
-	/**
-	 * Mapped values holder. The {@link ActiveDirectoryRealm} uses these mapped values to search for
-	 * a user.
-	 */
+	/** Mapped values holder. The {@link ActiveDirectoryRealm} uses these mapped values to search for a user. */
 	interface MappedValues {
 
 		String getSearchBase();
@@ -40,7 +34,6 @@ public interface UsernameSearchMapper {
 		String getSearchAttributeName();
 
 		String getSearchUsername();
-
 	}
 
 	/**
@@ -49,7 +42,6 @@ public interface UsernameSearchMapper {
 	 * @return supported string name type OIDs
 	 */
 	Oid[] getSupportedStringNameTypes();
-
 
 	/**
 	 * Determines whether a mapper is able to map a given GSS name into AD search space.
@@ -60,21 +52,15 @@ public interface UsernameSearchMapper {
 	boolean supportsGssName(GSSName gssName);
 
 	/**
-	 * Maps a GSS name to AD search space parameters. A mapper implementation must assure that the
-	 * user can be found in the given {@code context} when an approriate GSS name is presented. The
-	 * implementor must be aware that the returned search base might need to be relativized to the
-	 * root DN of the context.
+	 * Maps a GSS name to AD search space parameters. A mapper implementation must assure that the user can be found in
+	 * the given {@code context} when an approriate GSS name is presented. The implementor must be aware that the
+	 * returned search base might need to be relativized to the root DN of the context.
 	 *
-	 * @param context
-	 *            the search context
-	 * @param gssName
-	 *            the GSS name to be mapped
+	 * @param context the search context
+	 * @param gssName the GSS name to be mapped
 	 * @return mapped values for user retrieval
-	 * @throws NamingException
-	 *             if a context-related error has occured
-	 * @throws IllegalArgumentException
-	 *             if the GSS name is not supported
+	 * @throws NamingException if a context-related error has occured
+	 * @throws IllegalArgumentException if the GSS name is not supported
 	 */
 	MappedValues map(DirContext context, GSSName gssName) throws NamingException;
-
 }

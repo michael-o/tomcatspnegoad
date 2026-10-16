@@ -33,47 +33,44 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import org.ietf.jgss.GSSContext;
-import org.ietf.jgss.GSSCredential;
-import org.ietf.jgss.GSSException;
-import org.ietf.jgss.GSSName;
-
 import com.sun.security.jgss.AuthorizationDataEntry;
 import com.sun.security.jgss.ExtendedGSSContext;
 import com.sun.security.jgss.InquireType;
 
 import net.sf.michaelo.tomcat.pac.Krb5AuthzDataDumpPrinter;
 
+import org.ietf.jgss.GSSContext;
+import org.ietf.jgss.GSSCredential;
+import org.ietf.jgss.GSSException;
+import org.ietf.jgss.GSSName;
+
 /**
- * A realm which extracts and dumps Kerberos {@code AuthorizationData} and always returns a {@code null}.
- * Use the {@link org.apache.catalina.realm.CombinedRealm} to authenticate against this one first and
- * then against the actual one next.
- * <p>
- * This realm requires your JVM to provide an {@link ExtendedGSSContext} implementation. It will use
- * {@link InquireType#KRB5_GET_AUTHZ_DATA} to extract {@code AuthorizationData} according to RFC 4120,
- * section 5.2.6 from an established security context, dump to
- * <code>{catalina.base}/work/KRB5_AUTHZ_DATA/{gssName}/{yyyyMMdd'T'HHmmss.SSS}{#n?}</code> and
- * continue as described.
- * <p>
- * <strong>Note</strong>: Use this realm for testing/analysis purposes only along with the
+ * A realm which extracts and dumps Kerberos {@code AuthorizationData} and always returns a {@code null}. Use the
+ * {@link org.apache.catalina.realm.CombinedRealm} to authenticate against this one first and then against the actual
+ * one next.
+ *
+ * <p>This realm requires your JVM to provide an {@link ExtendedGSSContext} implementation. It will use
+ * {@link InquireType#KRB5_GET_AUTHZ_DATA} to extract {@code AuthorizationData} according to RFC 4120, section 5.2.6
+ * from an established security context, dump to <code>
+ * {catalina.base}/work/KRB5_AUTHZ_DATA/{gssName}/{yyyyMMdd'T'HHmmss.SSS}{#n?}</code> and continue as described.
+ *
+ * <p><strong>Note</strong>: Use this realm for testing/analysis purposes only along with the
  * {@link Krb5AuthzDataDumpPrinter}.
  */
 public class Krb5AuthzDataDumpingActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 
-	private static final DateTimeFormatter TS_FORMAT = DateTimeFormatter
-			.ofPattern("yyyyMMdd'T'HHmmss.SSS").withZone(ZoneId.systemDefault());
+	private static final DateTimeFormatter TS_FORMAT =
+			DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss.SSS").withZone(ZoneId.systemDefault());
 
 	private static final ConcurrentMap<String, Void> LOCKS = new ConcurrentHashMap<>();
 
-	protected Principal getPrincipal(GSSName gssName, GSSCredential gssCredential,
-			GSSContext gssContext) {
+	protected Principal getPrincipal(GSSName gssName, GSSCredential gssCredential, GSSContext gssContext) {
 		if (gssContext instanceof ExtendedGSSContext) {
 			ExtendedGSSContext extGssContext = (ExtendedGSSContext) gssContext;
 
 			AuthorizationDataEntry[] adEntries = null;
 			try {
-				adEntries = (AuthorizationDataEntry[]) extGssContext
-						.inquireSecContext(InquireType.KRB5_GET_AUTHZ_DATA);
+				adEntries = (AuthorizationDataEntry[]) extGssContext.inquireSecContext(InquireType.KRB5_GET_AUTHZ_DATA);
 
 			} catch (GSSException e) {
 				logger.warn(sm.getString("krb5AuthzDataRealmBase.inquireSecurityContextFailed"), e);
@@ -98,14 +95,16 @@ public class Krb5AuthzDataDumpingActiveDirectoryRealm extends ActiveDirectoryRea
 					Path dumpFile = createDumpFile(dumpDir, id);
 					try (PrintWriter w = new PrintWriter(Files.newBufferedWriter(dumpFile))) {
 						for (AuthorizationDataEntry adEntry : adEntriesCopy) {
-							w.printf("%d %s%n", adEntry.getType(),
-									Base64.getEncoder().encodeToString(adEntry.getData()));
+							w.printf(
+									"%d %s%n",
+									adEntry.getType(), Base64.getEncoder().encodeToString(adEntry.getData()));
 						}
 					}
 				} catch (IOException e) {
-					logger.warn(sm.getString(
-							"krb5AuthzDataDumpingActiveDirectoryRealm.dumpingKrb5AuthzDataFailed",
-							gssName), e);
+					logger.warn(
+							sm.getString(
+									"krb5AuthzDataDumpingActiveDirectoryRealm.dumpingKrb5AuthzDataFailed", gssName),
+							e);
 				}
 
 				return null;
@@ -132,5 +131,4 @@ public class Krb5AuthzDataDumpingActiveDirectoryRealm extends ActiveDirectoryRea
 		}
 		return dumpFile;
 	}
-
 }

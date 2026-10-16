@@ -27,16 +27,17 @@ import org.ietf.jgss.GSSName;
 
 /**
  * Represents a principal from Active Directory with a list of roles.
- * <p>
- * An Active Directory principal is comprised of the following items:
+ *
+ * <p>An Active Directory principal is comprised of the following items:
+ *
  * <ul>
- * <li>the GSS name,</li>
- * <li>the security identifier (SID),</li>
- * <li>an optional GSS credential for credential delegation (impersonation),</li>
- * <li>an array of security groups the user has been assigned to, stored according to the
- * role format configured in the realm,</li>
- * <li>and a map with additional attributes which are either a {@code String}, {@code byte[]} or a
- * {@code List} of either one.</li>
+ *   <li>the GSS name,
+ *   <li>the security identifier (SID),
+ *   <li>an optional GSS credential for credential delegation (impersonation),
+ *   <li>an array of security groups the user has been assigned to, stored according to the role format configured in
+ *       the realm,
+ *   <li>and a map with additional attributes which are either a {@code String}, {@code byte[]} or a {@code List} of
+ *       either one.
  * </ul>
  */
 public class ActiveDirectoryPrincipal implements TomcatPrincipal {
@@ -47,22 +48,21 @@ public class ActiveDirectoryPrincipal implements TomcatPrincipal {
 	private final String[] roles;
 	private final Map<String, Object> additionalAttributes;
 
-	/**
-	 * Constructs a new principal for the given parameters.
-	 */
+	/** Constructs a new principal for the given parameters. */
 	public ActiveDirectoryPrincipal(GSSName gssName, Sid sid, GSSCredential gssCredential) {
 		this(gssName, sid, null, gssCredential, null);
 	}
 
-	/**
-	 * Constructs a new principal for the given parameters.
-	 */
-	public ActiveDirectoryPrincipal(GSSName gssName, Sid sid, List<String> roles,
-			GSSCredential gssCredential, Map<String, Object> additionalAttributes) {
+	/** Constructs a new principal for the given parameters. */
+	public ActiveDirectoryPrincipal(
+			GSSName gssName,
+			Sid sid,
+			List<String> roles,
+			GSSCredential gssCredential,
+			Map<String, Object> additionalAttributes) {
 		this.gssName = gssName;
 		this.sid = sid;
-		if (roles == null || roles.isEmpty())
-			this.roles = new String[0];
+		if (roles == null || roles.isEmpty()) this.roles = new String[0];
 		else {
 			this.roles = roles.toArray(new String[0]);
 			Arrays.sort(this.roles);
@@ -70,8 +70,7 @@ public class ActiveDirectoryPrincipal implements TomcatPrincipal {
 		this.gssCredential = gssCredential;
 		if (additionalAttributes == null || additionalAttributes.isEmpty())
 			this.additionalAttributes = Collections.emptyMap();
-		else
-			this.additionalAttributes = Collections.unmodifiableMap(additionalAttributes);
+		else this.additionalAttributes = Collections.unmodifiableMap(additionalAttributes);
 	}
 
 	@Override
@@ -110,15 +109,13 @@ public class ActiveDirectoryPrincipal implements TomcatPrincipal {
 	/**
 	 * Grants access if supplied role is associated with this principal.
 	 *
-	 * @param role
-	 *            the role to check
+	 * @param role the role to check
 	 * @return true if principal is associated with the role, else false
 	 */
 	public boolean hasRole(String role) {
 		if ("*".equals(role)) // Special 2.4 role meaning everyone
-			return true;
-		if (role == null)
-			return false;
+		return true;
+		if (role == null) return false;
 		return Arrays.binarySearch(roles, role) >= 0;
 	}
 
@@ -142,11 +139,9 @@ public class ActiveDirectoryPrincipal implements TomcatPrincipal {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj == null)
-			return false;
+		if (obj == null) return false;
 
-		if (!(obj instanceof ActiveDirectoryPrincipal))
-			return false;
+		if (!(obj instanceof ActiveDirectoryPrincipal)) return false;
 
 		ActiveDirectoryPrincipal other = (ActiveDirectoryPrincipal) obj;
 
@@ -169,5 +164,4 @@ public class ActiveDirectoryPrincipal implements TomcatPrincipal {
 			gssCredential.dispose();
 		}
 	}
-
 }

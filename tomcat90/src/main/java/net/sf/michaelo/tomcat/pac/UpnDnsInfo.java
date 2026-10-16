@@ -27,8 +27,8 @@ import net.sf.michaelo.tomcat.realm.Sid;
  */
 public class UpnDnsInfo {
 
-	public final static long UPN_CONSTRUCTED_FLAG = 0x00000001L;
-	public final static long SAM_NAME_AND_SID_FLAG = 0x00000002L;
+	public static final long UPN_CONSTRUCTED_FLAG = 0x00000001L;
+	public static final long SAM_NAME_AND_SID_FLAG = 0x00000002L;
 
 	private final String upn;
 	private final String dnsDomainName;
@@ -41,17 +41,13 @@ public class UpnDnsInfo {
 	/**
 	 * Parses a UPN DNS info object from a byte array.
 	 *
-	 * @param infoBytes
-	 *            UPN DNS info structure encoded as bytes
-	 * @throws NullPointerException
-	 *             if {@code infoBytes} is null
-	 * @throws IllegalArgumentException
-	 *             if {@code infoBytes} is empty
+	 * @param infoBytes UPN DNS info structure encoded as bytes
+	 * @throws NullPointerException if {@code infoBytes} is null
+	 * @throws IllegalArgumentException if {@code infoBytes} is empty
 	 */
 	public UpnDnsInfo(byte[] infoBytes) {
 		Objects.requireNonNull(infoBytes, "infoBytes cannot be null");
-		if (infoBytes.length == 0)
-			throw new IllegalArgumentException("infoBytes cannot be empty");
+		if (infoBytes.length == 0) throw new IllegalArgumentException("infoBytes cannot be empty");
 
 		PacDataBuffer buf = new PacDataBuffer(infoBytes);
 
@@ -125,5 +121,4 @@ public class UpnDnsInfo {
 		buf.get(dst);
 		return new String(dst, StandardCharsets.UTF_16LE);
 	}
-
 }

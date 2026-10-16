@@ -20,13 +20,14 @@ import java.security.SignatureException;
 
 /**
  * An interface for pluggable PAC signature verifier implementations for {@link PacSignatureData}.
- * <p>
- * The specification of Kerberos checksum (calculation) is available at
+ *
+ * <p>The specification of Kerberos checksum (calculation) is available at
+ *
  * <ul>
- * <li><a href="https://datatracker.ietf.org/doc/html/rfc4120#section-4">RFC 4120, section 4</a></li>
- * <li><a href="https://www.rfc-editor.org/rfc/rfc4757.html#section-4">RFC 4757, section 4</a></li>
- * <li><a href="https://datatracker.ietf.org/doc/html/rfc3961">RFC 3961</a></li>
- * <li><a href="https://www.rfc-editor.org/rfc/rfc3962.html">RFC 9362</a></li>
+ *   <li><a href="https://datatracker.ietf.org/doc/html/rfc4120#section-4">RFC 4120, section 4</a>
+ *   <li><a href="https://www.rfc-editor.org/rfc/rfc4757.html#section-4">RFC 4757, section 4</a>
+ *   <li><a href="https://datatracker.ietf.org/doc/html/rfc3961">RFC 3961</a>
+ *   <li><a href="https://www.rfc-editor.org/rfc/rfc3962.html">RFC 9362</a>
  * </ul>
  */
 public interface PacSignatureVerifier {
@@ -40,22 +41,14 @@ public interface PacSignatureVerifier {
 	/**
 	 * Verifies the signature on the supplied data with an array of suitable Kerberos keys.
 	 *
-	 * @param signatureData
-	 *            the PAC signature data to be verified
-	 * @param data
-	 *            the data to be verififed
-	 * @param keys
-	 *            an array of keys to calculate the signature
-	 * @throws NullPointerException
-	 *             if any argument is null
-	 * @throws IllegalArgumentException
-	 *             if any array is empty
-	 * @throws IllegalArgumentException
-	 *             if no key algorithm matches the {@link PacSignatureData.SignatureType#getEType()
-	 *             signature encryption type}
-	 * @throws SignatureException
-	 *             if signature cannot be verified
+	 * @param signatureData the PAC signature data to be verified
+	 * @param data the data to be verififed
+	 * @param keys an array of keys to calculate the signature
+	 * @throws NullPointerException if any argument is null
+	 * @throws IllegalArgumentException if any array is empty
+	 * @throws IllegalArgumentException if no key algorithm matches the {@link PacSignatureData.SignatureType#getEType()
+	 *     signature encryption type}
+	 * @throws SignatureException if signature cannot be verified
 	 */
 	void verify(PacSignatureData signatureData, byte[] data, Key[] keys) throws SignatureException;
-
 }

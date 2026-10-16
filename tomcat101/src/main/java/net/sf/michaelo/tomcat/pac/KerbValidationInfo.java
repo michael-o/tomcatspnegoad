@@ -21,21 +21,21 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+import net.sf.michaelo.tomcat.realm.Sid;
+
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
-
-import net.sf.michaelo.tomcat.realm.Sid;
 
 /**
  * A class representing the <a href=
  * "https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-pac/69e86ccc-85e3-41b9-b514-7d969cd0ed73">{@code KERB_VALIDATION_INFO}</a>
- * structure from MS-PAC. This implementation only parses the members which are required for the
- * purpose of this component, everything else is skipped.
+ * structure from MS-PAC. This implementation only parses the members which are required for the purpose of this
+ * component, everything else is skipped.
  */
 public class KerbValidationInfo {
 
-	public final static long EXTRA_SIDS_USER_FLAG = 0x00000020L;
-	public final static long RESOURCE_GROUP_IDS_USER_FLAG = 0x00000200L;
+	public static final long EXTRA_SIDS_USER_FLAG = 0x00000020L;
+	public static final long RESOURCE_GROUP_IDS_USER_FLAG = 0x00000200L;
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -66,39 +66,27 @@ public class KerbValidationInfo {
 	/**
 	 * Parses a Kerberos validation info object from a byte array.
 	 *
-	 * @param infoBytes
-	 *            Kerberos validation info structure encoded as bytes
-	 * @throws NullPointerException
-	 *             if {@code infoBytes} is null
-	 * @throws IllegalArgumentException
-	 *             if {@code infoBytes} is empty
-	 * @throws IllegalArgumentException
-	 *             if {@code GroupCount} is not equal to the actually marshaled group count
-	 * @throws IllegalArgumentException
-	 *             if {@code SidCount} is not zero, but flag D is not set in {@code UserFlags}
-	 * @throws IllegalArgumentException
-	 *             if {@code ExtraSids} is not {@code null}, but flag D is not set in {@code UserFlags}
-	 * @throws IllegalArgumentException
-	 *             if {@code SidCount} is not equal to the actually marshaled SID count
-	 * @throws IllegalArgumentException
-	 *             if {@code ResourceGroupDomainSid} is not {@code null}, but flag H is not set in
-	 *             {@code UserFlags}
-	 * @throws IllegalArgumentException
-	 *             if {@code ResourceGroupCount} is not zero, but flag H is not set in
-	 *             {@code UserFlags}
-	 * @throws IllegalArgumentException
-	 *             if {@code ResourceGroupIds} is not {@code null}, but flag H is not set in
-	 *             {@code UserFlags}
-	 * @throws IllegalArgumentException
-	 *             if {@code ResourceGroupCount} is not equal to the actually marshaled resource
-	 *             group count
-	 * @throws IllegalArgumentException
-	 *             if any {@code RPC_UNICODE_STRING} is incorrectly NDR-encoded
+	 * @param infoBytes Kerberos validation info structure encoded as bytes
+	 * @throws NullPointerException if {@code infoBytes} is null
+	 * @throws IllegalArgumentException if {@code infoBytes} is empty
+	 * @throws IllegalArgumentException if {@code GroupCount} is not equal to the actually marshaled group count
+	 * @throws IllegalArgumentException if {@code SidCount} is not zero, but flag D is not set in {@code UserFlags}
+	 * @throws IllegalArgumentException if {@code ExtraSids} is not {@code null}, but flag D is not set in
+	 *     {@code UserFlags}
+	 * @throws IllegalArgumentException if {@code SidCount} is not equal to the actually marshaled SID count
+	 * @throws IllegalArgumentException if {@code ResourceGroupDomainSid} is not {@code null}, but flag H is not set in
+	 *     {@code UserFlags}
+	 * @throws IllegalArgumentException if {@code ResourceGroupCount} is not zero, but flag H is not set in
+	 *     {@code UserFlags}
+	 * @throws IllegalArgumentException if {@code ResourceGroupIds} is not {@code null}, but flag H is not set in
+	 *     {@code UserFlags}
+	 * @throws IllegalArgumentException if {@code ResourceGroupCount} is not equal to the actually marshaled resource
+	 *     group count
+	 * @throws IllegalArgumentException if any {@code RPC_UNICODE_STRING} is incorrectly NDR-encoded
 	 */
 	public KerbValidationInfo(byte[] infoBytes) {
 		Objects.requireNonNull(infoBytes, "infoBytes cannot be null");
-		if (infoBytes.length == 0)
-			throw new IllegalArgumentException("infoBytes cannot be empty");
+		if (infoBytes.length == 0) throw new IllegalArgumentException("infoBytes cannot be empty");
 
 		PacDataBuffer buf = new PacDataBuffer(infoBytes);
 
@@ -214,8 +202,8 @@ public class KerbValidationInfo {
 
 		long actualGroupCount = buf.getUnsignedInt();
 		if (groupCount != actualGroupCount)
-			throw new IllegalArgumentException("GroupCount is " + groupCount
-					+ ", but actual GroupCount is " + actualGroupCount);
+			throw new IllegalArgumentException(
+					"GroupCount is " + groupCount + ", but actual GroupCount is " + actualGroupCount);
 
 		this.groupIds = new ArrayList<GroupMembership>();
 		for (long l = 0L; l < groupCount; l++) {
@@ -229,8 +217,8 @@ public class KerbValidationInfo {
 		this.logonDomainId = getRpcSid(buf);
 
 		if (sidCount != 0L && (userFlags & EXTRA_SIDS_USER_FLAG) == 0L)
-			throw new IllegalArgumentException("SidCount is " + sidCount
-					+ ", but flag D is not set in UserFlags (" + toHexString(userFlags) + ")");
+			throw new IllegalArgumentException("SidCount is " + sidCount + ", but flag D is not set in UserFlags ("
+					+ toHexString(userFlags) + ")");
 
 		if (extraSidsPointer != 0L && (userFlags & EXTRA_SIDS_USER_FLAG) == 0L)
 			throw new IllegalArgumentException("ExtraSids is not null ("
@@ -357,15 +345,13 @@ public class KerbValidationInfo {
 	}
 
 	public List<GroupMembership> getResourceGroupIds() {
-		return resourceGroupIds != null ? Collections.unmodifiableList(resourceGroupIds)
-				: resourceGroupIds;
+		return resourceGroupIds != null ? Collections.unmodifiableList(resourceGroupIds) : resourceGroupIds;
 	}
 
 	private RpcUnicodeString getRpcUnicodeString(PacDataBuffer buf) {
 		int length = buf.getUnsignedShort();
 		int maximumLength = buf.getUnsignedShort();
-		if (maximumLength % 2 == 1)
-			maximumLength -= 1;
+		if (maximumLength % 2 == 1) maximumLength -= 1;
 		long pointer = buf.getUnsignedInt();
 
 		return new RpcUnicodeString(length, maximumLength, pointer);
@@ -381,12 +367,10 @@ public class KerbValidationInfo {
 		long actualCount = buf.getUnsignedInt();
 
 		if (offset > maximumCount || actualCount > maximumCount - offset)
-			throw new IllegalArgumentException(
-					"Incorrectly NDR-encoded UNICODE_STRING: maximumCount: " + maximumCount
-							+ ", offset: " + offset + ", actualCount: " + actualCount);
+			throw new IllegalArgumentException("Incorrectly NDR-encoded UNICODE_STRING: maximumCount: " + maximumCount
+					+ ", offset: " + offset + ", actualCount: " + actualCount);
 
-		if (maximumCount != string.getMaximumLength() / 2L
-				|| actualCount != string.getLength() / 2L)
+		if (maximumCount != string.getMaximumLength() / 2L || actualCount != string.getLength() / 2L)
 			throw new IllegalArgumentException(
 					"NDR-encoded UNICODE_STRING does not match RPC_UNICODE_STRING: maximumCount: "
 							+ maximumCount + ", actualCount: " + actualCount + ", maximumLength: "
@@ -408,12 +392,10 @@ public class KerbValidationInfo {
 	}
 
 	private void logPointer(String name, long pointer) {
-		if (logger.isTraceEnabled())
-			logger.trace(name + " pointer: " + toHexString(pointer));
+		if (logger.isTraceEnabled()) logger.trace(name + " pointer: " + toHexString(pointer));
 	}
 
 	private String toHexString(long l) {
 		return String.format("0x%08X", l);
 	}
-
 }

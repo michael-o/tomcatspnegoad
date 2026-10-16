@@ -35,21 +35,29 @@ import org.ietf.jgss.GSSException;
 import org.ietf.jgss.GSSManager;
 import org.ietf.jgss.GSSName;
 
-/**
- * A SPNEGO Authenticator which utilizes GSS-API to authenticate a client.
- */
+/** A SPNEGO Authenticator which utilizes GSS-API to authenticate a client. */
 public class SpnegoAuthenticator extends GSSAuthenticatorBase {
 
 	protected static final String SPNEGO_METHOD = "SPNEGO";
 	protected static final String SPNEGO_AUTH_SCHEME = "Negotiate";
 
-	private static final byte[] NTLM_TYPE1_MESSAGE_START = { (byte) 'N', (byte) 'T', (byte) 'L',
-			(byte) 'M', (byte) 'S', (byte) 'S', (byte) 'P', (byte) '\0', (byte) 0x01, (byte) 0x00,
-			(byte) 0x00, (byte) 0x00 };
+	private static final byte[] NTLM_TYPE1_MESSAGE_START = {
+		(byte) 'N',
+		(byte) 'T',
+		(byte) 'L',
+		(byte) 'M',
+		(byte) 'S',
+		(byte) 'S',
+		(byte) 'P',
+		(byte) '\0',
+		(byte) 0x01,
+		(byte) 0x00,
+		(byte) 0x00,
+		(byte) 0x00
+	};
 
 	@Override
-	protected boolean doAuthenticate(Request request, HttpServletResponse response)
-			throws IOException {
+	protected boolean doAuthenticate(Request request, HttpServletResponse response) throws IOException {
 
 		if (checkForCachedAuthentication(request, response, true)) {
 			return true;
@@ -62,8 +70,7 @@ public class SpnegoAuthenticator extends GSSAuthenticatorBase {
 			return false;
 		}
 
-		String authorizationValue = StringUtils.substring(authorization,
-				SPNEGO_AUTH_SCHEME.length() + 1);
+		String authorizationValue = StringUtils.substring(authorization, SPNEGO_AUTH_SCHEME.length() + 1);
 
 		if (StringUtils.isEmpty(authorizationValue)) {
 			sendUnauthorized(request, response, SPNEGO_AUTH_SCHEME);
@@ -79,10 +86,12 @@ public class SpnegoAuthenticator extends GSSAuthenticatorBase {
 		try {
 			inToken = Base64.getDecoder().decode(authorizationValue);
 		} catch (Exception e) {
-			logger.warn(sm.getString("spnegoAuthenticator.incorrectlyEncodedToken",
-					authorizationValue), e);
+			logger.warn(sm.getString("spnegoAuthenticator.incorrectlyEncodedToken", authorizationValue), e);
 
-			sendUnauthorized(request, response, SPNEGO_AUTH_SCHEME,
+			sendUnauthorized(
+					request,
+					response,
+					SPNEGO_AUTH_SCHEME,
 					"spnegoAuthenticator.incorrectlyEncodedToken.responseMessage");
 			return false;
 		}
@@ -92,15 +101,14 @@ public class SpnegoAuthenticator extends GSSAuthenticatorBase {
 			for (int i = 0; i < NTLM_TYPE1_MESSAGE_START.length; i++) {
 				ntlmDetected = inToken[i] == NTLM_TYPE1_MESSAGE_START[i];
 
-				if (!ntlmDetected)
-					break;
+				if (!ntlmDetected) break;
 			}
 
 			if (ntlmDetected) {
 				logger.warn(sm.getString("spnegoAuthenticator.ntlmNotSupported"));
 
-				sendUnauthorized(request, response, SPNEGO_AUTH_SCHEME,
-						"spnegoAuthenticator.ntlmNotSupported.responseMessage");
+				sendUnauthorized(
+						request, response, SPNEGO_AUTH_SCHEME, "spnegoAuthenticator.ntlmNotSupported.responseMessage");
 				return false;
 			}
 		}
@@ -121,8 +129,8 @@ public class SpnegoAuthenticator extends GSSAuthenticatorBase {
 			}
 
 			final GSSManager manager = GSSManager.getInstance();
-			final PrivilegedExceptionAction<GSSCredential> action = () -> manager.createCredential(null,
-					GSSCredential.INDEFINITE_LIFETIME, SPNEGO_MECHANISM, GSSCredential.ACCEPT_ONLY);
+			final PrivilegedExceptionAction<GSSCredential> action = () -> manager.createCredential(
+					null, GSSCredential.INDEFINITE_LIFETIME, SPNEGO_MECHANISM, GSSCredential.ACCEPT_ONLY);
 
 			try {
 				gssContext = manager.createContext(Subject.doAs(lc.getSubject(), action));
@@ -134,8 +142,7 @@ public class SpnegoAuthenticator extends GSSAuthenticatorBase {
 			} catch (GSSException e) {
 				logger.error(sm.getString("spnegoAuthenticator.createContextFailed"), e);
 
-				sendInternalServerError(request, response,
-						"spnegoAuthenticator.createContextFailed");
+				sendInternalServerError(request, response, "spnegoAuthenticator.createContextFailed");
 				return false;
 			}
 
@@ -144,8 +151,8 @@ public class SpnegoAuthenticator extends GSSAuthenticatorBase {
 			} catch (GSSException e) {
 				logger.warn(sm.getString("spnegoAuthenticator.invalidToken", authorizationValue), e);
 
-				sendUnauthorized(request, response, SPNEGO_AUTH_SCHEME,
-						"spnegoAuthenticator.invalidToken.responseMessage");
+				sendUnauthorized(
+						request, response, SPNEGO_AUTH_SCHEME, "spnegoAuthenticator.invalidToken.responseMessage");
 				return false;
 			}
 
@@ -159,15 +166,15 @@ public class SpnegoAuthenticator extends GSSAuthenticatorBase {
 
 					if (principal == null) {
 						GSSName srcName = gssContext.getSrcName();
-						sendUnauthorized(request, response, SPNEGO_AUTH_SCHEME,
-								"gssAuthenticatorBase.userNotFound", srcName);
+						sendUnauthorized(
+								request, response, SPNEGO_AUTH_SCHEME, "gssAuthenticatorBase.userNotFound", srcName);
 						return false;
 					}
 				} else {
 					logger.error(sm.getString("spnegoAuthenticator.continueContextNotSupported"));
 
-					sendInternalServerError(request, response,
-							"spnegoAuthenticator.continueContextNotSupported.responseMessage");
+					sendInternalServerError(
+							request, response, "spnegoAuthenticator.continueContextNotSupported.responseMessage");
 					return false;
 				}
 			} catch (GSSException e) {
@@ -217,5 +224,4 @@ public class SpnegoAuthenticator extends GSSAuthenticatorBase {
 	protected String getAuthMethod() {
 		return SPNEGO_METHOD;
 	}
-
 }

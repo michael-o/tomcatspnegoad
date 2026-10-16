@@ -45,34 +45,31 @@ public abstract class PacSignatureVerifierBase implements PacSignatureVerifier {
 	}
 
 	@Override
-	public void verify(PacSignatureData signatureData, byte[] data, Key[] keys)
-			throws SignatureException {
+	public void verify(PacSignatureData signatureData, byte[] data, Key[] keys) throws SignatureException {
 		Objects.requireNonNull(signatureData, "signatureData cannot be null");
 		Objects.requireNonNull(data, "data cannot be null");
-		if (data.length == 0)
-			throw new IllegalArgumentException("data cannot be empty");
+		if (data.length == 0) throw new IllegalArgumentException("data cannot be empty");
 		Objects.requireNonNull(keys, "data cannot be null");
-		if (keys.length == 0)
-			throw new IllegalArgumentException("keys cannot be empty");
+		if (keys.length == 0) throw new IllegalArgumentException("keys cannot be empty");
 
 		Key[] filteredKeys = Arrays.stream(keys)
-				.filter(key -> ETYPE_MAPPER.get(key.getAlgorithm()) != null && ETYPE_MAPPER
-						.get(key.getAlgorithm()) == signatureData.getType().getEType())
+				.filter(key -> ETYPE_MAPPER.get(key.getAlgorithm()) != null
+						&& ETYPE_MAPPER.get(key.getAlgorithm())
+								== signatureData.getType().getEType())
 				.toArray(Key[]::new);
 		if (filteredKeys.length == 0)
-			throw new IllegalArgumentException(
-					"No suitable keys provided for etype " + signatureData.getType().getEType());
+			throw new IllegalArgumentException("No suitable keys provided for etype "
+					+ signatureData.getType().getEType());
 
 		verifyInternal(signatureData, data, filteredKeys);
 	}
 
 	/**
-	 * In contrast to {@link #verify(PacSignatureData, byte[], Key[])} all input parameters are
-	 * validated before passed down.
+	 * In contrast to {@link #verify(PacSignatureData, byte[], Key[])} all input parameters are validated before passed
+	 * down.
 	 *
 	 * @see #verify(PacSignatureData, byte[], Key[])
 	 */
-	abstract protected void verifyInternal(PacSignatureData signatureData, byte[] data, Key[] keys)
+	protected abstract void verifyInternal(PacSignatureData signatureData, byte[] data, Key[] keys)
 			throws SignatureException;
-
 }

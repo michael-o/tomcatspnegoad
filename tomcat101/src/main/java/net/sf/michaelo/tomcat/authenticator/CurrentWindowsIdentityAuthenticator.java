@@ -15,8 +15,6 @@
  */
 package net.sf.michaelo.tomcat.authenticator;
 
-import jakarta.servlet.http.HttpServletResponse;
-
 import java.io.IOException;
 import java.security.Principal;
 import java.security.PrivilegedActionException;
@@ -33,17 +31,16 @@ import org.ietf.jgss.GSSException;
 import org.ietf.jgss.GSSManager;
 import org.ietf.jgss.GSSName;
 
-/**
- * A Windows Identity Authenticator which uses GSS-API to retrieve to currently logged in user.
- */
+import jakarta.servlet.http.HttpServletResponse;
+
+/** A Windows Identity Authenticator which uses GSS-API to retrieve to currently logged in user. */
 public class CurrentWindowsIdentityAuthenticator extends GSSAuthenticatorBase {
 
 	protected static final String CURRENT_WINDOWS_IDENTITY_METHOD = "CURRENT_WINDOWS_IDENTITY";
 	protected static final String CURRENT_WINDOWS_IDENTITY_AUTH_SCHEME = "CWI";
 
 	@Override
-	protected boolean doAuthenticate(Request request, HttpServletResponse response)
-			throws IOException {
+	protected boolean doAuthenticate(Request request, HttpServletResponse response) throws IOException {
 
 		if (checkForCachedAuthentication(request, response, true)) {
 			return true;
@@ -58,14 +55,14 @@ public class CurrentWindowsIdentityAuthenticator extends GSSAuthenticatorBase {
 			} catch (LoginException e) {
 				logger.error(sm.getString("cwiAuthenticator.obtainFailed"), e);
 
-				sendUnauthorized(request, response, CURRENT_WINDOWS_IDENTITY_AUTH_SCHEME,
-						"cwiAuthenticator.obtainFailed");
+				sendUnauthorized(
+						request, response, CURRENT_WINDOWS_IDENTITY_AUTH_SCHEME, "cwiAuthenticator.obtainFailed");
 				return false;
 			}
 
 			final GSSManager manager = GSSManager.getInstance();
-			final PrivilegedExceptionAction<GSSCredential> action = () -> manager.createCredential(null,
-					GSSCredential.INDEFINITE_LIFETIME, KRB5_MECHANISM, GSSCredential.INITIATE_ONLY);
+			final PrivilegedExceptionAction<GSSCredential> action = () -> manager.createCredential(
+					null, GSSCredential.INDEFINITE_LIFETIME, KRB5_MECHANISM, GSSCredential.INITIATE_ONLY);
 
 			GSSCredential gssCredential = null;
 
@@ -74,8 +71,8 @@ public class CurrentWindowsIdentityAuthenticator extends GSSAuthenticatorBase {
 			} catch (PrivilegedActionException e) {
 				logger.error(sm.getString("cwiAuthenticator.obtainFailed"), e.getException());
 
-				sendUnauthorized(request, response, CURRENT_WINDOWS_IDENTITY_AUTH_SCHEME,
-						"cwiAuthenticator.obtainFailed");
+				sendUnauthorized(
+						request, response, CURRENT_WINDOWS_IDENTITY_AUTH_SCHEME, "cwiAuthenticator.obtainFailed");
 				return false;
 			}
 
@@ -83,16 +80,18 @@ public class CurrentWindowsIdentityAuthenticator extends GSSAuthenticatorBase {
 				Realm realm = context.getRealm();
 				GSSName gssName = gssCredential.getName();
 
-				Principal principal = realm.authenticate(gssName,
-						isStoreDelegatedCredential() ? gssCredential : null);
+				Principal principal = realm.authenticate(gssName, isStoreDelegatedCredential() ? gssCredential : null);
 
 				if (principal != null) {
-					register(request, response, principal, getAuthMethod(), principal.getName(),
-							null);
+					register(request, response, principal, getAuthMethod(), principal.getName(), null);
 					return true;
 				} else {
-					sendUnauthorized(request, response, CURRENT_WINDOWS_IDENTITY_AUTH_SCHEME,
-							"gssAuthenticatorBase.userNotFound", gssName);
+					sendUnauthorized(
+							request,
+							response,
+							CURRENT_WINDOWS_IDENTITY_AUTH_SCHEME,
+							"gssAuthenticatorBase.userNotFound",
+							gssName);
 					return false;
 				}
 			} catch (GSSException e) {
@@ -116,5 +115,4 @@ public class CurrentWindowsIdentityAuthenticator extends GSSAuthenticatorBase {
 	protected String getAuthMethod() {
 		return CURRENT_WINDOWS_IDENTITY_METHOD;
 	}
-
 }

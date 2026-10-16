@@ -26,38 +26,30 @@ import org.ietf.jgss.GSSContext;
 import org.ietf.jgss.GSSName;
 
 /**
- * Base Active Directory realm which is able to retrieve principals for {@link GSSName GSS names},
- * fully established {@link GSSContext security contexts} or {@link X509Certificate TLS client certificates}.
+ * Base Active Directory realm which is able to retrieve principals for {@link GSSName GSS names}, fully established
+ * {@link GSSContext security contexts} or {@link X509Certificate TLS client certificates}.
  */
 public abstract class ActiveDirectoryRealmBase extends RealmBase {
 
 	protected final Log logger = LogFactory.getLog(getClass());
 	protected final StringManager sm = StringManager.getManager(getClass());
 
-	/**
-	 * @return Always {@code null} as this realm has no way of obtaining this
-	 * information.
-	 */
+	/** @return Always {@code null} as this realm has no way of obtaining this information. */
 	@Override
 	protected String getPassword(String username) {
 		// Always return null
 		return null;
 	}
 
-	/**
-	 * @throws UnsupportedOperationException
-	 *             always throws because not implemented
-	 */
+	/** @throws UnsupportedOperationException always throws because not implemented */
 	@Override
 	protected Principal getPrincipal(String username) {
-		throw new UnsupportedOperationException(
-				"getPrincipal(String) is not supported by this realm");
+		throw new UnsupportedOperationException("getPrincipal(String) is not supported by this realm");
 	}
 
 	@Override
 	protected boolean hasRoleInternal(Principal principal, String role) {
-		if (!(principal instanceof ActiveDirectoryPrincipal))
-			return false;
+		if (!(principal instanceof ActiveDirectoryPrincipal)) return false;
 
 		ActiveDirectoryPrincipal adp = (ActiveDirectoryPrincipal) principal;
 		return adp.hasRole(role);
@@ -70,8 +62,7 @@ public abstract class ActiveDirectoryRealmBase extends RealmBase {
 		}
 
 		String className = principal.getClass().getName();
-		throw new IllegalStateException(sm.getString("activeDirectoryRealmBase.cannotGetRoles",
-				principal.getName(), className));
+		throw new IllegalStateException(
+				sm.getString("activeDirectoryRealmBase.cannotGetRoles", principal.getName(), className));
 	}
-
 }

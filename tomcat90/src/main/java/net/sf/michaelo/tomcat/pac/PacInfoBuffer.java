@@ -29,9 +29,7 @@ public class PacInfoBuffer {
 	private final BigInteger offset;
 	private final byte[] data;
 
-	/**
-	 * Constructs a PAC info buffer.
-	 */
+	/** Constructs a PAC info buffer. */
 	public PacInfoBuffer(long type, long bufferSize, BigInteger offset, byte[] data) {
 		this.type = type;
 		this.bufferSize = bufferSize;
@@ -54,5 +52,4 @@ public class PacInfoBuffer {
 	public byte[] getData() {
 		return data;
 	}
-
 }

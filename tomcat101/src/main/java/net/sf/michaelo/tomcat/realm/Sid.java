@@ -27,13 +27,35 @@ import java.util.Arrays;
  */
 public class Sid {
 
-	public static final Sid NULL_SID = new Sid(new byte[] { (byte) 0x01, (byte) 0x01, (byte) 0x00,
-			(byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00,
-			(byte) 0x00, (byte) 0x00, (byte) 0x00 });
+	public static final Sid NULL_SID = new Sid(new byte[] {
+		(byte) 0x01,
+		(byte) 0x01,
+		(byte) 0x00,
+		(byte) 0x00,
+		(byte) 0x00,
+		(byte) 0x00,
+		(byte) 0x00,
+		(byte) 0x00,
+		(byte) 0x00,
+		(byte) 0x00,
+		(byte) 0x00,
+		(byte) 0x00
+	});
 
-	public static final Sid ANONYMOUS_SID = new Sid(new byte[] { (byte) 0x01, (byte) 0x01,
-			(byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x00, (byte) 0x05,
-			(byte) 0x07, (byte) 0x00, (byte) 0x00, (byte) 0x00 });
+	public static final Sid ANONYMOUS_SID = new Sid(new byte[] {
+		(byte) 0x01,
+		(byte) 0x01,
+		(byte) 0x00,
+		(byte) 0x00,
+		(byte) 0x00,
+		(byte) 0x00,
+		(byte) 0x00,
+		(byte) 0x05,
+		(byte) 0x07,
+		(byte) 0x00,
+		(byte) 0x00,
+		(byte) 0x00
+	});
 
 	private byte[] bytes;
 
@@ -47,31 +69,23 @@ public class Sid {
 	/**
 	 * Parses a SID object from a byte array.
 	 *
-	 * @param sidBytes
-	 *            SID structure encoded as bytes
-	 * @throws NullPointerException
-	 *             if {@code sidBytes} is null
-	 * @throws IllegalArgumentException
-	 *             if {@code sidBytes} contains less than 12 bytes
-	 * @throws IllegalArgumentException
-	 *             if SID's revision is not 1
-	 * @throws IllegalArgumentException
-	 *             if SID's subauthority count is more than 15
+	 * @param sidBytes SID structure encoded as bytes
+	 * @throws NullPointerException if {@code sidBytes} is null
+	 * @throws IllegalArgumentException if {@code sidBytes} contains less than 12 bytes
+	 * @throws IllegalArgumentException if SID's revision is not 1
+	 * @throws IllegalArgumentException if SID's subauthority count is more than 15
 	 */
 	public Sid(byte[] sidBytes) {
-		if (sidBytes == null)
-			throw new NullPointerException("sidBytes cannot be null");
+		if (sidBytes == null) throw new NullPointerException("sidBytes cannot be null");
 		if (sidBytes.length < 12)
-			throw new IllegalArgumentException(
-					"SID must be at least 12 bytes long but is " + sidBytes.length);
+			throw new IllegalArgumentException("SID must be at least 12 bytes long but is " + sidBytes.length);
 
 		ByteBuffer buf = ByteBuffer.wrap(sidBytes);
 		buf.order(ByteOrder.LITTLE_ENDIAN);
 
 		// Always 0x01
 		this.revision = buf.get() & 0xFF;
-		if (this.revision != 0x01)
-			throw new IllegalArgumentException("SID revision must be 1 but is " + this.revision);
+		if (this.revision != 0x01) throw new IllegalArgumentException("SID revision must be 1 but is " + this.revision);
 
 		// At most 15 subauthorities
 		this.subAuthorityCount = buf.get() & 0xFF;
@@ -123,16 +137,13 @@ public class Sid {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj == null)
-			return false;
+		if (obj == null) return false;
 
-		if (!(obj instanceof Sid))
-			return false;
+		if (!(obj instanceof Sid)) return false;
 
 		Sid that = (Sid) obj;
 
-		if (this == that)
-			return true;
+		if (this == that) return true;
 
 		return Arrays.equals(this.bytes, that.bytes);
 	}
@@ -146,5 +157,4 @@ public class Sid {
 	public String toString() {
 		return sidString;
 	}
-
 }

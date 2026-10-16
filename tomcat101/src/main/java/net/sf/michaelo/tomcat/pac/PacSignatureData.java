@@ -25,8 +25,9 @@ import java.util.Objects;
 public class PacSignatureData {
 
 	public enum SignatureType {
-
-		HMAC_MD5(-138, 16, 23), HMAC_SHA1_96_AES128(15, 12, 17), HMAC_SHA1_96_AES256(16, 12, 18);
+		HMAC_MD5(-138, 16, 23),
+		HMAC_SHA1_96_AES128(15, 12, 17),
+		HMAC_SHA1_96_AES256(16, 12, 18);
 
 		private final int value;
 		private final int size;
@@ -57,19 +58,14 @@ public class PacSignatureData {
 	/**
 	 * Parses a PAC signature data object from a byte array.
 	 *
-	 * @param sigDataBytes
-	 *            PAC signature data structure encoded as bytes
-	 * @throws NullPointerException
-	 *             if {@code sigDataBytes} is null
-	 * @throws IllegalArgumentException
-	 *             if {@code sigDataBytes} is empty
-	 * @throws IllegalArgumentException
-	 *             if encoded signature type is not supported by {@link SignatureType}
+	 * @param sigDataBytes PAC signature data structure encoded as bytes
+	 * @throws NullPointerException if {@code sigDataBytes} is null
+	 * @throws IllegalArgumentException if {@code sigDataBytes} is empty
+	 * @throws IllegalArgumentException if encoded signature type is not supported by {@link SignatureType}
 	 */
 	public PacSignatureData(byte[] sigDataBytes) {
 		Objects.requireNonNull(sigDataBytes, "sigDataBytes cannot be null");
-		if (sigDataBytes.length == 0)
-			throw new IllegalArgumentException("sigDataBytes cannot be empty");
+		if (sigDataBytes.length == 0) throw new IllegalArgumentException("sigDataBytes cannot be empty");
 
 		PacDataBuffer buf = new PacDataBuffer(sigDataBytes);
 
@@ -99,5 +95,4 @@ public class PacSignatureData {
 	public byte[] getSignature() {
 		return signature;
 	}
-
 }

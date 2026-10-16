@@ -15,9 +15,7 @@
  */
 package net.sf.michaelo.tomcat.realm.mapper;
 
-/**
- * A base mapper for the AD attribute {@code sAMAccountName} and the realm.
- */
+/** A base mapper for the AD attribute {@code sAMAccountName} and the realm. */
 public abstract class SamAccountNameMapper implements UsernameSearchMapper {
 
 	protected static class SamAccountNameMappedValues implements MappedValues {
@@ -44,7 +42,5 @@ public abstract class SamAccountNameMapper implements UsernameSearchMapper {
 		public String getSearchUsername() {
 			return searchUsername;
 		}
-
 	}
-
 }

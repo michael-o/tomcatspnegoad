@@ -84,10 +84,10 @@
 				<executions>
 					<execution>
 						<id>delete-dependency-reduced-pom</id>
-						<phase>clean</phase>
 						<goals>
 							<goal>clean</goal>
 						</goals>
+						<phase>clean</phase>
 						<configuration>
 							<filesets>
 								<filesets>
@@ -105,10 +105,10 @@
 				<artifactId>maven-shade-plugin</artifactId>
 				<executions>
 					<execution>
-						<phase>package</phase>
 						<goals>
 							<goal>shade</goal>
 						</goals>
+						<phase>package</phase>
 						<configuration>
 							<artifactSet>
 								<includes>

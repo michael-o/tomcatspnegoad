@@ -46,19 +46,13 @@ public class StubGSSName implements GSSName {
 		return false;
 	}
 
-	/**
-	 * @throws UnsupportedOperationException
-	 *             always throws because not implemented
-	 */
+	/** @throws UnsupportedOperationException always throws because not implemented */
 	@Override
 	public GSSName canonicalize(Oid mech) throws GSSException {
 		throw new UnsupportedOperationException("method canonicalize() is not supported");
 	}
 
-	/**
-	 * @throws UnsupportedOperationException
-	 *             always throws because not implemented
-	 */
+	/** @throws UnsupportedOperationException always throws because not implemented */
 	@Override
 	public byte[] export() throws GSSException {
 		throw new UnsupportedOperationException("method export() is not supported");
@@ -69,19 +63,13 @@ public class StubGSSName implements GSSName {
 		return oid;
 	}
 
-	/**
-	 * @throws UnsupportedOperationException
-	 *             always throws because not implemented
-	 */
+	/** @throws UnsupportedOperationException always throws because not implemented */
 	@Override
 	public boolean isAnonymous() {
 		throw new UnsupportedOperationException("method isAnonymous() is not supported");
 	}
 
-	/**
-	 * @throws UnsupportedOperationException
-	 *             always throws because not implemented
-	 */
+	/** @throws UnsupportedOperationException always throws because not implemented */
 	@Override
 	public boolean isMN() {
 		throw new UnsupportedOperationException("method isNM() is not supported");
@@ -108,5 +96,4 @@ public class StubGSSName implements GSSName {
 	public String toString() {
 		return name;
 	}
-
 }

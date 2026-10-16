@@ -44,5 +44,4 @@ public class KerbSidAndAttributes {
 	public String toString() {
 		return String.format("KerbSidAndAttributes[sid=%s, attributes=0x%08X]", sid, attributes);
 	}
-
 }

@@ -14,7 +14,5 @@
  * limitations under the License.
  */
 
-/**
- * Minimalist ASN.1 parser components.
- */
+/** Minimalist ASN.1 parser components. */
 package net.sf.michaelo.tomcat.realm.asn1;

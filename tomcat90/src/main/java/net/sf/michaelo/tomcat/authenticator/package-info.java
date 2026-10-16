@@ -14,7 +14,5 @@
  * limitations under the License.
  */
 
-/**
- * GSS-API-based authenticators for Apache Tomcat.
- */
+/** GSS-API-based authenticators for Apache Tomcat. */
 package net.sf.michaelo.tomcat.authenticator;

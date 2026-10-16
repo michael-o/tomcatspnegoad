@@ -42,5 +42,4 @@ public class GroupMembership {
 	public String toString() {
 		return String.format("GroupMembership[relativeId=%d, attributes=0x%08X]", relativeId, attributes);
 	}
-
 }

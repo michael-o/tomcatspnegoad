@@ -14,7 +14,5 @@
  * limitations under the License.
  */
 
-/**
- * Active Directory components for Apache Tomcat.
- */
+/** Active Directory components for Apache Tomcat. */
 package net.sf.michaelo.tomcat.realm;

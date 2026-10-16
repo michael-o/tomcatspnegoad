@@ -29,24 +29,22 @@ import org.ietf.jgss.GSSName;
 import org.ietf.jgss.Oid;
 
 /**
- * A mapper for the AD attribute {@code sAMAccountName} and the realm. This mapper splits the GSS
- * name in the primary and realm component. The instance component is completely ignored. The
- * primary component is assigned to the {@code sAMAccountName} and the realm is transformed to a
- * search base according to <a href="https://tools.ietf.org/html/rfc2247">RFC 2247</a>. Moreover,
- * this implementation mimics
- * <a href="https://docs.microsoft.com/de-de/windows/win32/api/ntdsapi/nf-ntdsapi-dscracknamesw">
- * {@code DsCrackNames}</a> with {@code formatOffered} set to {@code DS_USER_PRINCIPAL_NAME} and
- * {@code formatDesired} set to {@code DS_FQDN_1779_NAME}. Verified against <a href=
+ * A mapper for the AD attribute {@code sAMAccountName} and the realm. This mapper splits the GSS name in the primary
+ * and realm component. The instance component is completely ignored. The primary component is assigned to the
+ * {@code sAMAccountName} and the realm is transformed to a search base according to <a
+ * href="https://tools.ietf.org/html/rfc2247">RFC 2247</a>. Moreover, this implementation mimics <a
+ * href="https://docs.microsoft.com/de-de/windows/win32/api/ntdsapi/nf-ntdsapi-dscracknamesw">{@code DsCrackNames}</a>
+ * with {@code formatOffered} set to {@code DS_USER_PRINCIPAL_NAME} and {@code formatDesired} set to
+ * {@code DS_FQDN_1779_NAME}. Verified against <a href=
  * "https://github.com/samba-team/samba/blob/7ed24924d2917556a03c51eadcb65b3e3c1e8af6/source4/dsdb/samdb/cracknames.c#L1260">
  * Samba's implementation</a> of {@code DsCrackNames}.
- * <p>
- * <strong>Note:</strong> This mapper requires to operate from the {@code RootDSE} of a domain
- * controller or better yet, a GC. No root DN normalization (stripping DC components) happens here
- * (yet).
+ *
+ * <p><strong>Note:</strong> This mapper requires to operate from the {@code RootDSE} of a domain controller or better
+ * yet, a GC. No root DN normalization (stripping DC components) happens here (yet).
  */
 public class SamAccountNameRfc2247Mapper extends SamAccountNameMapper {
 
-	protected final static Oid KRB5_NT_PRINCIPAL;
+	protected static final Oid KRB5_NT_PRINCIPAL;
 
 	static {
 		try {
@@ -56,7 +54,7 @@ public class SamAccountNameRfc2247Mapper extends SamAccountNameMapper {
 		}
 	}
 
-	private static final Oid[] SUPPORTED_STRING_NAME_TYPES = new Oid[] { KRB5_NT_PRINCIPAL };
+	private static final Oid[] SUPPORTED_STRING_NAME_TYPES = new Oid[] {KRB5_NT_PRINCIPAL};
 
 	@Override
 	public Oid[] getSupportedStringNameTypes() {
@@ -73,8 +71,7 @@ public class SamAccountNameRfc2247Mapper extends SamAccountNameMapper {
 		}
 	}
 
-	public synchronized MappedValues map(DirContext context, GSSName gssName)
-			throws NamingException {
+	public synchronized MappedValues map(DirContext context, GSSName gssName) throws NamingException {
 		if (!supportsGssName(gssName))
 			throw new IllegalArgumentException("GSS name '" + gssName + "' is not supported");
 
@@ -94,6 +91,5 @@ public class SamAccountNameRfc2247Mapper extends SamAccountNameMapper {
 		searchBase = searchBaseName.toString();
 
 		return new SamAccountNameMappedValues(searchBase, samAccountName);
-
 	}
 }

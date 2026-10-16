@@ -20,15 +20,11 @@ import java.security.SignatureException;
 
 /**
  * A PAC signature verifier which will do nothing.
- * <p>
- * <strong>Note:</strong> Use this verifier for testing purposes only, <em>do not</em> use in
- * production!
+ *
+ * <p><strong>Note:</strong> Use this verifier for testing purposes only, <em>do not</em> use in production!
  */
 public class NopPacSignatureVerifier implements PacSignatureVerifier {
 
 	@Override
-	public void verify(PacSignatureData signatureData, byte[] data, Key[] keys)
-			throws SignatureException {
-	}
-
+	public void verify(PacSignatureData signatureData, byte[] data, Key[] keys) throws SignatureException {}
 }

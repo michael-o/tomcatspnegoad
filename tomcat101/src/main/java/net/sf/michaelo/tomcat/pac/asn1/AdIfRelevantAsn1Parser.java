@@ -20,13 +20,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import org.apache.tomcat.util.buf.Asn1Parser;
-
 import com.sun.security.jgss.AuthorizationDataEntry;
 
+import org.apache.tomcat.util.buf.Asn1Parser;
+
 /**
- * A minimalist ASN.1 parser for Kerberos {@code AuthorizationData} according to RFC 4120, section
- * 5.2.6 for the {@code AD-IF-RELEVANT} type. It unwraps all nested data as described in <a href=
+ * A minimalist ASN.1 parser for Kerberos {@code AuthorizationData} according to RFC 4120, section 5.2.6 for the
+ * {@code AD-IF-RELEVANT} type. It unwraps all nested data as described in <a href=
  * "https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-pac/21181737-74fd-492c-bfbd-0322993a9061">MS-PAC
  * structure</a>.
  */
@@ -38,24 +38,19 @@ public class AdIfRelevantAsn1Parser {
 	public static final int AD_IF_RELEVANT = 1;
 	public static final int AD_WIN2K_PAC = 128;
 
-	private AdIfRelevantAsn1Parser() {
-	}
+	private AdIfRelevantAsn1Parser() {}
 
 	/**
 	 * Parses the ASN.1 structure and converts to a list of {@code AuthorizationDataEntry} elements.
 	 *
-	 * @param adIfRelevant
-	 *            ASN.1 encoded data
+	 * @param adIfRelevant ASN.1 encoded data
 	 * @return a list of {@code AuthorizationDataEntry} elements
-	 * @throws NullPointerException
-	 *             if {@code adIfRelevant} is null
-	 * @throws IllegalArgumentException
-	 *             if {@code adIfRelevant} is empty
+	 * @throws NullPointerException if {@code adIfRelevant} is null
+	 * @throws IllegalArgumentException if {@code adIfRelevant} is empty
 	 */
 	public static List<AuthorizationDataEntry> parse(byte[] adIfRelevant) {
 		Objects.requireNonNull(adIfRelevant, "adIfRelevant cannot be null");
-		if (adIfRelevant.length == 0)
-			throw new IllegalArgumentException("adIfRelevant cannot be empty");
+		if (adIfRelevant.length == 0) throw new IllegalArgumentException("adIfRelevant cannot be empty");
 
 		List<AuthorizationDataEntry> adEntries = new ArrayList<>();
 
@@ -74,5 +69,4 @@ public class AdIfRelevantAsn1Parser {
 
 		return adEntries;
 	}
-
 }

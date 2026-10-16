@@ -24,23 +24,22 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import net.sf.michaelo.tomcat.pac.PacSignatureData.SignatureType;
+
 import sun.security.krb5.Checksum;
 import sun.security.krb5.EncryptionKey;
 
 /**
  * A PAC signature verifier based on private Sun classes from Java's Kerberos implementation.
- * <p>
- * <strong>Note:</strong> This implementation is far from ideal because it uses private classes
- * which can break anytime. If you are running on Java 17 or newer you <em>must</em> pass
- * {@code --add-exports=java.security.jgss/sun.security.krb5=ALL-UNNAMED} to your JVM. A better
- * solution would be to use the <a href="https://directory.apache.org/kerby/">Apache Kerby</a>
- * library.
+ *
+ * <p><strong>Note:</strong> This implementation is far from ideal because it uses private classes which can break
+ * anytime. If you are running on Java 17 or newer you <em>must</em> pass
+ * {@code --add-exports=java.security.jgss/sun.security.krb5=ALL-UNNAMED} to your JVM. A better solution would be to use
+ * the <a href="https://directory.apache.org/kerby/">Apache Kerby</a> library.
  */
 public class PrivateSunPacSignatureVerifier extends PacSignatureVerifierBase {
 
 	@Override
-	protected void verifyInternal(PacSignatureData signatureData, byte[] data, Key[] keys)
-			throws SignatureException {
+	protected void verifyInternal(PacSignatureData signatureData, byte[] data, Key[] keys) throws SignatureException {
 		SignatureType type = signatureData.getType();
 		byte[] expectedSignature = signatureData.getSignature();
 		List<byte[]> actualFailedSignatures = new ArrayList<>();
@@ -55,10 +54,8 @@ public class PrivateSunPacSignatureVerifier extends PacSignatureVerifierBase {
 			}
 
 			byte[] actualSignature = checksum.getBytes();
-			if (Arrays.equals(expectedSignature, actualSignature))
-				return;
-			else
-				actualFailedSignatures.add(actualSignature);
+			if (Arrays.equals(expectedSignature, actualSignature)) return;
+			else actualFailedSignatures.add(actualSignature);
 		}
 
 		String actualFailedSignaturesStr = actualFailedSignatures.stream()
@@ -68,5 +65,4 @@ public class PrivateSunPacSignatureVerifier extends PacSignatureVerifierBase {
 				+ " do not match expected signature '"
 				+ Base64.getEncoder().encodeToString(expectedSignature) + "'");
 	}
-
 }

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-   Copyright 2012–2025 Michael Osipov
+   Copyright 2012–2026 Michael Osipov
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@
 	<parent>
 		<groupId>net.sf.michael-o</groupId>
 		<artifactId>michael-o-parent</artifactId>
-		<version>19</version>
+		<version>21</version>
 	</parent>
 
 	<groupId>net.sf.michael-o.tomcat</groupId>
@@ -56,8 +56,8 @@
 	<scm>
 		<connection>scm:git:https://github.com/michael-o/tomcatspnegoad.git</connection>
 		<developerConnection>scm:git:https://github.com/michael-o/tomcatspnegoad.git</developerConnection>
-		<url>https://github.com/michael-o/tomcatspnegoad</url>
 		<tag>HEAD</tag>
+		<url>https://github.com/michael-o/tomcatspnegoad</url>
 	</scm>
 	<issueManagement>
 		<system>GitHub</system>
@@ -102,10 +102,10 @@
 					<executions>
 						<execution>
 							<id>unpack-site-resources</id>
-							<phase>pre-site</phase>
 							<goals>
 								<goal>unpack</goal>
 							</goals>
+							<phase>pre-site</phase>
 							<configuration>
 								<artifactItems>
 									<artifactItem>

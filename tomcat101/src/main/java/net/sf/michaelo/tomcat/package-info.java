@@ -14,7 +14,5 @@
  * limitations under the License.
  */
 
-/**
- * The base package for my Apache Tomcat Authnz components.
- */
+/** The base package for my Apache Tomcat Authnz components. */
 package net.sf.michaelo.tomcat;

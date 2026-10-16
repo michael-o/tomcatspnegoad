@@ -21,8 +21,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 /**
- * A thin wrapper around {@link ByteBuffer} to comply with the encoding rules defined by the
- * <a href=
+ * A thin wrapper around {@link ByteBuffer} to comply with the encoding rules defined by the <a href=
  * "https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-pac/6655b92f-ab06-490b-845d-037e6987275f">{@code PACTYPE}</a>
  * structure from MS-PAC.
  */
@@ -35,8 +34,7 @@ public class PacDataBuffer {
 	/**
 	 * Constructs a PAC data buffer from a byte array.
 	 *
-	 * @param pacDataBytes
-	 *            PAC data encoded as bytes
+	 * @param pacDataBytes PAC data encoded as bytes
 	 */
 	public PacDataBuffer(byte[] pacDataBytes) {
 		buf = ByteBuffer.wrap(pacDataBytes);
@@ -59,8 +57,7 @@ public class PacDataBuffer {
 
 	protected PacDataBuffer align(int bytes) {
 		int shift = ((Buffer) buf).position() & bytes - 1;
-		if (bytes != 0 && shift != 0)
-			skip(bytes - shift);
+		if (bytes != 0 && shift != 0) skip(bytes - shift);
 		return this;
 	}
 
@@ -88,9 +85,7 @@ public class PacDataBuffer {
 		align(8);
 		long temp = buf.getLong();
 		BigInteger value = BigInteger.valueOf(temp);
-		if (value.compareTo(BigInteger.ZERO) < 0)
-			value = value.add(TWO_COMPL_REF);
+		if (value.compareTo(BigInteger.ZERO) < 0) value = value.add(TWO_COMPL_REF);
 		return value;
 	}
-
 }

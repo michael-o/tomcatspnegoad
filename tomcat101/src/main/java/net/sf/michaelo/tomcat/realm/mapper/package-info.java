@@ -14,8 +14,5 @@
  * limitations under the License.
  */
 
-/**
- * Pluggable username search mappers for the
- * {@link net.sf.michaelo.tomcat.realm.ActiveDirectoryRealm}.
- */
+/** Pluggable username search mappers for the {@link net.sf.michaelo.tomcat.realm.ActiveDirectoryRealm}. */
 package net.sf.michaelo.tomcat.realm.mapper;

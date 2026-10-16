@@ -29,14 +29,14 @@ import org.apache.juli.logging.LogFactory;
 
 /**
  * A class representing the <a href=
- * "https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-pac/166d8064-c863-41e1-9c23-edaaa5f36962">{@code PAC Data}</a>
- * structure from MS-PAC. This implementation only parses the embedded structures which are required
- * for the purpose of this component, everything else is skipped.
- * <p>
- * <strong>Important:</strong> It is imperative to pass a suitable signature verifier implementation
- * and the long term Kerberos keys for the principal from the keytab which were used to establish
- * the security context. The simplest implementation is the {@link PrivateSunPacSignatureVerifier}
- * which uses private Sun classes to perform the calculation.
+ * "https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-pac/166d8064-c863-41e1-9c23-edaaa5f36962">{@code PAC
+ * Data}</a> structure from MS-PAC. This implementation only parses the embedded structures which are required for the
+ * purpose of this component, everything else is skipped.
+ *
+ * <p><strong>Important:</strong> It is imperative to pass a suitable signature verifier implementation and the long
+ * term Kerberos keys for the principal from the keytab which were used to establish the security context. The simplest
+ * implementation is the {@link PrivateSunPacSignatureVerifier} which uses private Sun classes to perform the
+ * calculation.
  */
 public class Pac {
 
@@ -62,52 +62,38 @@ public class Pac {
 	/**
 	 * Parses a PAC data object from a byte array.
 	 *
-	 * @param pacDataBytes
-	 *            PAC data structure encoded as bytes
-	 * @param signatureVerifier
-	 *            a signature verifier implementation
-	 * @throws NullPointerException
-	 *             if {@code infoBytes} is null
-	 * @throws IllegalArgumentException
-	 *             if {@code infoBytes} is empty
-	 * @throws NullPointerException
-	 *             if {@code signatureVerifier} is null
-	 * @throws IllegalArgumentException
-	 *             if PAC version is not 0
-	 * @throws IllegalArgumentException
-	 *             if an embedded {@code PAC_INFO_BUFFER} structure offset is not a multiple of 8
-	 * @throws IllegalArgumentException
-	 *             if any embedded structure is invalid
-	 * @throws IllegalArgumentException
-	 *             if any of the required embedded structures ({@code KERB_VALIDATION_INFO},
-	 *             {@code PAC_CLIENT_INFO}, {@code PAC_SIGNATURE_DATA} (Server Signature),
-	 *             {@code PAC_SIGNATURE_DATA} (KDC Signature)) is not present
+	 * @param pacDataBytes PAC data structure encoded as bytes
+	 * @param signatureVerifier a signature verifier implementation
+	 * @throws NullPointerException if {@code infoBytes} is null
+	 * @throws IllegalArgumentException if {@code infoBytes} is empty
+	 * @throws NullPointerException if {@code signatureVerifier} is null
+	 * @throws IllegalArgumentException if PAC version is not 0
+	 * @throws IllegalArgumentException if an embedded {@code PAC_INFO_BUFFER} structure offset is not a multiple of 8
+	 * @throws IllegalArgumentException if any embedded structure is invalid
+	 * @throws IllegalArgumentException if any of the required embedded structures ({@code KERB_VALIDATION_INFO},
+	 *     {@code PAC_CLIENT_INFO}, {@code PAC_SIGNATURE_DATA} (Server Signature), {@code PAC_SIGNATURE_DATA} (KDC
+	 *     Signature)) is not present
 	 */
 	public Pac(byte[] pacDataBytes, PacSignatureVerifier signatureVerifier) {
 		Objects.requireNonNull(pacDataBytes, "pacDataBytes cannot be null");
-		if (pacDataBytes.length == 0)
-			throw new IllegalArgumentException("pacDataBytes cannot be empty");
+		if (pacDataBytes.length == 0) throw new IllegalArgumentException("pacDataBytes cannot be empty");
 
 		PacDataBuffer buf = new PacDataBuffer(pacDataBytes);
-		this.signatureVerifier = Objects.requireNonNull(signatureVerifier,
-				"signatureVerifier cannot be null");
+		this.signatureVerifier = Objects.requireNonNull(signatureVerifier, "signatureVerifier cannot be null");
 
 		// Read PACTYPE structure
-		if (logger.isTraceEnabled())
-			logger.trace("Parsing PACTYPE structure...");
+		if (logger.isTraceEnabled()) logger.trace("Parsing PACTYPE structure...");
 		// cBuffers
 		long buffers = buf.getUnsignedInt();
 		// Version
 		long version = buf.getUnsignedInt();
-		if (version != 0L)
-			throw new IllegalArgumentException("PAC must have version 0, but has " + version);
+		if (version != 0L) throw new IllegalArgumentException("PAC must have version 0, but has " + version);
 
 		if (logger.isTraceEnabled())
 			logger.trace("PAC has version " + version + " and contains " + buffers + " buffers");
 
 		// Read PAC_INFO_BUFFER structures
-		if (logger.isTraceEnabled())
-			logger.trace("Parsing " + buffers + " PAC_INFO_BUFFER structures...");
+		if (logger.isTraceEnabled()) logger.trace("Parsing " + buffers + " PAC_INFO_BUFFER structures...");
 		List<PacInfoBuffer> pacInfoBuffers = new ArrayList<>();
 		for (long l = 0L; l < buffers; l++) {
 			// ulType
@@ -117,8 +103,7 @@ public class Pac {
 			// Offset
 			BigInteger offset = buf.getUnsignedLong();
 			if (!offset.mod(EIGHT).equals(BigInteger.ZERO))
-				throw new IllegalArgumentException(
-						"PAC_INFO_BUFFER offset must be multiple of 8, but is " + offset);
+				throw new IllegalArgumentException("PAC_INFO_BUFFER offset must be multiple of 8, but is " + offset);
 			int pos = buf.position();
 			buf.position(offset.intValue());
 			byte[] data = new byte[(int) bufferSize];
@@ -139,36 +124,29 @@ public class Pac {
 			byte[] data = pacInfoBuffer.getData();
 			if (type == KERB_VALIDATION_INFO) {
 				if (kerbValidationInfo != null) {
-					if (logger.isTraceEnabled())
-						logger.trace("Ignoring additional KERB_VALIDATION_INFO structure");
+					if (logger.isTraceEnabled()) logger.trace("Ignoring additional KERB_VALIDATION_INFO structure");
 				} else {
-					if (logger.isTraceEnabled())
-						logger.trace("Parsing KERB_VALIDATION_INFO structure...");
+					if (logger.isTraceEnabled()) logger.trace("Parsing KERB_VALIDATION_INFO structure...");
 					kerbValidationInfo = new KerbValidationInfo(data);
 				}
 			} else if (type == UPN_DNS_INFO) {
 				if (upnDnsInfo != null) {
-					if (logger.isTraceEnabled())
-						logger.trace("Ignoring additional UPN_DNS_INFO structure");
+					if (logger.isTraceEnabled()) logger.trace("Ignoring additional UPN_DNS_INFO structure");
 				} else {
-					if (logger.isTraceEnabled())
-						logger.trace("Parsing UPN_DNS_INFO structure...");
+					if (logger.isTraceEnabled()) logger.trace("Parsing UPN_DNS_INFO structure...");
 					upnDnsInfo = new UpnDnsInfo(data);
 				}
 			} else if (type == PAC_CLIENT_INFO) {
 				if (upnDnsInfo != null) {
-					if (logger.isTraceEnabled())
-						logger.trace("Ignoring additional PAC_CLIENT_INFO structure");
+					if (logger.isTraceEnabled()) logger.trace("Ignoring additional PAC_CLIENT_INFO structure");
 				} else {
-					if (logger.isTraceEnabled())
-						logger.trace("Parsing PAC_CLIENT_INFO structure...");
+					if (logger.isTraceEnabled()) logger.trace("Parsing PAC_CLIENT_INFO structure...");
 					pacClientInfo = new PacClientInfo(data);
 				}
 			} else if (type == SERVER_SIGNATURE) {
 				if (serverSignature != null) {
 					if (logger.isTraceEnabled())
-						logger.trace(
-								"Ignoring additional PAC_SIGNATURE_DATA (Server Signature) structure");
+						logger.trace("Ignoring additional PAC_SIGNATURE_DATA (Server Signature) structure");
 				} else {
 					if (logger.isTraceEnabled())
 						logger.trace("Parsing PAC_SIGNATURE_DATA (Server Signature) structure...");
@@ -180,8 +158,7 @@ public class Pac {
 			} else if (type == KDC_SIGNATURE) {
 				if (kdcSignature != null) {
 					if (logger.isTraceEnabled())
-						logger.trace(
-								"Ignoring additional PAC_SIGNATURE_DATA (KDC Signature) structure");
+						logger.trace("Ignoring additional PAC_SIGNATURE_DATA (KDC Signature) structure");
 				} else {
 					if (logger.isTraceEnabled())
 						logger.trace("Parsing PAC_SIGNATURE_DATA (KDC Signature) structure...");
@@ -192,19 +169,16 @@ public class Pac {
 				}
 			} else {
 				if (logger.isTraceEnabled())
-					logger.trace(
-							"Ignoring unsupported structure type " + String.format("0x%08X", type)
-									+ " with data " + Base64.getEncoder().encodeToString(data));
+					logger.trace("Ignoring unsupported structure type " + String.format("0x%08X", type) + " with data "
+							+ Base64.getEncoder().encodeToString(data));
 			}
 		}
 
 		if (kerbValidationInfo == null)
-			throw new IllegalArgumentException(
-					"PAC does not contain required KERB_VALIDATION_INFO structure");
+			throw new IllegalArgumentException("PAC does not contain required KERB_VALIDATION_INFO structure");
 
 		if (pacClientInfo == null)
-			throw new IllegalArgumentException(
-					"PAC does not contain required PAC_CLIENT_INFO structure");
+			throw new IllegalArgumentException("PAC does not contain required PAC_CLIENT_INFO structure");
 
 		if (serverSignature == null)
 			throw new IllegalArgumentException(
@@ -236,18 +210,15 @@ public class Pac {
 	}
 
 	/**
-	 * Verifies the server signature of this PAC data structure with zeroed server and KDC signature
-	 * values with the supplied long term Kerberos keys.
+	 * Verifies the server signature of this PAC data structure with zeroed server and KDC signature values with the
+	 * supplied long term Kerberos keys.
 	 *
-	 * @param keys
-	 *            an array of long term Kerberos keys for the principal from the keytab which was
-	 *            used to establish the security context
-	 * @throws SignatureException
-	 *             if the signature validation fails with all supplied keys
+	 * @param keys an array of long term Kerberos keys for the principal from the keytab which was used to establish the
+	 *     security context
+	 * @throws SignatureException if the signature validation fails with all supplied keys
 	 * @see PacSignatureVerifier
 	 */
 	public void verifySignature(Key[] keys) throws SignatureException {
 		signatureVerifier.verify(serverSignature, zeroedPacData, keys);
 	}
-
 }
