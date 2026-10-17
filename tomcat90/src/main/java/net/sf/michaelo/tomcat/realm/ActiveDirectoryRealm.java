@@ -711,6 +711,7 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 						e.getRemainingName(),
 						e.getReferralInfo()));
 
+				results = null;
 				continue;
 			}
 
