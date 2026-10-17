@@ -452,8 +452,10 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 				if (e instanceof CommunicationException || e instanceof ServiceUnavailableException) canRetry = true;
 				else {
 					String explanation = e.getExplanation();
-					if (explanation.equals("LDAP connection has been closed")
-							|| explanation.startsWith("LDAP response read timed out, timeout used:")) canRetry = true;
+					if (explanation != null
+							&& (explanation.equals("LDAP connection has been closed")
+									|| explanation.startsWith("LDAP response read timed out, timeout used:")))
+						canRetry = true;
 				}
 
 				if (retry && canRetry) {
