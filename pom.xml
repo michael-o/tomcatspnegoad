@@ -48,7 +48,6 @@
 	</developers>
 
 	<modules>
-		<module>tomcat85</module>
 		<module>tomcat90</module>
 		<module>tomcat101</module>
 	</modules>
