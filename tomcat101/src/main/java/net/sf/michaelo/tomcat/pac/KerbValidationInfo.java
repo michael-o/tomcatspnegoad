@@ -386,6 +386,10 @@ public class KerbValidationInfo {
 
 	private Sid getRpcSid(PacDataBuffer buf) {
 		long actualSubAuthorityCount = buf.getUnsignedInt();
+		// Sid rejects more than 15 subauthorities, reject here too to avoid an oversized/negative allocation
+		if (actualSubAuthorityCount > 15L)
+			throw new IllegalArgumentException(
+					"SID subauthority count must be at most 15 but is " + actualSubAuthorityCount);
 		byte[] sidBytes = new byte[8 + (int) actualSubAuthorityCount * 4];
 		buf.get(sidBytes);
 		return new Sid(sidBytes);
