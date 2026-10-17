@@ -245,6 +245,12 @@ public class KerbValidationInfo {
 			}
 		}
 
+		// Per MS-PAC: "If the UserId member equals 0x00000000, the first group SID in this
+		// member [ExtraSids] is the SID for this account."
+		if (this.userId == 0L && (this.extraSids == null || this.extraSids.isEmpty()))
+			throw new IllegalArgumentException(
+					"UserId is 0, but ExtraSids does not contain the account's SID as its first entry");
+
 		if (resourceGroupDomainSidPointer != 0L && (userFlags & RESOURCE_GROUP_IDS_USER_FLAG) == 0L)
 			throw new IllegalArgumentException("ResourceGroupDomainSid is not null ("
 					+ toHexString(resourceGroupDomainSidPointer)
