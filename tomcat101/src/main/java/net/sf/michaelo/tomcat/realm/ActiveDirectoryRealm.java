@@ -36,6 +36,7 @@ import javax.naming.CommunicationException;
 import javax.naming.CompositeName;
 import javax.naming.InvalidNameException;
 import javax.naming.Name;
+import javax.naming.NameNotFoundException;
 import javax.naming.NameParser;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
@@ -853,6 +854,10 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 			Attributes roleAttributes = null;
 			try {
 				roleAttributes = context.getAttributes(roleRdn, this.roleAttributes);
+			} catch (NameNotFoundException e) {
+				logger.warn(sm.getString("activeDirectoryRealm.role.nameNotFoundException", role));
+
+				continue;
 			} catch (ReferralException e) {
 				logger.warn(sm.getString(
 						"activeDirectoryRealm.role.referralException",
