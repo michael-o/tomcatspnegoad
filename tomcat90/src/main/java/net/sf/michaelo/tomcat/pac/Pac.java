@@ -137,7 +137,7 @@ public class Pac {
 					upnDnsInfo = new UpnDnsInfo(data);
 				}
 			} else if (type == PAC_CLIENT_INFO) {
-				if (upnDnsInfo != null) {
+				if (pacClientInfo != null) {
 					if (logger.isTraceEnabled()) logger.trace("Ignoring additional PAC_CLIENT_INFO structure");
 				} else {
 					if (logger.isTraceEnabled()) logger.trace("Parsing PAC_CLIENT_INFO structure...");
