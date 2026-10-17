@@ -214,7 +214,7 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 	// A mere holder class for directory server connections
 	protected static class DirContextConnection {
 		protected String id;
-		protected long lastBorrowTime;
+		protected long lastReturnTime;
 		protected DirContext context;
 	}
 
@@ -485,7 +485,7 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 			connection = connectionPool.pop();
 
 			if (connection != null) {
-				long idleTime = System.currentTimeMillis() - connection.lastBorrowTime;
+				long idleTime = System.currentTimeMillis() - connection.lastReturnTime;
 				// TODO support maxIdleTime = -1 (no expiry)
 				if (idleTime > maxIdleTime) {
 					if (logger.isDebugEnabled())
@@ -507,8 +507,6 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 				open(connection);
 			}
 		}
-
-		connection.lastBorrowTime = System.currentTimeMillis();
 
 		if (logger.isDebugEnabled()) logger.debug(sm.getString("activeDirectoryRealm.acquired", connection.id));
 
@@ -544,6 +542,8 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 		if (connection == null) return;
 
 		if (connection.context == null) return;
+
+		connection.lastReturnTime = System.currentTimeMillis();
 
 		if (logger.isDebugEnabled()) logger.debug(sm.getString("activeDirectoryRealm.release", connection.id));
 		if (!connectionPool.push(connection)) close(connection);
