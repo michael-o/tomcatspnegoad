@@ -29,6 +29,7 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 
 import javax.security.auth.Subject;
 import javax.security.auth.kerberos.KerberosKey;
@@ -351,15 +352,17 @@ public class Krb5AuthzDataDumpPrinter {
 			if (Files.isRegularFile(path)) {
 				dumpFile(path, format, keys);
 			} else if (Files.isDirectory(path)) {
-				Files.walk(path).filter(Files::isRegularFile).forEach(file -> {
-					try {
-						dumpFile(file, format, keys);
-					} catch (IOException e) {
-						throw new UncheckedIOException(e);
-					} catch (SignatureException e) {
-						throw new RuntimeException(e);
-					}
-				});
+				try (Stream<Path> stream = Files.walk(path)) {
+					stream.filter(Files::isRegularFile).forEach(file -> {
+						try {
+							dumpFile(file, format, keys);
+						} catch (IOException e) {
+							throw new UncheckedIOException(e);
+						} catch (SignatureException e) {
+							throw new RuntimeException(e);
+						}
+					});
+				}
 			} else {
 				System.err.printf("Ignoring unsupported path '%s'%n", path);
 				continue;

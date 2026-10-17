@@ -351,15 +351,17 @@ public class Krb5AuthzDataDumpPrinter {
 			if (Files.isRegularFile(path)) {
 				dumpFile(path, format, keys);
 			} else if (Files.isDirectory(path)) {
-				Files.walk(path).filter(Files::isRegularFile).forEach(file -> {
-					try {
-						dumpFile(file, format, keys);
-					} catch (IOException e) {
-						throw new UncheckedIOException(e);
-					} catch (SignatureException e) {
-						throw new RuntimeException(e);
-					}
-				});
+				try (var stream = Files.walk(path)) {
+					stream.filter(Files::isRegularFile).forEach(file -> {
+						try {
+							dumpFile(file, format, keys);
+						} catch (IOException e) {
+							throw new UncheckedIOException(e);
+						} catch (SignatureException e) {
+							throw new RuntimeException(e);
+						}
+					});
+				}
 			} else {
 				System.err.printf("Ignoring unsupported path '%s'%n", path);
 				continue;
