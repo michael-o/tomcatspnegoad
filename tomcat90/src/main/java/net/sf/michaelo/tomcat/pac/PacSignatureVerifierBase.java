@@ -49,7 +49,7 @@ public abstract class PacSignatureVerifierBase implements PacSignatureVerifier {
 		Objects.requireNonNull(signatureData, "signatureData cannot be null");
 		Objects.requireNonNull(data, "data cannot be null");
 		if (data.length == 0) throw new IllegalArgumentException("data cannot be empty");
-		Objects.requireNonNull(keys, "data cannot be null");
+		Objects.requireNonNull(keys, "keys cannot be null");
 		if (keys.length == 0) throw new IllegalArgumentException("keys cannot be empty");
 
 		Key[] filteredKeys = Arrays.stream(keys)
