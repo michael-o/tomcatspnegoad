@@ -25,7 +25,7 @@
 About ${project.name}
 
   ${project.description} It integrates your Java webapp into your Active Directory environment with ease
-  and provides modules for Tomcat 8.5.x, 9.0.x, and 10.1.x.
+  and provides modules for Tomcat 9.0.x and 10.1.x.
 
 * Getting Started
 
