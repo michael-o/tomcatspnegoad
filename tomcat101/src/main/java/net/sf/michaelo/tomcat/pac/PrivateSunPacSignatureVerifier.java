@@ -16,9 +16,9 @@
 package net.sf.michaelo.tomcat.pac;
 
 import java.security.Key;
+import java.security.MessageDigest;
 import java.security.SignatureException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -54,7 +54,7 @@ public class PrivateSunPacSignatureVerifier extends PacSignatureVerifierBase {
 			}
 
 			byte[] actualSignature = checksum.getBytes();
-			if (Arrays.equals(expectedSignature, actualSignature)) return;
+			if (MessageDigest.isEqual(expectedSignature, actualSignature)) return;
 			else actualFailedSignatures.add(actualSignature);
 		}
 
