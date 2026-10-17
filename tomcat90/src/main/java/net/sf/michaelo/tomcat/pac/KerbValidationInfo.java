@@ -251,7 +251,7 @@ public class KerbValidationInfo {
 					+ "), but flag H is not set in UserFlags (" + toHexString(userFlags) + ")");
 
 		if (resourceGroupCount != 0L && (userFlags & RESOURCE_GROUP_IDS_USER_FLAG) == 0L)
-			throw new IllegalArgumentException("ResourceGroupCount is " + sidCount
+			throw new IllegalArgumentException("ResourceGroupCount is " + resourceGroupCount
 					+ ", but flag H is not set in UserFlags (" + toHexString(userFlags) + ")");
 
 		if (resourceGroupIdsPointer != 0L && (userFlags & RESOURCE_GROUP_IDS_USER_FLAG) == 0L)
