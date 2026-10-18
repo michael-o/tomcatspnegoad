@@ -50,6 +50,7 @@
 	<modules>
 		<module>tomcat90</module>
 		<module>tomcat101</module>
+		<module>tomcat110</module>
 	</modules>
 
 	<scm>
