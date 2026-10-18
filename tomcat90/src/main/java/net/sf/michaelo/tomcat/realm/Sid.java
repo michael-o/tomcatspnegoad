@@ -22,7 +22,7 @@ import java.util.Arrays;
 
 /**
  * A class representing a <a href=
- * "https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/f992ad60-0fe4-4b87-9fed-beb478836861">{@code SID}
+ * "https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-dtyp/f992ad60-0fe4-4b87-9fed-beb478836861">{@code SID}
  * (security identifier)</a> from MS-DTYP.
  */
 public class Sid {

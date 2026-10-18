@@ -149,8 +149,8 @@ import org.ietf.jgss.Oid;
  * <h2 id="referral-handling">Referral Handling</h2>
  *
  * Active Directory uses two type of responses when it cannot complete a search request: referrals and search result
- * references. Both are different in nature, read more about them <a
- * href="https://documentation.avaya.com/en-US/bundle/DeployingAvayaDeviceServices_R8.1.4/page/LDAP_Search_Results_and_Referrals.html">here</a>.
+ * references. Both are different in nature, read more about them <a href=
+ * "https://documentation.avaya.com/en-us/home/bundle/avaya-device-services/deployingavayadeviceservices_r10-3-x/examples-of-microsoft-active-directory-ldap-proper/ldap-search-results-and-referrals.html">here</a>.
  * For this section I will use the term <i>referral</i> for both types synomously as does the <a
  * href="https://docs.oracle.com/javase/jndi/tutorial/ldap/referral/jndi.html">JNDI/LDAP Provider documentation</a>.
  * <br>
@@ -162,19 +162,19 @@ import org.ietf.jgss.Oid;
  * {@link ManageReferralControl} when {@code ignore} is set and assumes that the target server will ignore referrals,
  * but this is a misconception in this provider implementation, see <a
  * href="https://openldap-software.0penldap.narkive.com/cuImLMRw/managedsait#post2">here</a> and <a
- * href="https://bugs.openjdk.java.net/browse/JDK-5109452">here</a>. It is also unclear whether Microsoft Active
- * Directory supports this control. <br>
+ * href="https://bugs.openjdk.org/browse/JDK-5109452">here</a>. It is also unclear whether Microsoft Active Directory
+ * supports this control. <br>
  * This realm will catch this exception and continue to process the enumeration. If the {@code DirContextSource} is set
  * to {@code throw}, this realm will catch the {@link ReferralException} also, but avoid following referrals manually
  * (for several reasons) and will continue with the process. Following referrals automatically is a completely opaque
  * operation to the application, no {@code ReferralException} is thrown, but the referrals are handled internally and
  * referral contexts are queried and closed. If you choose to {@code follow} referrals you <strong>must</strong> use my
- * <a href="https://michael-o.github.io/activedirectory-dns-locator/">Active Directory DNS Locator</a> otherwise the
+ * <a href="https://michael-o.github.io/active-directory-dc-locator/">Active Directory DC Locator</a> otherwise the
  * queries <strong>will</strong> fail and you will suffer from <a
- * href="https://bugs.java.com/bugdatabase/view_bug.do?bug_id=JDK-8161361">JDK-8161361</a> and <a
- * href="https://bugs.java.com/bugdatabase/view_bug.do?bug_id=JDK-8160768">JDK-8160768</a>!
+ * href="https://bugs.java.com/bugdatabase/JDK-8161361">JDK-8161361</a> and <a
+ * href="https://bugs.java.com/bugdatabase/JDK-8160768">JDK-8160768</a>!
  *
- * <p><em>Why do you need to use my Active Directory DNS Locator?</em> Microsoft takes a very sophisticated approach on
+ * <p><em>Why do you need to use my Active Directory DC Locator?</em> Microsoft takes a very sophisticated approach on
  * not to rely on hostnames because servers can be provisioned and decommissioned any time. Instead, they heavily rely
  * on DNS domain names and DNS SRV records at runtime. I.e., an initial or a referral URL does not contain a hostname,
  * but only a domain name. While you can connect to the service with this name, you cannot easily authenticate against
@@ -190,17 +190,20 @@ import org.ietf.jgss.Oid;
  * 3268) with a single forest and set referrals to {@code ignore}, or with multiple forests and set referrals to either
  *
  * <ul>
- *   <li>{@code follow} with a {@link DirContextSource} in your home forest and use my Active Directory DNS Locator, or
+ *   <li>{@code follow} with a {@link DirContextSource} in your home forest and use my Active Directory DC Locator, or
  *   <li>{@code ignore} with multiple {@code DirContextSources}, and create a {@link CombinedRealm} with one
  *       {@code ActiveDirectoryRealm} per forest.
  * </ul>
  *
  * <p>You will then have the principal properly looked up in Active Directory.
  *
- * <p>Further references: <a href="https://technet.microsoft.com/en-us/library/cc759550%28v=ws.10%29.aspx">How DNS
- * Support for Active Directory Works</a> is a good read on the DNS topic as well as <a
- * href="https://technet.microsoft.com/en-us/library/cc978012.aspx">Global Catalog and LDAP Searches</a> and <a
- * href="https://technet.microsoft.com/en-us/library/cc978014.aspx">LDAP Referrals</a>.
+ * <p>Further references: <a href=
+ * "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2003/cc759550(v=ws.10)">How DNS
+ * Support for Active Directory Works</a> is a good read on the DNS topic as well as <a href=
+ * "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-2000-server/cc978012(v=technet.10)">Global
+ * Catalog and LDAP Searches</a> and <a href=
+ * "https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-2000-server/cc978014(v=technet.10)">LDAP
+ * Referrals</a>.
  *
  * <p><strong>Note:</strong> Always remember, referrals incur an amplification in time and space and make the entire
  * process slower. <br>
@@ -447,7 +450,7 @@ public class ActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 				}
 			} catch (NamingException e) {
 				// This construct is an ugly hack for
-				// https://bugs.openjdk.java.net/browse/JDK-8273402
+				// https://bugs.openjdk.org/browse/JDK-8273402
 				boolean canRetry = false;
 				if (e instanceof CommunicationException || e instanceof ServiceUnavailableException) canRetry = true;
 				else {

@@ -33,7 +33,7 @@ User Guide
   They are all <identical> function-wise and documentation as well as linked Javadoc apply to all of them, unless stated otherwise.
 
     [Prerequisites] Make sure that the machine running the Tomcat instance (a) has joined a domain,
-                    (b) has an appropriate {{{https://docs.microsoft.com/en-us/windows/win32/ad/service-principal-names}SPN}}
+                    (b) has an appropriate {{{https://learn.microsoft.com/en-us/windows/win32/ad/service-principal-names}SPN}}
                     set, (c) has Kerberos properly configured and (d) the JVM has all necessary
                     system properties set.
 

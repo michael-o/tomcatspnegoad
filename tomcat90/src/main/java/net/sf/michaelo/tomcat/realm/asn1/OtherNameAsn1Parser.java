@@ -22,8 +22,8 @@ import org.apache.tomcat.util.buf.Asn1Parser;
 /**
  * A minimalist ASN.1 parser for X.509 {@code SAN:otherName} according to RFC 5280, section 4.2.1.6.
  *
- * <p>It properly takes <a href="https://bugs.openjdk.java.net/browse/JDK-6776681">JDK-6776681</a> into account and
- * solves <a href="https://bugs.openjdk.java.net/browse/JDK-8277976">JDK-8277976</a>.
+ * <p>It properly takes <a href="https://bugs.openjdk.org/browse/JDK-6776681">JDK-6776681</a> into account and solves <a
+ * href="https://bugs.openjdk.org/browse/JDK-8277976">JDK-8277976</a>.
  */
 public class OtherNameAsn1Parser {
 
@@ -50,7 +50,7 @@ public class OtherNameAsn1Parser {
 		byte[] typeId = parser.parseOIDAsBytes();
 		byte[] value = parser.parseAttributeAsBytes(0);
 		parser = new Asn1Parser(value);
-		// Workaround for https://bugs.openjdk.java.net/browse/JDK-6776681
+		// Workaround for https://bugs.openjdk.org/browse/JDK-6776681
 		if (parser.peekTag() == 0xA0) // context-specific and constructed + tag number 0
 		value = parser.parseAttributeAsBytes(0);
 
