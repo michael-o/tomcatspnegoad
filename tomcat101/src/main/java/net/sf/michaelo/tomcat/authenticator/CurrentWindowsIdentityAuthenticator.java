@@ -52,7 +52,7 @@ public class CurrentWindowsIdentityAuthenticator extends GSSAuthenticatorBase {
 			try {
 				lc = new LoginContext(getLoginEntryName());
 				lc.login();
-			} catch (LoginException e) {
+			} catch (LoginException | SecurityException e) {
 				logger.error(sm.getString("cwiAuthenticator.obtainFailed"), e);
 
 				sendUnauthorized(

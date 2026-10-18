@@ -126,7 +126,7 @@ public class SpnegoAuthenticator extends GSSAuthenticatorBase {
 			try {
 				lc = new LoginContext(getLoginEntryName());
 				lc.login();
-			} catch (LoginException e) {
+			} catch (LoginException | SecurityException e) {
 				logger.error(sm.getString("spnegoAuthenticator.obtainFailed"), e);
 
 				sendInternalServerError(request, response, "spnegoAuthenticator.obtainFailed");
