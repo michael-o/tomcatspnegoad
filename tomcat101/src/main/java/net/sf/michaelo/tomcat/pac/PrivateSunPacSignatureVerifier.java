@@ -46,16 +46,20 @@ public class PrivateSunPacSignatureVerifier extends PacSignatureVerifierBase {
 		for (int i = 0; i < keys.length; i++) {
 			Key key = keys[i];
 			EncryptionKey encKey = new EncryptionKey(type.getEType(), key.getEncoded());
-			Checksum checksum = null;
 			try {
-				checksum = new Checksum(type.getValue(), data, encKey, KU_KERB_NON_KERB_CKSUM_SALT);
-			} catch (Exception e) {
-				throw new SignatureException("Failed to calculate signature", e);
-			}
+				Checksum checksum;
+				try {
+					checksum = new Checksum(type.getValue(), data, encKey, KU_KERB_NON_KERB_CKSUM_SALT);
+				} catch (Exception e) {
+					throw new SignatureException("Failed to calculate signature", e);
+				}
 
-			byte[] actualSignature = checksum.getBytes();
-			if (MessageDigest.isEqual(expectedSignature, actualSignature)) return;
-			else actualFailedSignatures.add(actualSignature);
+				byte[] actualSignature = checksum.getBytes();
+				if (MessageDigest.isEqual(expectedSignature, actualSignature)) return;
+				else actualFailedSignatures.add(actualSignature);
+			} finally {
+				encKey.destroy();
+			}
 		}
 
 		String actualFailedSignaturesStr = actualFailedSignatures.stream()
