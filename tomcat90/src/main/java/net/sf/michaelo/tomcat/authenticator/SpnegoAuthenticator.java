@@ -59,7 +59,12 @@ public class SpnegoAuthenticator extends GSSAuthenticatorBase {
 	@Override
 	protected boolean doAuthenticate(Request request, HttpServletResponse response) throws IOException {
 
-		if (checkForCachedAuthentication(request, response, true)) {
+		/*
+		 * Reauthentication using the cached user name and password (if any) is not enabled for SPNEGO
+		 * authentication. This is because the delegated credential will not be available unless a normal SPNEGO
+		 * authentication takes place.
+		 */
+		if (checkForCachedAuthentication(request, response, false)) {
 			return true;
 		}
 
