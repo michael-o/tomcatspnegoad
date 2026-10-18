@@ -317,7 +317,7 @@ public class Krb5AuthzDataDumpPrinter {
 				KeyTab keyTab =
 						subject.getPrivateCredentials(KeyTab.class).iterator().next();
 				keysValue = keyTab.getKeys(principal);
-			} catch (LoginException e) {
+			} catch (LoginException | SecurityException e) {
 				throw new IllegalStateException(
 						"Failed to load Kerberos keys for login entry '" + loginEntryName + "'", e);
 			} finally {

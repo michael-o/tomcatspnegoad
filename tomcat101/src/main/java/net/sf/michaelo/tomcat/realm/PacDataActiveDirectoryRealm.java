@@ -274,7 +274,7 @@ public class PacDataActiveDirectoryRealm extends ActiveDirectoryRealmBase {
 			Set<KeyTab> privateCredentials = subject.getPrivateCredentials(KeyTab.class);
 			KeyTab keyTab = privateCredentials.iterator().next();
 			return keyTab.getKeys(principal);
-		} catch (LoginException e) {
+		} catch (LoginException | SecurityException e) {
 			throw new IllegalStateException("Failed to load Kerberos keys for login entry '" + loginEntryName + "'", e);
 		} finally {
 			if (lc != null) {
