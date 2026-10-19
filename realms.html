@@ -85,8 +85,7 @@
   &lt;Resource name=&quot;my-active-directory&quot; type=&quot;net.sf.michaelo.dirctxsrc.DirContextSource&quot;
     factory=&quot;net.sf.michaelo.dirctxsrc.DirContextSourceFactory&quot;
     urls=&quot;ldap://ad.example.com&quot; auth=&quot;gssapi&quot; loginEntryName=&quot;my-client&quot; /&gt;
-[&#x2026;]
-</code></pre></section><section><a id="Referral_Handling"></a>
+[&#x2026;]</code></pre></section><section><a id="Referral_Handling"></a>
 <h3>Referral Handling</h3>
 <p>In general, you should pick LDAP URLs which avoid any referral chasing because it amplifies execution in space and time. You are highly recommended using the Global Catalog (port 3268) only. More details on how this realm deals with referrals can be found in the <a href="./tomcat90-authnz-spnego-ad/apidocs/net/sf/michaelo/tomcat/realm/ActiveDirectoryRealm.html#referral-handling">Javadoc</a>.</p></section><section><a id="Configuring_the_Realm"></a>
 <h3>Configuring the Realm</h3>
@@ -97,8 +96,7 @@
   &lt;Realm className=&quot;net.sf.michaelo.tomcat.realm.ActiveDirectoryRealm&quot;
     dirContextSourceName=&quot;my-active-directory&quot; localDirContextSource=&quot;true|false&quot; /&gt;
 [&#x2026;]
-&lt;/Context&gt;
-</code></pre>
+&lt;/Context&gt;</code></pre>
 <p>Provide the <code>dirContextSourceName</code> you have configured for the <code>DirContextSource</code> above and hint whether this directory context source has been configured <a class="externalLink" href="https://michael-o.github.io/dirctxsrc/dircontextsourcefactory.html#Resource_Declaration_Examples">locally or globally</a>. Default value is <code>false</code>.</p>
 <p>You have successfully configured the <code>ActiveDirectoryRealm</code> in your webapp. It is now ready to use.</p></section><section><a id="Authenticated_Principal"></a>
 <h3>Authenticated Principal</h3>
@@ -125,8 +123,7 @@
   &lt;Realm className=&quot;net.sf.michaelo.tomcat.realm.PacDataActiveDirectoryRealm&quot;
     loginEntryName=&quot;a-login-entry&quot; /&gt;
 [&#x2026;]
-&lt;/Context&gt;
-</code></pre>
+&lt;/Context&gt;</code></pre>
 <p>Provide the <code>loginEntryName</code> you have configured for the <code>SpnegoAuthenticator</code> before.</p>
 <p>You have successfully configured the <code>PacDataActiveDirectoryRealm</code> in your webapp. It is now ready to use.</p></section><section><a id="Authenticated_Principal_1"></a>
 <h3>Authenticated Principal</h3>
@@ -143,8 +140,7 @@
   &lt;Realm className=&quot;org.apache.catalina.realm.UserDatabaseRealm&quot;
     resourceName=&quot;UserDatabase&quot; stripRealmForGss=&quot;false&quot; /&gt;
 [&#x2026;]
-&lt;/Context&gt;
-</code></pre>
+&lt;/Context&gt;</code></pre>
 <p>You have successfully configured the <code>UserDatabaseRealm</code> in your webapp. It is now ready to use.</p></section><section><a id="Alternative_Realm_Implementations"></a>
 <h2>Alternative Realm Implementations</h2>
 <p>If you are not using Active Directory as a user repository (e.g. database or another directory server) and can still make use of this library. Extend Tomcat's <a class="externalLink" href="https://tomcat.apache.org/tomcat-9.0-doc/api/org/apache/catalina/realm/RealmBase.html"><code>RealmBase</code></a> class and override any of these methods:</p>

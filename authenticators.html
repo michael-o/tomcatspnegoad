@@ -81,8 +81,7 @@
   &lt;Valve className=&quot;net.sf.michaelo.tomcat.authenticator.SpnegoAuthenticator&quot;
     loginEntryName=&quot;a-login-entry&quot; /&gt;
 [&#x2026;]
-&lt;/Context&gt;
-</code></pre>
+&lt;/Context&gt;</code></pre>
 <p>Provide the login entry name from your <code>login.conf</code> configured for the machine or service account capable of accepting GSS contexts with SPNEGO/Kerberos. The file is referenced through the JVM property <code>java.security.auth.login.config</code> added to your <code>CATALINA_OPTS</code>.</p>
 <p>You have successfully configured the <code>SpnegoAuthenticator</code> in your webapp. It is now ready to use.</p></section><section><a id="SSL_Authenticator"></a>
 <h2>SSL Authenticator</h2>
@@ -93,8 +92,7 @@
   &lt;!-- Add this --&gt;
   &lt;Valve className=&quot;org.apache.catalina.authenticator.SSLAuthenticator&quot; /&gt;
 [&#x2026;]
-&lt;/Context&gt;
-</code></pre>
+&lt;/Context&gt;</code></pre>
 <p>It is expected that you follow the Tomcat documentation to properly configure your <code>Connector</code> for certificate-based authentication.</p>
 <p>You have successfully configured the <code>SSLAuthenticator</code> in your webapp. It is now ready to use.</p></section><section><a id="Using_an_Authenticator_During_Development"></a>
 <h2>Using an Authenticator During Development</h2>
@@ -106,8 +104,7 @@
   &lt;Valve className=&quot;net.sf.michaelo.tomcat.authenticator.CurrentWindowsIdentityAuthenticator&quot;
     loginEntryName=&quot;a-login-entry&quot; /&gt;
 [&#x2026;]
-&lt;/Context&gt;
-</code></pre>
+&lt;/Context&gt;</code></pre>
 <p>Provide the login entry name from your <code>login.conf</code> configured for your user account capable of initiating GSS contexts with SPNEGO/Kerberos.</p>
 <dl>
 <dt>Warning</dt>

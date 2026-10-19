@@ -108,24 +108,20 @@
       &lt;role-name&gt;Bogus&lt;/role-name&gt;
     &lt;/auth-constraint&gt;
   &lt;/security-constraint&gt;
-[&#x2026;]
-</code></pre></section><section><a id="Creating_the_Necessary_JSPs"></a>
+[&#x2026;]</code></pre></section><section><a id="Creating_the_Necessary_JSPs"></a>
 <h2>Creating the Necessary JSPs</h2>
 <p>Create the following JSPs in the root of your webapp: <br /><br /><code>index.jsp</code>:</p>
 <pre class="prettyprint"><code>[&#x2026;]
 Hello ${pageContext.request.remoteUser}!
-[&#x2026;]
-</code></pre>
+[&#x2026;]</code></pre>
 <p><code>specific.jsp</code>:</p>
 <pre class="prettyprint"><code>[&#x2026;]
 Hello ${pageContext.request.remoteUser}, you are member of $AD_GROUP!
-[&#x2026;]
-</code></pre>
+[&#x2026;]</code></pre>
 <p><code>bogus.jsp</code>:</p>
 <pre class="prettyprint"><code>[&#x2026;]
 Hello ${pageContext.request.remoteUser}, you should not see this!
-[&#x2026;]
-</code></pre></section><section><a id="Packaging_and_Deployment"></a>
+[&#x2026;]</code></pre></section><section><a id="Packaging_and_Deployment"></a>
 <h2>Packaging and Deployment</h2>
 <p>Now package your webapp and deploy it to your remote Tomcat instance.</p></section><section><a id="Verification"></a>
 <h2>Verification</h2>
