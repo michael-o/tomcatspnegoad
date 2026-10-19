@@ -20,7 +20,8 @@ import java.util.Arrays;
 import javax.naming.NamingException;
 import javax.naming.directory.DirContext;
 
-import org.apache.commons.lang3.StringUtils;
+import net.sf.michaelo.tomcat.StringUtils;
+
 import org.ietf.jgss.GSSException;
 import org.ietf.jgss.GSSName;
 import org.ietf.jgss.Oid;

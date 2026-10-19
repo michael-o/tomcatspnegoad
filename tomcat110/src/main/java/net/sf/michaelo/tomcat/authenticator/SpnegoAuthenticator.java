@@ -25,9 +25,10 @@ import javax.security.auth.Subject;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 
+import net.sf.michaelo.tomcat.StringUtils;
+
 import org.apache.catalina.Realm;
 import org.apache.catalina.connector.Request;
-import org.apache.commons.lang3.StringUtils;
 import org.ietf.jgss.GSSContext;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
