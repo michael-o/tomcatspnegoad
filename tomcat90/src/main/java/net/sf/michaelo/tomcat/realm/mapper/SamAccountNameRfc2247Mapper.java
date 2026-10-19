@@ -23,7 +23,8 @@ import javax.naming.NameParser;
 import javax.naming.NamingException;
 import javax.naming.directory.DirContext;
 
-import org.apache.commons.lang3.StringUtils;
+import net.sf.michaelo.tomcat.StringUtils;
+
 import org.ietf.jgss.GSSException;
 import org.ietf.jgss.GSSName;
 import org.ietf.jgss.Oid;
@@ -75,12 +76,12 @@ public class SamAccountNameRfc2247Mapper extends SamAccountNameMapper {
 		if (!supportsGssName(gssName))
 			throw new IllegalArgumentException("GSS name '" + gssName + "' is not supported");
 
-		String[] upnComponents = StringUtils.split(gssName.toString(), '@');
+		String[] upnComponents = StringUtils.split(gssName.toString(), "@");
 		String samAccountName = upnComponents[0];
 		String realm = upnComponents[1];
 		String searchBase = StringUtils.EMPTY;
 
-		String[] realmComponents = StringUtils.split(realm, '.');
+		String[] realmComponents = StringUtils.split(realm, ".");
 		NameParser parser = context.getNameParser(StringUtils.EMPTY);
 		Name searchBaseName = parser.parse(StringUtils.EMPTY);
 

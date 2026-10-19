@@ -17,9 +17,10 @@ package net.sf.michaelo.tomcat.authenticator;
 
 import java.io.IOException;
 
+import net.sf.michaelo.tomcat.StringUtils;
+
 import org.apache.catalina.authenticator.AuthenticatorBase;
 import org.apache.catalina.connector.Request;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 import org.apache.tomcat.util.res.StringManager;

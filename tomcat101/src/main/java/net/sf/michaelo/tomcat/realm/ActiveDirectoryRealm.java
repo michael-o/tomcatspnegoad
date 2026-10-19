@@ -54,6 +54,7 @@ import javax.naming.ldap.Rdn;
 import javax.security.auth.x500.X500Principal;
 
 import net.sf.michaelo.dirctxsrc.DirContextSource;
+import net.sf.michaelo.tomcat.StringUtils;
 import net.sf.michaelo.tomcat.authenticator.SpnegoAuthenticator;
 import net.sf.michaelo.tomcat.realm.asn1.OtherNameAsn1Parser;
 import net.sf.michaelo.tomcat.realm.asn1.OtherNameParseResult;
@@ -66,7 +67,6 @@ import org.apache.catalina.LifecycleException;
 import org.apache.catalina.Server;
 import org.apache.catalina.authenticator.SSLAuthenticator;
 import org.apache.catalina.realm.CombinedRealm;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.naming.ContextBindings;
 import org.apache.tomcat.util.buf.Asn1Parser;
 import org.apache.tomcat.util.collections.SynchronizedStack;
