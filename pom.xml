@@ -73,7 +73,7 @@
 	</distributionManagement>
 
 	<properties>
-		<requiredJavaVersion>11</requiredJavaVersion>
+		<requiredJavaVersion>17</requiredJavaVersion>
 		<project.build.outputTimestamp>2024-11-06T16:00:17Z</project.build.outputTimestamp>
 	</properties>
 
